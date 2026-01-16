@@ -14,7 +14,7 @@
         .container { 
             background: white; padding: 30px; border-radius: 15px; 
             box-shadow: 0 5px 15px rgba(0,0,0,0.1); text-align: center; 
-            max-width: 500px; width: 90%; 
+            max-width: 500px; width: 78%; 
         }
 
         .logout-btn {
@@ -69,7 +69,6 @@
     </style>
 </head>
 <body>
-
 <div class="container">
     <button class="logout-btn" onclick="window.location.href='index.php'">Kembali</button>
     <img src="aset/img/polines.png" alt="Logo Polines" style="width: 100px; margin-top: 20px; margin-bottom: -15px;">
@@ -104,8 +103,8 @@
             <video id="video" autoplay muted playsinline></video>
             <div class="face-overlay"></div>
         </div>
-        <div id="status">⏳ Memuat Sistem AI...</div>
-        <button id="btn-scan" disabled>📸 AMBIL DATA WAJAH</button>
+        <div id="status">Memuat...</div>
+        <button id="btn-scan" disabled>AMBIL DATA WAJAH</button>
     </div>
 </div>
 
@@ -143,7 +142,7 @@
             faceapi.nets.faceLandmark68Net.loadFromUri('aset/models'),   
             faceapi.nets.faceRecognitionNet.loadFromUri('aset/models')   
         ]).then(() => {
-            statusTxt.innerText = "✅ Model AI Siap. Menyalakan Kamera...";
+            statusTxt.innerText = "Menyalakan Kamera...";
             initCamera();
         }).catch(err => {
             alert("Gagal memuat Model AI.");
@@ -169,10 +168,10 @@
 
     // --- PROSES SCAN ---
     btnScan.addEventListener('click', async () => {
-        statusTxt.innerText = "🔍 Menganalisa wajah...";
+        statusTxt.innerText = "Menganalisa wajah...";
         statusTxt.style.color = "#e67e22";
         btnScan.disabled = true;
-        btnScan.innerText = "⏳ Memproses...";
+        btnScan.innerText = "Memproses...";
 
         try {
             const detection = await faceapi.detectSingleFace(video, TINY_FACE_OPTIONS)
@@ -189,7 +188,7 @@
                     descriptor: descriptor
                 };
                 
-                statusTxt.innerText = "💾 Mengirim ke database...";
+                statusTxt.innerText = "Mengirim ke database...";
                 
                 $.ajax({
                     url: 'simpan_wajah.php', 
@@ -221,7 +220,7 @@
         statusTxt.innerText = "Gagal. Silakan coba lagi.";
         statusTxt.style.color = "red";
         btnScan.disabled = false;
-        btnScan.innerText = "📸 AMBIL DATA WAJAH";
+        btnScan.innerText = "AMBIL DATA WAJAH";
     }
 </script>
 

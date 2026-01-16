@@ -10,7 +10,7 @@
     
     <style>
         /* --- STYLE TIDAK DIUBAH (SAMA PERSIS) --- */
-        body { font-family: 'Poppins', sans-serif; background: #eef2f5; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 20px; }
+        body { font-family: 'Poppins', sans-serif; background: #eef2f5; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 20px; margin-left: 4%; margin-right: 4%; }
         .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 500px; text-align: center; position: relative; }
         .logout-btn { display: block; width: 100%; padding: 10px; background-color: #f53b57; color: #fff; text-decoration: none; border-radius: 8px; font-size: 14px; font-weight: bold; transition: 0.2s; border: 1px solid #d63031; margin-bottom: 15px; cursor: pointer; box-sizing: border-box; }  
         .logout-btn:hover { background-color: #d63031; }  
@@ -34,7 +34,6 @@
     </style>
 </head>
 <body>
-
     <div class="card">
         <button class="logout-btn" onclick="window.location.href='index.php'">Kembali</button>
         
@@ -59,7 +58,7 @@
         
         <div class="status-txt" id="status">Pilih Mode Absen</div>
 
-        <button id="btn-absen-utama" onclick="prosesAbsen()">📸 ABSEN SEKARANG</button>
+        <button id="btn-absen-utama" onclick="prosesAbsen()">ABSEN SEKARANG</button>
         
         <div class="gps-status" id="gps-info">Mencari GPS...</div>
     </div>
@@ -104,10 +103,10 @@
         
         if(mode == 'masuk') {
             $('#btn-masuk').addClass('active-masuk');
-            $('#btn-absen-utama').text("📸 ABSEN MASUK").addClass('bg-masuk');
+            $('#btn-absen-utama').text("ABSEN MASUK").addClass('bg-masuk');
         } else {
             $('#btn-keluar').addClass('active-keluar');
-            $('#btn-absen-utama').text("🏠 ABSEN PULANG").addClass('bg-keluar');
+            $('#btn-absen-utama').text("ABSEN PULANG").addClass('bg-keluar');
         }
 
         $('#step-input').fadeIn();
@@ -193,7 +192,7 @@
             const ctx = canvas.getContext('2d');
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-if (detection) {
+            if (detection) {
                 const resizedDetections = faceapi.resizeResults(detection, displaySize);
                 const box = resizedDetections.detection.box;
                 
@@ -238,7 +237,7 @@ if (detection) {
         const btn = $('#btn-absen-utama');
         const video = document.getElementById('video');
         
-        btn.prop('disabled', true).text("⏳ Sedang Memverifikasi...");
+        btn.prop('disabled', true).text("Sedang Memverifikasi...");
         
         try {
             const detection = await faceapi.detectSingleFace(video, TINY_FACE_OPTIONS)
@@ -295,8 +294,8 @@ if (detection) {
     function resetTombol() {
         const btn = $('#btn-absen-utama');
         btn.prop('disabled', false);
-        if(currentMode == 'masuk') btn.text("📸 ABSEN MASUK");
-        else btn.text("🏠 ABSEN PULANG");
+        if(currentMode == 'masuk') btn.text("ABSEN MASUK");
+        else btn.text("ABSEN PULANG");
     }
 </script>
 
