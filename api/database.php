@@ -3,7 +3,7 @@ date_default_timezone_set('Asia/Jakarta');
 
 $host = "gateway01.ap-southeast-1.prod.aws.tidbcloud.com";
 $user = "3UEpyYnuidk1vBW.root";
-$pass = "OvCZ7LN1zbK6Njq2";
+$pass = "JJzyScJjDNdB4ezK";
 $db   = "test";
 $port = 4000;
 
