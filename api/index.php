@@ -1,3 +1,63 @@
+<?php
+    include 'database.php';    
+    // Ambil jumlah record per halaman (Default 15)
+    $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 15;
+    
+    // Ambil halaman aktif (Default 1)
+    $halaman = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+    
+    // Hitung mulai data (Offset)
+    $mulai_dari = ($halaman > 1) ? ($halaman * $limit) - $limit : 0;
+
+    // Logika Tanggal
+// Logika Tanggal (Rentang Waktu)
+    $where_clause = ""; 
+    $param_tgl = ""; 
+    $tgl_mulai_val = "";
+    $tgl_akhir_val = "";
+    
+    // Cek apakah user mengisi kedua tanggal
+    if(isset($_GET['tgl_mulai']) && isset($_GET['tgl_akhir']) && !empty($_GET['tgl_mulai']) && !empty($_GET['tgl_akhir'])) {
+        $mulai = mysqli_real_escape_string($conn, $_GET['tgl_mulai']);
+        $akhir = mysqli_real_escape_string($conn, $_GET['tgl_akhir']);
+        
+        $tgl_mulai_val = $mulai;
+        $tgl_akhir_val = $akhir;
+        
+        // Query BETWEEN untuk rentang tanggal
+        $where_clause = "WHERE absensi.tanggal BETWEEN '$mulai' AND '$akhir'";
+        
+        // Parameter untuk link pagination
+        $param_tgl = "&tgl_mulai=".$mulai."&tgl_akhir=".$akhir;
+    } else {
+        $where_clause = ""; // Tampilkan Semua
+    }
+// 1. Ambil data dari URL (GET)
+$mulai = isset($_GET['dari']) ? $_GET['dari'] : date('Y-m-d');
+$sampai = isset($_GET['sampai']) ? $_GET['sampai'] : date('Y-m-d');
+$keyword = isset($_GET['keyword']) ? $_GET['keyword'] : ''; // <--- Tangkap Keyword
+
+// 2. Siapkan Query Dasar
+// Kita gabungkan (JOIN) tabel absensi dengan data mahasiswa biar bisa cari Nama
+$sql = "SELECT absensi.*, data.nama, data.prodi 
+        FROM absensi 
+        JOIN data ON absensi.nim = data.nim 
+        WHERE (absensi.tanggal BETWEEN '$mulai' AND '$sampai')";
+
+// 3. Jika ada pencarian, tambahkan filter tambahan
+if (!empty($keyword)) {
+    // Amankan string biar ga kena SQL Injection
+    $safe_keyword = mysqli_real_escape_string($conn, $keyword);
+    
+    // Cari di kolom Nama ATAU NIM
+    $sql .= " AND (data.nama LIKE '%$safe_keyword%' OR absensi.nim LIKE '%$safe_keyword%')";
+}
+
+// 4. Urutkan data
+$sql .= " ORDER BY absensi.tanggal DESC, absensi.jam_masuk DESC";
+
+$result = mysqli_query($conn, $sql);
+?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -234,46 +294,37 @@ tbody tr:hover {
     </main>
 
 <section class="management">
-    <?php 
-    include 'database.php';    
-    // Ambil jumlah record per halaman (Default 15)
-    $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 15;
-    
-    // Ambil halaman aktif (Default 1)
-    $halaman = isset($_GET['page']) ? (int)$_GET['page'] : 1;
-    
-    // Hitung mulai data (Offset)
-    $mulai_dari = ($halaman > 1) ? ($halaman * $limit) - $limit : 0;
-
-    // Logika Tanggal
-// Logika Tanggal (Rentang Waktu)
-    $where_clause = ""; 
-    $param_tgl = ""; 
-    $tgl_mulai_val = "";
-    $tgl_akhir_val = "";
-    
-    // Cek apakah user mengisi kedua tanggal
-    if(isset($_GET['tgl_mulai']) && isset($_GET['tgl_akhir']) && !empty($_GET['tgl_mulai']) && !empty($_GET['tgl_akhir'])) {
-        $mulai = mysqli_real_escape_string($conn, $_GET['tgl_mulai']);
-        $akhir = mysqli_real_escape_string($conn, $_GET['tgl_akhir']);
-        
-        $tgl_mulai_val = $mulai;
-        $tgl_akhir_val = $akhir;
-        
-        // Query BETWEEN untuk rentang tanggal
-        $where_clause = "WHERE absensi.tanggal BETWEEN '$mulai' AND '$akhir'";
-        
-        // Parameter untuk link pagination
-        $param_tgl = "&tgl_mulai=".$mulai."&tgl_akhir=".$akhir;
-    } else {
-        $where_clause = ""; // Tampilkan Semua
-    }
-    ?>
     <h2 style="font-family: 'Poppins', sans-serif; margin-bottom: 15px; margin-left: 10px;">
         Rekap Absen Mahasiswa
     </h2>
 
     <div class="controls-wrapper">
+        <form method="GET" action="">
+    
+    <div style="margin-bottom: 15px;">
+        <label>Cari Nama / NIM:</label>
+        <input type="text" 
+               name="keyword" 
+               class="form-control" 
+               placeholder="Ketik nama mahasiswa..." 
+               value="<?= isset($_GET['keyword']) ? $_GET['keyword'] : '' ?>" 
+               autocomplete="off">
+    </div>
+    <div style="margin-bottom: 15px;">
+        <label>Dari Tanggal:</label>
+        <input type="date" name="dari" class="form-control" value="<?= $mulai ?>">
+    </div>
+
+    <div style="margin-bottom: 15px;">
+        <label>Sampai Tanggal:</label>
+        <input type="date" name="sampai" class="form-control" value="<?= $sampai ?>">
+    </div>
+
+    <button type="submit" class="btn-primary">Tampilkan Data</button>
+    
+    <a href="?" class="btn-reset" style="text-decoration:none; margin-left:10px;">Reset</a>
+
+</form>
         <form method="GET" class="filter-left">
             <label><b>Periode:</b></label>
             <input type="date" name="tgl_mulai" class="input-date" value="<?= $tgl_mulai_val ?>" required>
