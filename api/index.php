@@ -207,9 +207,19 @@ tbody tr:hover {
         }
         .page-link.active { background-color: #3182ce; color: white; border-color: #3182ce; }
         .page-link:hover:not(.active) { background-color: #f0f0f0; }
+
+        img{width: 100px;margin-top:-10px; margin-bottom: 15px; justify-content: center;
+        display: flex; align-items: center; margin-left: auto; margin-right: auto; margin-top: 20px;}
+        .tengah{text-align: center;}
   </style>
 </head>
 <body>
+    <img src="aset/img/polines.png" alt="Logo Polines">
+    <div class="tengah">
+    <h2>Selamat Datang di Sistem Absensi</h2>
+    <p>Politeknik Negeri Semarang</p>
+    </div>
+
   <main class="content">
     <div class="cards">
       <a href="absensi.php" style="text-decoration:none" class="card">

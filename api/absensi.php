@@ -39,8 +39,6 @@
         
         <h2>Absensi Wajah</h2>
         <p id="jam">--:--:--</p>
-        <img src="aset/img/polines.png" alt="Logo Polines" style="width: 100px;margin-top:-10px; margin-bottom: 15px;">
-
 
         <div class="mode-selector">
             <button id="btn-masuk" class="btn-mode" onclick="setMode('masuk')">MASUK</button>

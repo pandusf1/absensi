@@ -71,7 +71,6 @@
 <body>
 <div class="container">
     <button class="logout-btn" onclick="window.location.href='index.php'">Kembali</button>
-    <img src="aset/img/polines.png" alt="Logo Polines" style="width: 100px; margin-top: 20px; margin-bottom: -15px;">
     <h2>Registrasi Wajah</h2>
     
     <div id="step-1">
