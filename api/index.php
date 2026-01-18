@@ -122,7 +122,7 @@
       </a>
       <a href="daftar_wajah.php" class="card">
         <div class="icon">🤵‍♂️</div>
-        <div><p class="number">Daftar / Update Wajah</p></div>
+        <div><p class="number">Registrasi Wajah</p></div>
       </a>
     </div>
   </main>
