@@ -208,7 +208,7 @@ tbody tr:hover {
         .page-link.active { background-color: #3182ce; color: white; border-color: #3182ce; }
         .page-link:hover:not(.active) { background-color: #f0f0f0; }
 
-        img{width: 100px;margin-top:-10px; margin-bottom: 15px; justify-content: center;
+        img{width: 100px;margin-top:-10px; margin-bottom: 10px; justify-content: center;
         display: flex; align-items: center; margin-left: auto; margin-right: auto; margin-top: 20px;}
         .tengah{text-align: center;}
   </style>
