@@ -26,7 +26,97 @@
         h2 { margin-bottom: 20px; color: #333; clear: both; padding-top: 10px; }
         
         /* Input Form */
-        .input-group { margin-bottom: 15px; text-align: left; }
+        .form-section {
+        background: #ffffff;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        margin-bottom: 20px;
+        border: 1px solid #e0e0e0;
+    }
+
+    .input-group {
+        margin-bottom: 20px;
+        position: relative;
+    }
+
+    /* Label di atas input */
+    .input-label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #334155;
+        font-size: 0.9rem;
+        letter-spacing: 0.5px;
+    }
+
+    /* Wrapper untuk Select agar bisa custom panah */
+    .select-wrapper {
+        position: relative;
+    }
+
+    /* Styling Select Box Utama */
+    .custom-select {
+        width: 100%;
+        padding: 12px 15px;
+        padding-right: 40px; /* Space untuk panah */
+        font-size: 1rem;
+        color: #1e293b;
+        background-color: #f8fafc;
+        border: 2px solid #e2e8f0;
+        border-radius: 8px;
+        appearance: none; /* Hilangkan panah bawaan browser */
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+    /* Efek saat diklik/aktif */
+    .custom-select:focus {
+        outline: none;
+        border-color: #3b82f6; /* Warna Biru Polines/Modern */
+        background-color: #fff;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+    }
+
+    /* Membuat Panah Custom menggunakan CSS Pseudo-element */
+    .select-wrapper::after {
+        content: "▼";
+        font-size: 0.8rem;
+        color: #64748b;
+        position: absolute;
+        right: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        pointer-events: none; /* Agar klik tembus ke select */
+        transition: 0.3s;
+    }
+
+    /* Putar panah saat select aktif (opsional, support browser tertentu) */
+    .select-wrapper:focus-within::after {
+        transform: translateY(-50%) rotate(180deg);
+        color: #3b82f6;
+    }
+
+    /* Tampilan saat Disabled (Prodi belum aktif) */
+    .custom-select:disabled {
+        background-color: #e2e8f0;
+        color: #94a3b8;
+        cursor: not-allowed;
+        border-color: #cbd5e1;
+    }
+
+    /* Animasi halus */
+    @keyframes slideDown {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* Animasi saat prodi muncul */
+    #prodi:not([disabled]) {
+        animation: slideDown 0.3s ease-out forwards;
+    }
         label { font-weight: bold; font-size: 14px; color: #555; display: block; margin-bottom: 5px; }
         input[type="text"] { 
             width: 100%; padding: 12px; border: 1px solid #ddd; 
@@ -84,18 +174,26 @@
             <input type="text" id="nama" placeholder="Contoh: Budi Santoso">
         </div>
 
-        <div class="input-group">
-    <label>Jurusan</label>
-    <select name="jurusan" id="jurusan" required onchange="updateProdi()">
-        <option value="">-- Pilih Jurusan --</option>
-        </select>
-</div>
+<div class="form-section">
+    <h4 style="margin-bottom: 20px; color: #333;">Data Akademik</h4>
 
-<div class="input-group">
-    <label>Program Studi</label>
-    <select name="prodi" id="prodi" required disabled>
-        <option value="">-- Pilih Jurusan --</option>
-    </select>
+    <div class="input-group">
+        <label class="input-label" for="jurusan">Pilih Jurusan</label>
+        <div class="select-wrapper">
+            <select name="jurusan" id="jurusan" class="custom-select" required onchange="updateProdi()">
+                <option value="">-- Jurusan --</option>
+                </select>
+        </div>
+    </div>
+
+    <div class="input-group">
+        <label class="input-label" for="prodi">Program Studi</label>
+        <div class="select-wrapper">
+            <select name="prodi" id="prodi" class="custom-select" required disabled>
+                <option value="">-- Program Studi --</option>
+            </select>
+        </div>
+    </div>
 </div>
 
         <button id="btn-lanjut">Lanjut</button>
@@ -230,39 +328,40 @@
         "Akuntansi": [
             "D3 Akuntansi",
             "D3 Keuangan dan Perbankan",
-            "D4 Akuntansi Manajerial",
-            "D4 Komputerisasi Akuntansi",
-            "D4 Perbankan Syariah",
-            "D4 Analis Keuangan"
+            "STr Akuntansi Manajerial",
+            "STr Komputerisasi Akuntansi",
+            "STr Perbankan Syariah",
+            "STr Analis Keuangan"
         ],
         "Teknik Elektro": [
             "D3 Teknik Listrik",
             "D3 Teknik Elektronika",
             "D3 Teknik Telekomunikasi",
             "D3 Teknik Informatika",
-            "D4 Teknik Telekomunikasi",
-            "D4 Teknologi Rekayasa Instalasi Listrik",
-            "D4 Teknologi Rekayasa Komputer",
-            "D4 Teknologi Rekayasa Pembangkit Energi"
+            "STr Teknik Telekomunikasi",
+            "STr Teknologi Rekayasa Instalasi Listrik",
+            "STr Teknologi Rekayasa Komputer",
+            "STr Teknologi Rekayasa Pembangkit Energi",
+            "Magister Teknik Telekomunikasi"
         ],
         "Teknik Sipil": [
             "D3 Konstruksi Sipil",
             "D3 Konstruksi Gedung",
-            "D4 Perancangan Jalan dan Jembatan",
-            "D4 Perawatan dan Perbaikan Gedung"
+            "STr Perancangan Jalan dan Jembatan",
+            "STr Perawatan dan Perbaikan Gedung"
         ],
         "Teknik Mesin": [
             "D3 Teknik Mesin",
             "D3 Teknik Konversi Energi",
-            "D4 Teknik Mesin Produksi dan Perawatan",
-            "D4 Rekayasa Perancangan Mekanik",
-            "D4 Teknologi Rekayasa Pembangkit Energi"
+            "STr Teknik Mesin Produksi dan Perawatan",
+            "STr Rekayasa Perancangan Mekanik",
+            "STr Teknologi Rekayasa Pembangkit Energi"
         ],
         "Administrasi Bisnis": [
             "D3 Administrasi Bisnis",
             "D3 Manajemen Pemasaran",
-            "D4 Manajemen Bisnis Internasional",
-            "D4 Administrasi Bisnis Terapan"
+            "STr Manajemen Bisnis Internasional",
+            "STr Administrasi Bisnis Terapan"
         ]
     };
 
