@@ -216,7 +216,7 @@ tbody tr:hover {
 <body>
     <img src="aset/img/polines.png" alt="Logo Polines">
     <div class="tengah">
-    <h2>Selamat Datang di Sistem Absensi</h2>
+    <h2>Selamat Datang di Sistem Absensi Mahasiswa</h2>
     <p>Politeknik Negeri Semarang</p>
     </div>
 
