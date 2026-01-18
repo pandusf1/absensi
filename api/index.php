@@ -105,6 +105,33 @@
     .page-link { padding: 8px 12px; border: 1px solid #ddd; background: white; color: #333; text-decoration: none; border-radius: 4px; font-size: 14px; }
     .page-link.active { background-color: #3182ce; color: white; border-color: #3182ce; }
     
+    /* --- CSS KHUSUS TAMPILAN HP (RESPONSIF) --- */
+    @media (max-width: 768px) {
+        
+        /* 1. Ubah baris filter tanggal jadi tumpuk ke bawah */
+        .filter-row {
+            flex-direction: column; /* Elemen disusun vertikal (atas-bawah) */
+            align-items: stretch;   /* Lebarkan elemen jadi 100% */
+            gap: 10px;              /* Jarak antar elemen */
+        }
+
+        /* 2. Pastikan input tanggal memenuhi lebar layar */
+        .form-group {
+            width: 100%;
+        }
+
+        .input-date {
+            width: 100%; /* Input tanggal jadi full lebar */
+        }
+
+        /* 3. Tombol Cari & Reset juga jadi full lebar biar rapi */
+        .btn-filter, .btn-reset {
+            width: 100%;
+            display: block;
+            text-align: center;
+            margin-top: 5px;
+        }
+    }
   </style>
 </head>
 <body>
