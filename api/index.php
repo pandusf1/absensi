@@ -59,7 +59,7 @@
     
     /* --- HEADER & CARD --- */
     img { width: 100px; margin: 20px auto 10px; display: block; }
-    .tengah { text-align: center; margin-bottom: 20px; }
+    .tengah { text-align: center; margin-bottom: 8px; }
     
     .cards { display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 24px; }
     .card { background: #fff; border-radius: 16px; padding: 20px 24px; flex: 1; min-width: 250px; display: flex; align-items: center; gap: 16px; transition: 0.3s; box-shadow: 0 2px 5px rgba(0,0,0,0.08); text-decoration: none; }
@@ -108,7 +108,7 @@
   </style>
 </head>
 <body>
-    <img src="aset/img/polines.png" alt="Logo Polines">
+    <img src="aset/img/polines.png" alt="Logo Polines" style="margin-top: 25px;">
     <div class="tengah">
         <h2>Sistem Absensi Mahasiswa</h2>
         <p>Politeknik Negeri Semarang</p>
