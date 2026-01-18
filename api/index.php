@@ -162,7 +162,7 @@ if (isset($_GET['ajax_request'])) {
     /* LOADER (Animasi saat loading data) */
     .loading-overlay {
         display: none; position: absolute; left: 50%; margin-top: 50px; transform: translateX(-50%);
-        font-weight: bold; color: #3182ce; background: rgba(255,255,255,0.9); padding: 10px 20px; border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        font-weight: bold; 
     }
 
     /* RESPONSIVE HP */
