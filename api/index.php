@@ -267,7 +267,7 @@ if (isset($_GET['ajax_request'])) {
         </tbody>
     </table>
     </div>
-    <div style="margin-left:auto">
+    <div style="margin-left:auto; margin-top: 10px;">
         <label style="margin-bottom:5px">Tampilkan:</label>
         <select id="limit" onchange="loadData(1)" style="padding:10px; border-radius:8px; border:1px solid #cbd5e0; margin-top:5px;">
             <option value="15">15</option>
