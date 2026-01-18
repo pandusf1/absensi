@@ -201,7 +201,7 @@
             <label for="prodi">Program Studi</label>
             <div class="select-wrapper">
                 <select name="prodi" id="prodi" class="custom-select" required disabled>
-                    <option value="">-- Pilih Jurusan Dulu --</option>
+                    <option value="">-- Pilih Prodi --</option>
                 </select>
             </div>
         </div>
