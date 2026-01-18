@@ -250,6 +250,7 @@ if (isset($_GET['ajax_request'])) {
         </div>
     </div>    
     
+    <div class="table-responsive">
     <table>
         <thead>
             <tr>
@@ -266,6 +267,7 @@ if (isset($_GET['ajax_request'])) {
             <div id="loader" class="loading-overlay">Memuat Data...</div>
         </tbody>
     </table>
+    </div>
     <div style="margin-left:auto">
         <label>Tampilkan</label>
         <select id="limit" onchange="loadData(1)" style="padding:10px; border-radius:8px; border:1px solid #cbd5e0;">
