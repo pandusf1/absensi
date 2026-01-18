@@ -159,9 +159,8 @@ if (isset($_GET['ajax_request'])) {
     .page-link.active { background-color: #3182ce; color: white; border-color: #3182ce; }
     .page-link:hover { background-color: #f1f1f1; }
 
-    /* LOADER (Animasi saat loading data) */
     .loading-overlay {
-        display: none; position: absolute; left: 50%; margin-top: 50px; transform: translateX(-50%);
+        display: none; position: absolute; left: 50%; margin-top: 50%; transform: translateX(-50%);
         font-weight: bold; 
     }
 
