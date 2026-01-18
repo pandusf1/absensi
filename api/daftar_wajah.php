@@ -170,8 +170,8 @@
             font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.3s; color: white; margin-top: 15px;
         }
         
-        #btn-lanjut { background: #3b82f6; }
-        #btn-lanjut:hover { background: #2563eb; }
+        #btn-lanjut { background: #3b82f6;}
+        #btn-lanjut:hover { background: #2563eb;}
 
         #btn-scan { background: #10b981; display: none; }
         #btn-scan:hover { background: #059669; }
@@ -217,7 +217,7 @@
             </div>
         </div>
 
-        <button id="btn-lanjut">Lanjut ke Kamera</button>
+        <button id="btn-lanjut" style="padding:7px; border-radius: 8px;">Lanjut</button>
     </div>
 
     <div id="step-2" style="display: none;">
