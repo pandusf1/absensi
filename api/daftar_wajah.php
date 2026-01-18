@@ -28,6 +28,8 @@
             text-align: center; /* Default center untuk elemen seperti judul */
             max-width: 500px; 
             width: 85%; 
+            margin-left: 5%;
+            margin-right: 5%;
         }
 
         /* --- TYPOGRAPHY --- */
