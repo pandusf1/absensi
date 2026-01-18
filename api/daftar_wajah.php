@@ -22,14 +22,12 @@
         
         .container { 
             background: white; 
-            padding: 30px; 
+            padding: 20px; 
             border-radius: 15px; 
             box-shadow: 0 5px 15px rgba(0,0,0,0.1); 
             text-align: center; /* Default center untuk elemen seperti judul */
             max-width: 500px; 
             width: 85%; 
-            margin-left: 5%;
-            margin-right: 5%;
         }
 
         /* --- TYPOGRAPHY --- */
