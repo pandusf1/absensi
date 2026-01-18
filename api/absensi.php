@@ -15,7 +15,7 @@
         .logout-btn { display: block; width: 100%; padding: 7px; background-color: #f53b57; color: #fff; text-decoration: none; border-radius: 8px; font-size: 13px; font-weight: bold; transition: 0.2s; border: 1px solid #d63031; margin-bottom: 15px; cursor: pointer; box-sizing: border-box; }  
         .logout-btn:hover { background-color: #d63031; }  
         h2 { margin: 0 0 5px 0; color: #333; }
-        p#jam { font-size: 18px; color: #666; margin-bottom: 20px; margin-top: 0; }
+        p#jam { font-size: 16x; color: #666; margin-bottom: 20px; margin-top: 0; }
         .mode-selector { display: flex; gap: 10px; margin-bottom: 20px; }
         .btn-mode { flex: 1; padding: 15px; border: 2px solid #ddd; border-radius: 8px; cursor: pointer; font-weight: bold; background: white; font-size: 14px; transition: 0.2s; }
         .btn-mode.active-masuk { background: #d4edda; border-color: #28a745; color: #155724; }
