@@ -6,7 +6,7 @@
     $halaman = isset($_GET['page']) ? (int)$_GET['page'] : 1;
     $mulai_dari = ($halaman > 1) ? ($halaman * $limit) - $limit : 0;
 
-    // --- UBAH DI SINI: Default Kosong (Bukan Hari Ini) ---
+    // Ambil input dari URL (Default Kosong)
     $tgl_mulai = isset($_GET['tgl_mulai']) ? $_GET['tgl_mulai'] : ''; 
     $tgl_akhir = isset($_GET['tgl_akhir']) ? $_GET['tgl_akhir'] : ''; 
     $keyword   = isset($_GET['keyword']) ? $_GET['keyword'] : '';
@@ -14,7 +14,7 @@
     // --- 2. LOGIKA PENCARIAN & FILTER ---
     $where_conditions = [];
 
-    // Filter A: Rentang Tanggal (Hanya jalan jika user mengisi tanggal)
+    // Filter A: Rentang Tanggal
     if (!empty($tgl_mulai) && !empty($tgl_akhir)) {
         $where_conditions[] = "absensi.tanggal BETWEEN '$tgl_mulai' AND '$tgl_akhir'";
     }
@@ -28,7 +28,7 @@
         }
     }
 
-    // Gabungkan semua filter
+    // Gabungkan filter
     $sql_where = "";
     if (count($where_conditions) > 0) {
         $sql_where = "WHERE " . implode(" AND ", $where_conditions);
@@ -54,10 +54,10 @@
   <style>
     /* --- CSS GLOBAL --- */
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: "Poppins", sans-serif; }
-    body { background-color: #f5f7fa; color: #1e1e1e; }
+    body { background-color: #f5f7fa; color: #1e1e1e; scroll-behavior: smooth; /* Smooth Scroll di CSS */ }
     .content { padding-top: 24px; margin-left: 3%; margin-right: 3%; }
     
-    /* --- STYLE HEADER & CARD --- */
+    /* --- HEADER & CARD --- */
     img { width: 100px; margin: 20px auto 10px; display: block; }
     .tengah { text-align: center; margin-bottom: 20px; }
     
@@ -68,7 +68,7 @@
     .card h3 { font-size: 16px; color: #555; margin-bottom: 4px; }
     .card .number { font-size: 22px; font-weight: 700; color: #000; }
 
-    /* --- STYLE TABEL & WRAPPER --- */
+    /* --- TABEL & WRAPPER --- */
     .management { background: #fff; border-radius: 16px; padding: 24px; box-shadow: 0 2px 5px rgba(0,0,0,0.08); margin: 0 3%; overflow-x: auto; }
     table { width: 100%; border-collapse: collapse; min-width: 600px; margin-top: 15px; }
     thead tr { background-color: #f8f9fa; text-align: left; border-bottom: 2px solid #edf2f7; }
@@ -82,7 +82,7 @@
     .badge-telat { background-color: #fed7d7; color: #742a2a; }
     .badge-pulang { background-color: #bee3f8; color: #2c5282; }
 
-    /* --- FILTER FORM STYLE --- */    
+    /* --- FILTER FORM --- */    
     .filter-form { display: flex; flex-direction: column; gap: 15px; margin-bottom: 20px; }
     .search-row { width: 100%; }
     .input-search { width: 100%; padding: 12px 15px; border: 1px solid #cbd5e0; border-radius: 8px; font-size: 14px; background-color: #f8fafc; }
@@ -90,10 +90,9 @@
 
     .filter-row { display: flex; flex-wrap: wrap; gap: 15px; align-items: end; }
     .form-group { display: flex; flex-direction: column; gap: 5px; }
-    .form-group label { font-size: 12px; font-weight: 600; color: #64748b; }
+    .form-group label { font-size: 14px; font-weight: 600; color: #64748b; }
     
     .input-date { padding: 10px; border: 1px solid #cbd5e0; border-radius: 8px; font-size: 14px; }
-    .input-date:invalid { color: #999; } /* Styling saat kosong */
 
     .btn-filter { padding: 10px 24px; background-color: #3182ce; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.2s; }
     .btn-filter:hover { background-color: #2b6cb0; }
@@ -128,18 +127,17 @@
     </div>
   </main>
 
-<section class="management">
+<section class="management" id="hasil-pencarian">
     <h2 style="font-family: 'Poppins', sans-serif; margin-bottom: 20px;">
         Rekap Absen Mahasiswa
     </h2>
 
     <form method="GET" class="filter-form">
-        
         <div class="search-row">
             <div class="form-group">
-                <label>Cari (Nama / NIM / Prodi):</label>
+                <label>Cari:</label>
                 <input type="text" name="keyword" class="input-search" 
-                       placeholder="Contoh: Pandu 4.41 Akuntansi" 
+                       placeholder="Nama / NIM / Prodi" 
                        value="<?= htmlspecialchars($keyword) ?>">
             </div>
         </div>
@@ -155,12 +153,10 @@
                 <input type="date" name="tgl_akhir" class="input-date" value="<?= $tgl_akhir ?>">
             </div>
 
-            <button type="submit" class="btn-filter">🔍 Cari Data</button>
+            <button type="submit" class="btn-filter">Cari Data</button>
             <a href="?" class="btn-reset">Reset</a>
-            
             <input type="hidden" name="limit" value="<?= $limit ?>">
         </div>
-
     </form>    
 
     <table>
@@ -262,5 +258,20 @@
     </div>
 
 </section>
+
+<script>
+    // Cek jika URL memiliki parameter (tanda habis search / klik page 2 dst)
+    // window.location.search contohnya: "?keyword=budi&page=2"
+    if (window.location.search.length > 1) {
+        // Tunggu halaman render sebentar, lalu scroll
+        setTimeout(function() {
+            var element = document.getElementById("hasil-pencarian");
+            if(element) {
+                element.scrollIntoView({ behavior: "smooth", block: "start" });
+            }
+        }, 300); // delay 300ms agar smooth
+    }
+</script>
+
 </body>
 </html>
