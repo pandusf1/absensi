@@ -221,9 +221,7 @@ if (isset($_GET['ajax_request'])) {
             </div>
         </div>
     </div>    
-
-    <div id="loader" class="loading-overlay">Memuat Data...</div>
-
+    
     <table>
         <thead>
             <tr>
@@ -237,7 +235,8 @@ if (isset($_GET['ajax_request'])) {
             </tr>
         </thead>
         <tbody id="data-body">
-            </tbody>
+            <div id="loader" class="loading-overlay">Memuat Data...</div>
+        </tbody>
     </table>
     <div style="margin-left:auto">
         <label>Tampilkan</label>
