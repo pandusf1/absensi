@@ -214,7 +214,7 @@
             <video id="video" autoplay muted playsinline></video>
             <div class="face-overlay"></div>
         </div>
-        <div id="status">Memuat Sistem AI...</div>
+        <div id="status">Memuat...</div>
         <button id="btn-scan" disabled>AMBIL DATA WAJAH</button>
     </div>
 </div>
