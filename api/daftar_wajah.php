@@ -85,14 +85,18 @@
         </div>
 
         <div class="input-group">
-            <label>Jurusan</label>
-            <input type="text" id="jurusan" placeholder="Contoh: Teknik Elektro">
-        </div>
+    <label>Jurusan</label>
+    <select name="jurusan" id="jurusan" required onchange="updateProdi()">
+        <option value="">-- Pilih Jurusan --</option>
+        </select>
+</div>
 
-        <div class="input-group">
-            <label>Program Studi (Prodi)</label>
-            <input type="text" id="prodi" placeholder="Contoh: Teknologi Rekayasa Komputer">
-        </div>
+<div class="input-group">
+    <label>Program Studi</label>
+    <select name="prodi" id="prodi" required disabled>
+        <option value="">-- Pilih Jurusan --</option>
+    </select>
+</div>
 
         <button id="btn-lanjut">Lanjut</button>
     </div>
@@ -221,6 +225,91 @@
         btnScan.disabled = false;
         btnScan.innerText = "AMBIL DATA WAJAH";
     }
+
+    const dataPolines = {
+        "Akuntansi": [
+            "D3 Akuntansi",
+            "D3 Keuangan dan Perbankan",
+            "D4 Akuntansi Manajerial",
+            "D4 Komputerisasi Akuntansi",
+            "D4 Perbankan Syariah",
+            "D4 Analis Keuangan"
+        ],
+        "Teknik Elektro": [
+            "D3 Teknik Listrik",
+            "D3 Teknik Elektronika",
+            "D3 Teknik Telekomunikasi",
+            "D3 Teknik Informatika",
+            "D4 Teknik Telekomunikasi",
+            "D4 Teknologi Rekayasa Instalasi Listrik",
+            "D4 Teknologi Rekayasa Komputer",
+            "D4 Teknologi Rekayasa Pembangkit Energi"
+        ],
+        "Teknik Sipil": [
+            "D3 Konstruksi Sipil",
+            "D3 Konstruksi Gedung",
+            "D4 Perancangan Jalan dan Jembatan",
+            "D4 Perawatan dan Perbaikan Gedung"
+        ],
+        "Teknik Mesin": [
+            "D3 Teknik Mesin",
+            "D3 Teknik Konversi Energi",
+            "D4 Teknik Mesin Produksi dan Perawatan",
+            "D4 Rekayasa Perancangan Mekanik",
+            "D4 Teknologi Rekayasa Pembangkit Energi"
+        ],
+        "Administrasi Bisnis": [
+            "D3 Administrasi Bisnis",
+            "D3 Manajemen Pemasaran",
+            "D4 Manajemen Bisnis Internasional",
+            "D4 Administrasi Bisnis Terapan"
+        ]
+    };
+
+    const jurusanSelect = document.getElementById("jurusan");
+    const prodiSelect = document.getElementById("prodi");
+
+    // 1. Isi Dropdown Jurusan saat halaman dimuat
+    function populateJurusan() {
+        for (let jurusan in dataPolines) {
+            let option = document.createElement("option");
+            option.text = jurusan;
+            option.value = jurusan;
+            jurusanSelect.add(option);
+        }
+    }
+
+    // 2. Fungsi Update Prodi saat Jurusan dipilih
+    function updateProdi() {
+        // Ambil jurusan yang dipilih
+        const selectedJurusan = jurusanSelect.value;
+
+        // Reset dropdown prodi
+        prodiSelect.innerHTML = '<option value="">-- Pilih Program Studi --</option>';
+
+        if (selectedJurusan !== "") {
+            // Jika jurusan dipilih, aktifkan dropdown prodi
+            prodiSelect.disabled = false;
+            
+            // Ambil list prodi sesuai jurusan
+            const listProdi = dataPolines[selectedJurusan];
+
+            // Masukkan prodi ke dropdown
+            listProdi.forEach(function(prodi) {
+                let option = document.createElement("option");
+                option.text = prodi;
+                option.value = prodi;
+                prodiSelect.add(option);
+            });
+        } else {
+            // Jika tidak ada jurusan dipilih, matikan dropdown prodi
+            prodiSelect.innerHTML = '<option value="">-- Pilih Jurusan Terlebih Dahulu --</option>';
+            prodiSelect.disabled = true;
+        }
+    }
+
+    // Jalankan fungsi isi jurusan pertama kali
+    populateJurusan();
 </script>
 
 </body>
