@@ -12,7 +12,7 @@
         /* --- STYLE TIDAK DIUBAH (SAMA PERSIS) --- */
         body { font-family: 'Poppins', sans-serif; background: #eef2f5; display: flex; flex-direction: column; align-items: center; min-height: 100vh; margin: 0; padding: 20px; margin-left: 4%; margin-right: 4%; }
         .card { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); width: 100%; max-width: 500px; text-align: center; position: relative; }
-        .logout-btn { display: block; width: 100%; padding: 10px; background-color: #f53b57; color: #fff; text-decoration: none; border-radius: 8px; font-size: 14px; font-weight: bold; transition: 0.2s; border: 1px solid #d63031; margin-bottom: 15px; cursor: pointer; box-sizing: border-box; }  
+        .logout-btn { display: block; width: 100%; padding: 7px; background-color: #f53b57; color: #fff; text-decoration: none; border-radius: 8px; font-size: 13px; font-weight: bold; transition: 0.2s; border: 1px solid #d63031; margin-bottom: 15px; cursor: pointer; box-sizing: border-box; }  
         .logout-btn:hover { background-color: #d63031; }  
         h2 { margin: 0 0 5px 0; color: #333; }
         p#jam { font-size: 18px; color: #666; margin-bottom: 20px; margin-top: 0; }

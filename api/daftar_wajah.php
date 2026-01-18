@@ -39,18 +39,7 @@
             font-size: 1.5rem;
         }
 
-        .logout-btn {
-            padding: 8px 14px; 
-            background-color: #f53b57; 
-            color: #fff; 
-            text-decoration: none;
-            border-radius: 8px; 
-            font-size: 12px; 
-            transition: 0.2s; 
-            border:none; 
-            cursor: pointer; 
-            float: left;
-        }  
+.logout-btn { display: block; width: 100%; padding: 7px; background-color: #f53b57; color: #fff; text-decoration: none; border-radius: 8px; font-size: 13px; font-weight: bold; transition: 0.2s; border: 1px solid #d63031; margin-bottom: 15px; cursor: pointer; box-sizing: border-box; }  
         .logout-btn:hover { background-color: #d63031; }  
         
         /* --- FORM INPUT & LABEL (RATA KIRI) --- */
@@ -170,7 +159,7 @@
             font-size: 16px; font-weight: 600; cursor: pointer; transition: 0.3s; color: white; margin-top: 15px;
         }
         
-        #btn-lanjut { background: #3b82f6;}
+        #btn-lanjut { background: #3b82f6;padding:7px; border-radius: 8px; font-size: 13px;}
         #btn-lanjut:hover { background: #2563eb;}
 
         #btn-scan { background: #10b981; display: none; }
@@ -217,7 +206,7 @@
             </div>
         </div>
 
-        <button id="btn-lanjut" style="padding:7px; border-radius: 8px;">Lanjut</button>
+        <button id="btn-lanjut">Lanjut</button>
     </div>
 
     <div id="step-2" style="display: none;">
