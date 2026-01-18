@@ -26,15 +26,6 @@
         h2 { margin-bottom: 20px; color: #333; clear: both; padding-top: 10px; }
         
         /* Input Form */
-        .form-section {
-        background: #ffffff;
-        padding: 25px;
-        border-radius: 12px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        margin-bottom: 20px;
-        border: 1px solid #e0e0e0;
-    }
-
     .input-group {
         margin-bottom: 20px;
         position: relative;
@@ -117,7 +108,6 @@
     #prodi:not([disabled]) {
         animation: slideDown 0.3s ease-out forwards;
     }
-        label { font-weight: bold; font-size: 14px; color: #555; display: block; margin-bottom: 5px; }
         input[type="text"] { 
             width: 100%; padding: 12px; border: 1px solid #ddd; 
             border-radius: 8px; font-size: 14px; box-sizing: border-box;
@@ -174,9 +164,6 @@
             <input type="text" id="nama" placeholder="Contoh: Budi Santoso">
         </div>
 
-<div class="form-section">
-    <h4 style="margin-bottom: 20px; color: #333;">Data Akademik</h4>
-
     <div class="input-group">
         <label class="input-label" for="jurusan">Pilih Jurusan</label>
         <div class="select-wrapper">
@@ -194,7 +181,6 @@
             </select>
         </div>
     </div>
-</div>
 
         <button id="btn-lanjut">Lanjut</button>
     </div>
