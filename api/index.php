@@ -129,7 +129,7 @@ if (isset($_GET['ajax_request'])) {
     .card .number { font-size: 22px; font-weight: 700; color: #000; }
 
     /* TABEL */
-    .management { background: #fff; border-radius: 16px; padding: 24px; box-shadow: 0 2px 5px rgba(0,0,0,0.08); margin: 0 3%; overflow-x: auto; }
+    .management { background: #fff; border-radius: 16px; padding: 24px; box-shadow: 0 2px 5px rgba(0,0,0,0.08); margin: 0 3%; overflow-x: auto; width: auto; max-width: 100%;}
     table { width: 100%; border-collapse: collapse; min-width: 600px; margin-top: 15px; }
     thead tr { background-color: #f8f9fa; text-align: left; border-bottom: 2px solid #edf2f7; }
     th { padding: 16px; font-weight: 600; font-size: 14px; color: #4a5568; text-transform: uppercase; }
@@ -165,9 +165,37 @@ if (isset($_GET['ajax_request'])) {
         font-weight: bold; 
     }
 
+    .table-responsive {
+        width: 100%;
+        overflow-x: auto; /* HANYA tabel yang boleh discroll samping */
+        -webkit-overflow-scrolling: touch; /* Agar scroll smooth di iPhone */
+        margin-top: 15px;
+    }
+
     /* RESPONSIVE HP */
     @media (max-width: 768px) {
-        .filter-row { flex-direction: column; align-items: stretch; gap: 10px; }
+        .content {
+            padding-top: 10px;
+            margin-left: 10px; /* Margin kiri-kanan lebih tipis di HP */
+            margin-right: 10px;
+        }
+        
+        .management {
+            padding: 15px; /* Padding dalam card lebih tipis */
+            margin: 0;     /* Hilangkan margin luar card agar full width */
+            border-radius: 10px;
+        }
+
+        .filter-form {
+            width: 100%; /* Paksa form selebar layar */
+        }
+        
+        /* Pastikan input tidak keluar jalur */
+        .input-search, .input-date, select {
+            width: 100% !important; 
+            max-width: 100%;
+            box-sizing: border-box; /* Agar padding tidak menambah lebar */
+        }
         .form-group, .input-date { width: 100%; }
     }
   </style>
@@ -188,7 +216,7 @@ if (isset($_GET['ajax_request'])) {
       </a>
       <a href="daftar_wajah.php" class="card">
         <div class="icon">🤵‍♂️</div>
-        <div><p class="number">Daftar / Update Wajah</p></div>
+        <div><p class="number">Registrasi Wajah</p></div>
       </a>
     </div>
   </main>
