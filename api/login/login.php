@@ -59,7 +59,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // ==========================================
     // 2. CEK TABEL MAHASISWA
     // ==========================================
-    $query_mhs = "SELECT * FROM data WHERE nim='$username' OR email='$username'";
+    $query_mhs = "SELECT * FROM mahasiswa WHERE nim='$username' OR email='$username'";
     $cek_mhs = mysqli_query($conn, $query_mhs);
 
     // Cek jika query error (misal nama tabel salah)
