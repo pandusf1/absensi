@@ -280,6 +280,7 @@ if(isset($_POST['simpan_jadwal'])) {
                             while($m = mysqli_fetch_assoc($qm)): 
                             ?>
                             <tr style="cursor: pointer; transition:0.2s;" 
+                                id="tr"
                                 onmouseover="this.style.background='#f1f5f9'" 
                                 onmouseout="this.style.background='white'"
                                 onclick="bukaModalMatkul(this)" 
@@ -364,6 +365,7 @@ if(isset($_POST['simpan_jadwal'])) {
                                 $status_kelas = $real ? $real['status'] : 'Belum';
                             ?>
                             <tr style="cursor: pointer;" onclick="bukaModalJadwal(this)" 
+                                id="tr"
                                 data-id="<?= $row['id_jadwal'] ?>" data-status="<?= $status_kelas ?>" data-matkul="<?= htmlspecialchars($row['nama_matkul']) ?>" 
                                 data-hari="<?= $row['hari'] ?>" data-mulai="<?= $row['jam_mulai'] ?>" data-selesai="<?= $row['jam_selesai'] ?>" 
                                 data-ruang="<?= $row['ruang'] ?>" data-kelas="<?= $row['kelas'] ?>" data-kuota="<?= $row['kuota'] ?>">
@@ -438,33 +440,33 @@ if(isset($_POST['simpan_jadwal'])) {
 
                 <div class="table-responsive">
                     <table>
-                        <thead><tr><th>Tanggal</th><th>Mata Kuliah</th><th>Kelas</th><th>Materi</th><th>Hadir</th><th style="text-align:center;">Aksi</th></tr></thead>
-                        <tbody>
-                            <?php
-                            $where = "WHERE j.nip = '$nip_dosen'";
-                            if(!empty($_GET['keyword'])) $where .= " AND m.nama_matkul LIKE '%".mysqli_real_escape_string($conn, $_GET['keyword'])."%'";
-                            if(!empty($_GET['tgl_mulai'])) $where .= " AND r.tanggal >= '".$_GET['tgl_mulai']."'";
-                            if(!empty($_GET['tgl_akhir'])) $where .= " AND r.tanggal <= '".$_GET['tgl_akhir']."'";
+                        <thead><tr><th>Tanggal</th><th>Mata Kuliah</th><th>Kelas</th><th>Hadir</th></tr></thead>
+                            <tbody>
+                                <?php
+                                $where = "WHERE j.nip = '$nip_dosen'";
+                                if(!empty($_GET['keyword'])) $where .= " AND m.nama_matkul LIKE '%".mysqli_real_escape_string($conn, $_GET['keyword'])."%'";
+                                if(!empty($_GET['tgl_mulai'])) $where .= " AND r.tanggal >= '".$_GET['tgl_mulai']."'";
+                                if(!empty($_GET['tgl_akhir'])) $where .= " AND r.tanggal <= '".$_GET['tgl_akhir']."'";
 
-                            $q_rekap = mysqli_query($conn, "SELECT r.*, m.nama_matkul, j.kelas, 
-                                (SELECT COUNT(*) FROM presensi_kuliah pk WHERE pk.id_jadwal = r.id_jadwal AND pk.tanggal = r.tanggal AND pk.status = 'Hadir') as hadir,
-                                (SELECT COUNT(*) FROM presensi_kuliah pk WHERE pk.id_jadwal = r.id_jadwal AND pk.tanggal = r.tanggal) as total_mhs
-                                FROM realisasi_mengajar r JOIN jadwal j ON r.id_jadwal = j.id_jadwal JOIN matkul m ON j.kode_matkul = m.kode_matkul $where ORDER BY r.tanggal DESC");
-                            
-                            while ($row = mysqli_fetch_assoc($q_rekap)):
-                            ?>
-                            <tr>
-                                <td><?= date('d/m/Y', strtotime($row['tanggal'])) ?></td>
-                                <td><?= $row['nama_matkul'] ?></td>
-                                <td><?= $row['kelas'] ?></td>
-                                <td><?= $row['materi'] ?></td>
-                                <td><?= $row['hadir'] ?> / <?= $row['total_mhs'] ?></td>
-                                <td style="text-align:center;">
-                                    <button class="btn btn-blue" onclick="bukaDetail(<?= $row['id_jadwal'] ?>, '<?= $row['tanggal'] ?>', '<?= htmlspecialchars($row['nama_matkul']) ?>', '<?= htmlspecialchars($row['kelas']) ?>')">Detail</button>
-                                </td>
-                            </tr>
-                            <?php endwhile; ?>
-                        </tbody>
+                                $q_rekap = mysqli_query($conn, "SELECT r.*, m.nama_matkul, j.kelas, 
+                                    (SELECT COUNT(*) FROM presensi_kuliah pk WHERE pk.id_jadwal = r.id_jadwal AND pk.tanggal = r.tanggal AND pk.status = 'Hadir') as hadir,
+                                    (SELECT COUNT(*) FROM presensi_kuliah pk WHERE pk.id_jadwal = r.id_jadwal AND pk.tanggal = r.tanggal) as total_mhs
+                                    FROM realisasi_mengajar r JOIN jadwal j ON r.id_jadwal = j.id_jadwal JOIN matkul m ON j.kode_matkul = m.kode_matkul $where ORDER BY r.tanggal DESC");
+
+                                while ($row = mysqli_fetch_assoc($q_rekap)):
+                                ?>
+                                <tr style="cursor: pointer; transition:0.2s;" 
+                                    onmouseover="this.style.background='#f1f5f9'" 
+                                    onmouseout="this.style.background='white'"
+                                    onclick="bukaDetail(<?= $row['id_jadwal'] ?>, '<?= $row['tanggal'] ?>', '<?= htmlspecialchars($row['nama_matkul']) ?>', '<?= htmlspecialchars($row['kelas']) ?>')">
+
+                                    <td><?= date('d/m/Y', strtotime($row['tanggal'])) ?></td>
+                                    <td><?= $row['nama_matkul'] ?></td>
+                                    <td><?= $row['kelas'] ?></td>
+                                    <td><?= $row['hadir'] ?> / <?= $row['total_mhs'] ?></td>
+                                </tr>
+                                <?php endwhile; ?>
+                            </tbody>
                     </table>
                 </div>
             </div>
