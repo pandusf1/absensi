@@ -157,7 +157,7 @@ if(isset($_POST['simpan_jadwal'])) {
 
         /* CARDS & STATS */
         .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-bottom: 20px; }
-        .stat-grid { display: grid; grid-template-columns: 1fr; gap: 15px; margin-bottom: 20px; }
+        .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; margin-bottom: 20px; }
         .stat-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); text-align: center; border-bottom: 4px solid #ddd; }
         .stat-card h3 { font-size: 28px; margin-bottom: 5px; color: #1e293b; }
         .stat-card p { color: #64748b; font-size: 12px; margin: 0; }
@@ -181,11 +181,11 @@ if(isset($_POST['simpan_jadwal'])) {
         .overlay-sidebar { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 900; }
         .overlay-sidebar.active { display: block; }
 
-        /* RESPONSIVE */
         @media (max-width: 768px) { 
             .sidebar { left: -250px; } 
             .sidebar.active { left: 0; }
             .btn-burger { display: block; }
+            .stat-grid { display: grid;grid-template-columns: 1fr; gap: 15px; margin-bottom: 20px; }
         }
     </style>
 </head>

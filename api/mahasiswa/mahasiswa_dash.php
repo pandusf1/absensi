@@ -97,12 +97,6 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
         .main-content.active {
             /* Kalau di HP, margin tetap 0. Kalau Desktop, geser kanan */
         }
-        @media (min-width: 769px) {
-            .main-content.active {
-                margin-left: 250px;
-                width: calc(100% - 250px);
-            }
-        }
 
         /* TOP BAR */
         .top-bar { 
@@ -138,9 +132,18 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
         canvas { position: absolute; top: 0; left: 0; }
         
         /* Stat Cards */
-        .stat-grid { display: grid; grid-template-columns: 1fr; gap: 15px; margin-bottom: 20px; }
+        .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; margin-bottom: 20px; }
         .stat-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); text-align: center; border-bottom: 4px solid #ddd; }
         .stat-card h3 { font-size: 28px; margin-bottom: 5px; color: #1e293b; }
+
+        @media (min-width: 769px) {
+            .main-content.active {
+                margin-left: 250px;
+                width: calc(100% - 250px);
+            }
+            .stat-grid { display: grid;grid-template-columns: 1fr; gap: 15px; margin-bottom: 20px; }
+
+        }
     </style>
 </head>
 <body>
