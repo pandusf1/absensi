@@ -1,7 +1,4 @@
 <?php
-// ==========================================
-// 1. NYALAKAN PELACAK ERROR (Wajib saat Development)
-// ==========================================
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
@@ -53,13 +50,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = mysqli_real_escape_string($conn, $_POST['username']); 
     $password = mysqli_real_escape_string($conn, $_POST['password']);
 
-    // Debugging: Tampilkan apa yang dikirim (Nanti dihapus kalau sudah fix)
-    // echo "Mencari user: " . $username . "<br>"; 
 
-    // ==========================================
-    // 2. CEK TABEL MAHASISWA
-    // ==========================================
-    $query_mhs = "SELECT * FROM mahasiswa WHERE nim='$username' OR email='$username'";
+    $query_mhs = "SELECT * FROM data WHERE nim='$username' OR email='$username'";
     $cek_mhs = mysqli_query($conn, $query_mhs);
 
     // Cek jika query error (misal nama tabel salah)
@@ -70,11 +62,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (mysqli_num_rows($cek_mhs) > 0) {
         $row = mysqli_fetch_assoc($cek_mhs);
         
-        // Cek Password Hash vs Plain
-        // Jika password di database belum di-hash (masih tulisan biasa), password_verify pasti GAGAL.
-        // Uncomment baris bawah ini untuk debug hash password:
-        // var_dump($password, $row['password'], password_verify($password, $row['password'])); die();
-
         if (password_verify($password, $row['password'])) {
             // Login Sukses Mahasiswa
             $_SESSION['role'] = 'mahasiswa';
@@ -89,9 +76,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
-    // ==========================================
-    // 3. CEK TABEL DOSEN
-    // ==========================================
     $query_dosen = "SELECT * FROM dosen WHERE nip='$username' OR email='$username'";
     $cek_dosen = mysqli_query($conn, $query_dosen);
 
@@ -117,9 +101,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
-    // ==========================================
-    // 4. JIKA TIDAK DITEMUKAN DI KEDUANYA
-    // ==========================================
     echo '<!DOCTYPE html>
     <html lang="id">
     <head>
