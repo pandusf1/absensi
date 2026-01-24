@@ -5,36 +5,30 @@ error_reporting(E_ALL);
 
 date_default_timezone_set('Asia/Jakarta');
 
-// 1. CEK LOGIN PAKAI COOKIE (BUKAN SESSION LAGI)
+// 1. CEK LOGIN PAKAI COOKIE
 if (!isset($_COOKIE['status_login']) || $_COOKIE['role'] != 'mahasiswa') {
-    // Kalau cookie kosong, kembalikan ke login
-    header("Location: ../../index.php"); 
+    header("Location: ../index.php"); 
     exit;
 }
 
 require_once __DIR__ . '/../database.php';
 
-// 2. AMBIL DATA DARI COOKIE
+// 2. AMBIL DATA
 $nim_mhs = $_COOKIE['nim']; 
 
-// 3. AMBIL PROFIL DATABASE (Biar Data Valid)
-// Gunakan backtick `data` karena nama tabel sensitif
 $q_mhs = mysqli_query($conn, "SELECT * FROM `data` WHERE nim = '$nim_mhs'");
-
 if (!$q_mhs) { die("Error SQL: " . mysqli_error($conn)); }
 $mhs = mysqli_fetch_assoc($q_mhs);
 
 if(!$mhs) { 
-    // Data di database hilang tapi cookie ada? Hapus cookie & logout
     setcookie('status_login', '', time() - 3600, '/');
-    header("Location: ../../index.php");
+    header("Location: ../index.php");
     die("Error: Data NIM tidak ditemukan."); 
 }
 
 $kelas_mhs = $mhs['kelas'];
 
-// Setup Variabel Tampilan
-date_default_timezone_set('Asia/Jakarta');
+// Setup Variabel
 $hari_inggris = date('l');
 $map_hari = ['Sunday'=>'Minggu', 'Monday'=>'Senin', 'Tuesday'=>'Selasa', 'Wednesday'=>'Rabu', 'Thursday'=>'Kamis', 'Friday'=>'Jumat', 'Saturday'=>'Sabtu'];
 $hari_ini = $map_hari[$hari_inggris];
@@ -49,100 +43,56 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portal Mahasiswa</title>
     
+    <link rel="icon" href="data:,">
+
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
     <script src="../aset/js/face-api.min.js"></script> 
 
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
-        /* === CSS UTAMA === */
+        /* === CSS UTAMA (TIDAK DIUBAH) === */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         body { background-color: #f4f7f6; display: flex; min-height: 100vh; font-size: 13px; color: #333; overflow-x: hidden; }
         
-        /* SIDEBAR (DEFAULT: TERTUTUP/HIDDEN) */
-        .sidebar { 
-            width: 250px; background: #1e293b; color: white; 
-            position: fixed; height: 100vh; 
-            left: -250px; /* AWALNYA DISEMBUNYIKAN KE KIRI */
-            top: 0; z-index: 1000; transition: 0.3s; 
-            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
-        }
-        
-        /* SIDEBAR SAAT DIBUKA (ACTIVE) */
+        .sidebar { width: 250px; background: #1e293b; color: white; position: fixed; height: 100vh; left: -250px; top: 0; z-index: 1000; transition: 0.3s; box-shadow: 2px 0 10px rgba(0,0,0,0.1); }
         .sidebar.active { left: 0; }
-
-        .sidebar-header { 
-            padding: 20px; border-bottom: 1px solid #334155; 
-            display: flex; align-items: center; gap: 10px; background: #0f172a;
-        }
+        .sidebar-header { padding: 20px; border-bottom: 1px solid #334155; display: flex; align-items: center; gap: 10px; background: #0f172a; }
         .menu { list-style: none; padding-top: 10px; }
-        .menu li a { 
-            display: flex; align-items: center; padding: 14px 20px; 
-            color: #cbd5e1; text-decoration: none; transition: 0.2s; 
-            gap: 12px; font-size: 13px; border-left: 3px solid transparent;
-        }
-        .menu li a:hover, .menu li a.active { 
-            background-color: #334155; color: #60a5fa; border-left-color: #60a5fa; 
-        }
-
-        /* CONTENT AREA (DEFAULT: FULL WIDTH) */
-        .main-content { 
-            flex: 1; margin-left: 0; padding: 20px; 
-            width: 100%; transition: 0.3s; 
-        }
-
-        /* CONTENT SAAT SIDEBAR BUKA (KHUSUS DESKTOP) */
-        .main-content.active {
-            /* Kalau di HP, margin tetap 0. Kalau Desktop, geser kanan */
-        }
-
-        /* TOP BAR */
-        .top-bar { 
-            display: flex; justify-content: space-between; align-items: center; 
-            background: white; padding: 15px 20px; border-radius: 10px; 
-            box-shadow: 0 2px 5px rgba(0,0,0,0.03); margin-bottom: 25px;
-        }
+        .menu li a { display: flex; align-items: center; padding: 14px 20px; color: #cbd5e1; text-decoration: none; transition: 0.2s; gap: 12px; font-size: 13px; border-left: 3px solid transparent; }
+        .menu li a:hover, .menu li a.active { background-color: #334155; color: #60a5fa; border-left-color: #60a5fa; }
         
-        /* TOMBOL BURGER (SELALU MUNCUL) */
-        .btn-burger { 
-            display: block; /* SELALU TAMPIL */
-            background: none; border: none; font-size: 20px; cursor: pointer; color: #333;
-        }
-
-        /* OVERLAY GELAP (UNTUK HP) */
+        .main-content { flex: 1; margin-left: 0; padding: 20px; width: 100%; transition: 0.3s; }
+        
+        .top-bar { display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.03); margin-bottom: 25px; }
+        .btn-burger { display: block; background: none; border: none; font-size: 20px; cursor: pointer; color: #333; }
+        
         .overlay-sidebar { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 900; }
         .overlay-sidebar.active { display: block; }
-
-        /* Lainnya tetap sama... */
+        
         .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-bottom: 20px; }
         .table-responsive { width: 100%; overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; white-space: nowrap; }
         th, td { padding: 12px 15px; border-bottom: 1px solid #f1f5f9; text-align: left; }
         th { background: #f8fafc; color: #475569; font-weight: 600; font-size: 12px; }
-        
         .btn { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-weight: 500; font-size: 12px; color: white; transition: 0.2s; }
         .btn-green { background: #10b981; } .btn-blue { background: #3b82f6; } .btn-disabled { background: #e2e8f0; color: #94a3b8; cursor: not-allowed; }
-
+        
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center; }
         .modal-content { background: white; padding: 20px; border-radius: 15px; width: 90%; max-width: 450px; text-align: center; }
         #video-container { width: 100%; height: 300px; background: #000; border-radius: 10px; overflow: hidden; position: relative; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
         video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
         canvas { position: absolute; top: 0; left: 0; }
         
-        /* Stat Cards */
         .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; margin-bottom: 20px; }
         .stat-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); text-align: center; border-bottom: 4px solid #ddd; }
         .stat-card h3 { font-size: 28px; margin-bottom: 5px; color: #1e293b; }
 
         @media (min-width: 769px) {
-            .main-content.active {
-                margin-left: 250px;
-                width: calc(100% - 250px);
-            }
-            .stat-grid { display: grid;grid-template-columns: 1fr; gap: 15px; margin-bottom: 20px; }
-
+            .main-content.active { margin-left: 250px; width: calc(100% - 250px); }
         }
     </style>
 </head>
@@ -163,7 +113,7 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
             <li><a href="?page=jadwal" class="<?= $page=='jadwal'?'active':'' ?>"><i class="fa-solid fa-calendar-alt"></i> Jadwal & Absen</a></li>
             <li><a href="?page=riwayat" class="<?= $page=='riwayat'?'active':'' ?>"><i class="fa-solid fa-clock-rotate-left"></i> Riwayat</a></li>
             <li><a href="?page=update_wajah" class="<?= $page=='update_wajah'?'active':'' ?>"><i class="fa-solid fa-face-viewfinder"></i> Scan Wajah</a></li>
-            <li style="margin-top: 20px;"><a href="../login/logout.php" style="color:#ef4444;"><i class="fa-solid fa-sign-out-alt"></i> Keluar</a></li>
+            <li style="margin-top: 20px;"><a href="#" onclick="logout()" style="color:#ef4444;"><i class="fa-solid fa-sign-out-alt"></i> Keluar</a></li>
         </ul>
     </nav>
 
@@ -307,18 +257,23 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
 
     <script>
         function toggleSidebar() { 
-            // Toggle class 'active' untuk sidebar dan konten
             document.getElementById('mySidebar').classList.toggle('active'); 
             document.getElementById('mainContent').classList.toggle('active');
-            
-            // Toggle overlay untuk tampilan HP
             document.querySelector('.overlay-sidebar').classList.toggle('active'); 
         }
 
-        // --- FACE API LOGIC (TETAP SAMA SEPERTI SEBELUMNYA) ---
+        function logout() {
+            document.cookie = "status_login=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            document.cookie = "nim=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            document.cookie = "role=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            window.location.href = '../index.php';
+        }
+
+        // --- FACE API LOGIC ---
         const TINY_FACE_OPTIONS = new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.5 });
         let isModelLoaded = false;
 
+        // PERBAIKAN PATH MODEL: ../../
         Promise.all([
             faceapi.nets.tinyFaceDetector.loadFromUri('../aset/models'),
             faceapi.nets.faceLandmark68Net.loadFromUri('../aset/models'),
