@@ -1,32 +1,74 @@
 <?php
-// 1. SETTING DEBUG & SESSION
+// ==============================================
+// 1. MODE DEBUG (AKTIFKAN INI SAAT LAYAR PUTIH)
+// ==============================================
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-session_start();
-date_default_timezone_set('Asia/Jakarta');
+// Cek apakah script jalan
+echo "";
 
-// 2. CEK LOGIN (WAJIB)
+// ==============================================
+// 2. SETUP SESSION UNTUK VERCEL
+// ==============================================
+// Set cookie params AGAR session bisa dibaca di semua folder
+session_set_cookie_params(0, '/'); 
+session_start();
+
+echo "";
+
+// Cek status login (Debug: Tampilkan isi session jika ada masalah)
 if (!isset($_SESSION['status_login']) || $_SESSION['role'] != 'mahasiswa') {
-    header("Location: ../index.php"); 
+    // Jangan redirect dulu, kita cek kenapa ditolak
+    echo "<h1>Akses Ditolak!</h1>";
+    echo "<p>Session Status Login: " . (isset($_SESSION['status_login']) ? $_SESSION['status_login'] : 'KOSONG') . "</p>";
+    echo "<p>Session Role: " . (isset($_SESSION['role']) ? $_SESSION['role'] : 'KOSONG') . "</p>";
+    echo "<a href='../index.php'>Kembali ke Login</a>";
     exit;
 }
 
-require_once __DIR__ . '/../database.php';
+// ==============================================
+// 3. KONEKSI DATABASE (CRITICAL POINT)
+// ==============================================
+// Coba panggil database
+$path_db = __DIR__ . '/../database.php';
 
-// 3. AMBIL DATA DARI SESSION
+if (!file_exists($path_db)) {
+    die("<h1>FATAL ERROR:</h1> File database tidak ditemukan di: <b>$path_db</b><br>Cek struktur foldermu!");
+}
+
+require_once $path_db;
+
+if (!isset($conn)) {
+    die("<h1>FATAL ERROR:</h1> File database.php terpanggil, tapi variabel <b>\$conn</b> tidak ada. Cek isi database.php!");
+}
+
+// ==============================================
+// 4. LOGIKA UTAMA
+// ==============================================
 $nim_mhs = $_SESSION['nim']; 
 
-// 4. AMBIL PROFIL
-$q_mhs = mysqli_query($conn, "SELECT * FROM `data` WHERE nim = '$nim_mhs'");
-if (!$q_mhs) { die("Error SQL: " . mysqli_error($conn)); }
+// Pastikan pakai backtick `data` karena nama tabelmu 'data'
+$query_str = "SELECT * FROM `data` WHERE nim = '$nim_mhs'";
+$q_mhs = mysqli_query($conn, $query_str);
+
+if (!$q_mhs) { 
+    die("<h1>SQL ERROR:</h1> Query gagal dieksekusi.<br>Pesan: " . mysqli_error($conn)); 
+}
+
 $mhs = mysqli_fetch_assoc($q_mhs);
 
-if(!$mhs) { session_destroy(); die("Error: Data NIM tidak ditemukan."); }
+if(!$mhs) { 
+    // Jika data tidak ada di tabel, tapi session ada
+    session_destroy(); 
+    die("<h1>DATA ERROR:</h1> Mahasiswa dengan NIM $nim_mhs tidak ditemukan di database. (Mungkin terhapus?)"); 
+}
+
 $kelas_mhs = $mhs['kelas'];
 
 // Setup Variabel Tampilan
+date_default_timezone_set('Asia/Jakarta');
 $hari_inggris = date('l');
 $map_hari = ['Sunday'=>'Minggu', 'Monday'=>'Senin', 'Tuesday'=>'Selasa', 'Wednesday'=>'Rabu', 'Thursday'=>'Kamis', 'Friday'=>'Jumat', 'Saturday'=>'Sabtu'];
 $hari_ini = $map_hari[$hari_inggris];
