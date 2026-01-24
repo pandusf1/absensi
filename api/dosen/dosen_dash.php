@@ -273,25 +273,25 @@ if(isset($_POST['simpan_jadwal'])) {
                 <h3>Daftar Mata Kuliah</h3>
                 <div class="table-responsive">
                     <table>
-                        <thead><tr><th>Kode</th><th>Nama Mata Kuliah</th><th>SKS</th><th style="text-align:center;">Aksi</th></tr></thead>
+                        <thead><tr><th>Kode</th><th>Nama Mata Kuliah</th><th>SKS</th></tr></thead>
                         <tbody>
                             <?php 
                             $qm = mysqli_query($conn, "SELECT * FROM matkul WHERE nip='$nip_dosen' ORDER BY kode_matkul ASC"); 
                             while($m = mysqli_fetch_assoc($qm)): 
                             ?>
-                            <tr>
+                            <tr style="cursor: pointer; transition:0.2s;" 
+                                onmouseover="this.style.background='#f1f5f9'" 
+                                onmouseout="this.style.background='white'"
+                                onclick="bukaModalMatkul(this)" 
+                                data-kode="<?= $m['kode_matkul'] ?>" 
+                                data-nama="<?= htmlspecialchars($m['nama_matkul']) ?>" 
+                                data-sks="<?= $m['sks'] ?>">
                                 <td><b><?= $m['kode_matkul'] ?></b></td>
                                 <td><?= $m['nama_matkul'] ?></td>
                                 <td><?= $m['sks'] ?> SKS</td>
-                                <td style="text-align:center;">
-                                    <button class="btn btn-blue" onclick="bukaModalMatkul(this)" 
-                                        data-kode="<?= $m['kode_matkul'] ?>" data-nama="<?= htmlspecialchars($m['nama_matkul']) ?>" data-sks="<?= $m['sks'] ?>">
-                                        <i class="fa-solid fa-pen-to-square"></i> Edit
-                                    </button>
-                                </td>
                             </tr>
                             <?php endwhile; ?>
-                        </tbody>
+                        </tbody>                    
                     </table>
                 </div>
             </div>
@@ -320,7 +320,7 @@ if(isset($_POST['simpan_jadwal'])) {
                     </form>
                 </div>
             </div>
-
+            
         <?php elseif ($page == 'jadwal'): ?>
             <div class="card">
                 <h3 style="margin-bottom:15px; color:#3b82f6;">+ Tambah Jadwal Kelas</h3>
@@ -508,23 +508,54 @@ if(isset($_POST['simpan_jadwal'])) {
 
         function tutupModal(e) { if (e.target.classList.contains('modal')) e.target.style.display = 'none'; }
 
-        // --- JS MATKUL ---
         function bukaModalMatkul(el) {
-            $('#edit_kode_lama').val($(el).data('kode')); $('#edit_kode').val($(el).data('kode'));      
-            $('#edit_nama').val($(el).data('nama')); $('#edit_sks').val($(el).data('sks'));
+            // Ambil data dari atribut data-* yang kita buat di <tr> tadi
+            var kode = $(el).data('kode');
+            var nama = $(el).data('nama');
+            var sks = $(el).data('sks');
+
+            // Masukkan data tersebut ke dalam input form di Modal
+            $('#edit_kode_lama').val(kode); // Untuk referensi update database
+            $('#edit_kode').val(kode);      // Untuk tampilan (readonly)
+            $('#edit_nama').val(nama);
+            $('#edit_sks').val(sks);
+
+            // Munculkan Modal
             $('#modalEditMatkul').css('display', 'flex');
         }
+
+        // Fungsi simpan (biarkan seperti sebelumnya)
         function simpanEditMatkul(e) {
             e.preventDefault();
-            $.post('dosen_ajax.php', { action: 'edit_matkul', kode_lama: $('#edit_kode_lama').val(), kode_baru: $('#edit_kode').val(), nama: $('#edit_nama').val(), sks: $('#edit_sks').val() }, 
-            function(res) { Swal.fire({title:'Info', text:res, icon:'info', timer:1000, showConfirmButton:false}).then(() => { location.reload(); }); });
-        }
-        function hapusMatkulCurrent() {
-            Swal.fire({title:'Hapus?', text:"Jadwal terkait akan hilang!", icon:'warning', showCancelButton:true, confirmButtonColor:'#d33'}).then((r)=>{
-                if(r.isConfirmed) $.post('dosen_ajax.php', {action:'hapus_matkul', kode:$('#edit_kode_lama').val()}, function(res){ Swal.fire('Terhapus',res,'success').then(()=>location.reload()); });
+            $.post('dosen_ajax.php', {
+                action: 'edit_matkul', 
+                kode_lama: $('#edit_kode_lama').val(), 
+                kode_baru: $('#edit_kode').val(),
+                nama: $('#edit_nama').val(), 
+                sks: $('#edit_sks').val()
+            }, function(res) { 
+                Swal.fire({title:'Info', text:res, icon:'info', timer:1500, showConfirmButton:false})
+                .then(() => { location.reload(); }); 
             });
         }
 
+        // Fungsi hapus (biarkan seperti sebelumnya)
+        function hapusMatkulCurrent() {
+            let kode = $('#edit_kode_lama').val();
+            Swal.fire({
+                title: 'Hapus Mata Kuliah?', 
+                text: "Data jadwal terkait juga akan terhapus!", 
+                icon: 'warning', 
+                showCancelButton: true, 
+                confirmButtonColor: '#d33'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.post('dosen_ajax.php', { action: 'hapus_matkul', kode: kode }, function(res) { 
+                        Swal.fire('Terhapus!', res, 'success').then(() => { location.reload(); });
+                    });
+                }
+            });
+        }
         // --- JS JADWAL ---
         function aksiKelas(act, id) {
             Swal.fire({title:'Konfirmasi?', icon:'question', showCancelButton:true}).then((r)=>{
