@@ -8,7 +8,7 @@ date_default_timezone_set('Asia/Jakarta');
 // Kredensial TiDB (Password Baru Kamu)
 $host     = "gateway01.ap-southeast-1.prod.aws.tidbcloud.com";
 $user     = "3UEpyYnuidk1vBW.root";
-$password = "dM9VL8eoH2Pze2zt"; 
+$password = "jgOOpNyO9rqRgqcH"; 
 $dbname   = "absensi";
 $port     = 4000;
 

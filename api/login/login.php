@@ -32,9 +32,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $username = mysqli_real_escape_string($conn, $_POST['username']); 
     $password = mysqli_real_escape_string($conn, $_POST['password']);
 
-    // ===============================================
-    // 1. CEK MAHASISWA
-    // ===============================================
     $cek_mhs = mysqli_query($conn, "SELECT * FROM data WHERE nim='$username' OR email='$username'");
     
     if (mysqli_num_rows($cek_mhs) > 0) {
@@ -56,9 +53,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
-    // ===============================================
-    // 2. CEK DOSEN
-    // ===============================================
     $cek_dosen = mysqli_query($conn, "SELECT * FROM dosen WHERE nip='$username' OR email='$username'");
 
     if (mysqli_num_rows($cek_dosen) > 0) {
@@ -80,10 +74,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
-    // ===============================================
-    // 3. JIKA AKUN TIDAK ADA
-    // ===============================================
-    // Kita tetap pakai alert disini agar user tidak bingung kenapa halaman cuma refresh
     echo '<!DOCTYPE html>
     <html lang="id">
     <head>
