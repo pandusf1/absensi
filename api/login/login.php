@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once __DIR__ . '/../database.php';
+require_once __DIR__ . '../database.php';
 function show_error($text) {
     echo '<!DOCTYPE html>
     <html lang="id">
