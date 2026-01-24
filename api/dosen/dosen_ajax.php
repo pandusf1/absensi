@@ -1,6 +1,6 @@
 <?php
 // Pastikan path ini benar (naik satu folder ke database.php)
-include '../database.php'; 
+require_once __DIR__ . '/../database.php';
 date_default_timezone_set('Asia/Jakarta');
 
 $action = isset($_POST['action']) ? $_POST['action'] : '';

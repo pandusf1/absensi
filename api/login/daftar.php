@@ -1,6 +1,5 @@
 <?php
-include '../database.php'; // Pastikan koneksi database benar
-
+require_once __DIR__ . '/../database.php';
 // Fungsi bantuan untuk menampilkan SweetAlert & Redirect
 function show_alert($title, $text, $icon, $redirect) {
     echo '<!DOCTYPE html>

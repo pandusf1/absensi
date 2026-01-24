@@ -1,6 +1,6 @@
 <?php
 // Include koneksi database (naik satu folder)
-include '../database.php';
+require_once __DIR__ . '/../database.php';
 date_default_timezone_set('Asia/Jakarta');
 
 // Ambil action dari request AJAX

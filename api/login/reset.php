@@ -1,6 +1,5 @@
 <?php
-include '../database.php';
-
+require_once __DIR__ . '/../database.php';
 // Fungsi bantuan untuk menampilkan SweetAlert
 function show_alert_with_link($title, $text, $icon, $link_url) {
     echo '<!DOCTYPE html>

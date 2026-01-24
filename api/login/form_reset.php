@@ -1,6 +1,5 @@
 <?php
-include '../database.php';
-
+require_once __DIR__ . '/../database.php';
 // --- FUNGSI ALERT SERAGAM ---
 function show_alert($title, $text, $icon, $redirect) {
     echo '<!DOCTYPE html>

@@ -1,8 +1,6 @@
 <?php
 session_start();
-include '../database.php';
-
-// Fungsi bantuan HANYA UNTUK ERROR (Agar user tau kenapa gagal)
+require_once __DIR__ . '/../database.php';
 function show_error($text) {
     echo '<!DOCTYPE html>
     <html lang="id">

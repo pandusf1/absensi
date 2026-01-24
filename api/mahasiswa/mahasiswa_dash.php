@@ -1,5 +1,5 @@
 <?php
-include '../database.php';
+require_once __DIR__ . '/../database.php';
 date_default_timezone_set('Asia/Jakarta');
 
 $nim_mhs = '4.41.23.2.23'; // Sesuaikan NIM
