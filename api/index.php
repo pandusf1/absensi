@@ -1,6 +1,4 @@
 <?php
-require_once __DIR__ . 'database.php';
-// Logika PHP ditaruh di paling atas
 $page = $_GET['page'] ?? 'home';
 ?>
 
