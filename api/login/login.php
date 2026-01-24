@@ -1,10 +1,6 @@
 <?php
 session_start();
-
-// 1. Panggil Database dengan Path yang Aman (__DIR__)
 require_once __DIR__ . '/../database.php';
-
-// Fungsi untuk menampilkan pesan error dengan SweetAlert
 function show_error($text) {
     echo '<!DOCTYPE html>
     <html lang="id">
@@ -33,33 +29,25 @@ function show_error($text) {
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
-    // Sanitasi input
     $username = mysqli_real_escape_string($conn, $_POST['username']); 
     $password = mysqli_real_escape_string($conn, $_POST['password']);
 
     // ===============================================
-    // 1. CEK MAHASISWA (TABEL 'data')
+    // 1. CEK MAHASISWA
     // ===============================================
-    // PENTING: Pakai tanda backtick (`) di sekitar kata data
-    $query_mhs = "SELECT * FROM `data` WHERE nim='$username' OR email='$username'";
-    $cek_mhs = mysqli_query($conn, $query_mhs);
+    $cek_mhs = mysqli_query($conn, "SELECT * FROM data WHERE nim='$username' OR email='$username'");
     
-    // Cek error query
-    if (!$cek_mhs) {
-        die("Error Query Mahasiswa: " . mysqli_error($conn));
-    }
-
     if (mysqli_num_rows($cek_mhs) > 0) {
         $row = mysqli_fetch_assoc($cek_mhs);
         
         if (password_verify($password, $row['password'])) {
-            // SET SESSION MAHASISWA
+            // SET SESSION
             $_SESSION['role'] = 'mahasiswa';
             $_SESSION['nim'] = $row['nim'];
             $_SESSION['nama'] = $row['nama'];
             $_SESSION['status_login'] = true;
 
-            // REDIRECT KE DASHBOARD MAHASISWA
+            // [UBAH DISINI] LANGSUNG REDIRECT TANPA ALERT
             header("Location: ../mahasiswa/mahasiswa_dash.php");
             exit;
 
@@ -69,22 +57,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     // ===============================================
-    // 2. CEK DOSEN (TABEL 'dosen')
+    // 2. CEK DOSEN
     // ===============================================
-    $query_dosen = "SELECT * FROM dosen WHERE nip='$username' OR email='$username'";
-    $cek_dosen = mysqli_query($conn, $query_dosen);
+    $cek_dosen = mysqli_query($conn, "SELECT * FROM dosen WHERE nip='$username' OR email='$username'");
 
     if (mysqli_num_rows($cek_dosen) > 0) {
         $row = mysqli_fetch_assoc($cek_dosen);
 
         if (password_verify($password, $row['password'])) {
-            // SET SESSION DOSEN
+            // SET SESSION
             $_SESSION['role'] = 'dosen';
             $_SESSION['nip'] = $row['nip'];
             $_SESSION['nama'] = $row['nama_dosen'];
             $_SESSION['status_login'] = true;
 
-            // REDIRECT KE DASHBOARD DOSEN
+            // [UBAH DISINI] LANGSUNG REDIRECT TANPA ALERT
             header("Location: ../dosen/dosen_dash.php");
             exit;
 
@@ -94,8 +81,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     // ===============================================
-    // 3. JIKA TIDAK DITEMUKAN
+    // 3. JIKA AKUN TIDAK ADA
     // ===============================================
+    // Kita tetap pakai alert disini agar user tidak bingung kenapa halaman cuma refresh
     echo '<!DOCTYPE html>
     <html lang="id">
     <head>
