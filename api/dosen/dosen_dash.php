@@ -223,15 +223,6 @@ if(isset($_POST['simpan_jadwal'])) {
                     ?>
                 </h3>
             </div>
-            <div style="display:flex; align-items:center; gap:10px;">
-                <div style="text-align:right; display:none sm:block;">
-                    <span style="font-weight:600; display:block;"><?= htmlspecialchars($dosen['nama_dosen']) ?></span>
-                    <small style="color:#64748b;"><?= htmlspecialchars($dosen['nip']) ?></small>
-                </div>
-                <div style="width:35px; height:35px; background:#3b82f6; color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold;">
-                    <?= substr($dosen['nama_dosen'],0,1) ?>
-                </div>
-            </div>
         </div>
 
         <?php if ($page == 'home'): ?>
@@ -427,186 +418,247 @@ if(isset($_POST['simpan_jadwal'])) {
                 </div>
             </div>
 
-        <?php elseif ($page == 'rekap'): ?>
-            <div class="card">
-                <h3 style="margin-bottom:15px;">Laporan Presensi</h3>
-                <form method="GET" style="display:flex; gap:10px; flex-wrap:wrap; margin-bottom:15px;">
-                    <input type="hidden" name="page" value="rekap">
-                    <input type="text" name="keyword" placeholder="Cari Matkul..." value="<?= $_GET['keyword']??'' ?>" class="input-form" style="flex:1; margin:0;">
-                    <input type="date" name="tgl_mulai" value="<?= $_GET['tgl_mulai']??'' ?>" class="input-form" style="width:130px; margin:0;">
-                    <input type="date" name="tgl_akhir" value="<?= $_GET['tgl_akhir']??'' ?>" class="input-form" style="width:130px; margin:0;">
-                    <button type="submit" class="btn btn-blue">Filter</button>
-                </form>
-
-                <div class="table-responsive">
-                    <table>
-                        <thead><tr><th>Tanggal</th><th>Mata Kuliah</th><th>Kelas</th><th>Hadir</th></tr></thead>
-                            <tbody>
-                                <?php
-                                $where = "WHERE j.nip = '$nip_dosen'";
-                                if(!empty($_GET['keyword'])) $where .= " AND m.nama_matkul LIKE '%".mysqli_real_escape_string($conn, $_GET['keyword'])."%'";
-                                if(!empty($_GET['tgl_mulai'])) $where .= " AND r.tanggal >= '".$_GET['tgl_mulai']."'";
-                                if(!empty($_GET['tgl_akhir'])) $where .= " AND r.tanggal <= '".$_GET['tgl_akhir']."'";
-
-                                $q_rekap = mysqli_query($conn, "SELECT r.*, m.nama_matkul, j.kelas, 
-                                    (SELECT COUNT(*) FROM presensi_kuliah pk WHERE pk.id_jadwal = r.id_jadwal AND pk.tanggal = r.tanggal AND pk.status = 'Hadir') as hadir,
-                                    (SELECT COUNT(*) FROM presensi_kuliah pk WHERE pk.id_jadwal = r.id_jadwal AND pk.tanggal = r.tanggal) as total_mhs
-                                    FROM realisasi_mengajar r JOIN jadwal j ON r.id_jadwal = j.id_jadwal JOIN matkul m ON j.kode_matkul = m.kode_matkul $where ORDER BY r.tanggal DESC");
-
-                                while ($row = mysqli_fetch_assoc($q_rekap)):
-                                ?>
-                                <tr style="cursor: pointer; transition:0.2s;" 
-                                    onmouseover="this.style.background='#f1f5f9'" 
-                                    onmouseout="this.style.background='white'"
-                                    onclick="bukaDetail(<?= $row['id_jadwal'] ?>, '<?= $row['tanggal'] ?>', '<?= htmlspecialchars($row['nama_matkul']) ?>', '<?= htmlspecialchars($row['kelas']) ?>')">
-
-                                    <td><?= date('d/m/Y', strtotime($row['tanggal'])) ?></td>
-                                    <td><?= $row['nama_matkul'] ?></td>
-                                    <td><?= $row['kelas'] ?></td>
-                                    <td><?= $row['hadir'] ?> / <?= $row['total_mhs'] ?></td>
-                                </tr>
-                                <?php endwhile; ?>
-                            </tbody>
-                    </table>
-                </div>
+<?php elseif ($page == 'rekap'): ?>
+    <div class="card">
+        <h3 style="margin-bottom:15px;">Laporan Presensi</h3>
+        
+        <div style="background:#f8fafc; padding:15px; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:15px;">
+            <div style="margin-bottom:10px;">
+                <label style="font-size:11px; font-weight:bold; color:#64748b; display:block; margin-bottom:5px;">Pencarian</label>
+                <input type="text" id="filter_keyword" placeholder="Cari Mata Kuliah..." class="input-form" style="width:100%; margin:0;">
             </div>
 
-            <div id="modalDetailRekap" class="modal" onclick="tutupModal(event)">
-                <div class="modal-content">
-                    <h3 style="margin-bottom:5px;">Detail Kehadiran</h3>
-                    <p id="judulDetail" style="color:#666; font-size:12px; margin-bottom:15px;"></p>
-                    <div style="max-height:250px; overflow-y:auto; border:1px solid #eee; margin-bottom:15px;">
-                        <table style="margin:0;"><tbody id="bodyDetailMhs"></tbody></table>
-                    </div>
-                    <div style="background:#f0fdf4; padding:10px; border-radius:8px; border:1px dashed #22c55e;">
-                        <h4 style="font-size:12px; margin-bottom:5px; color:#166534;">+ Input Manual</h4>
-                        <form onsubmit="tambahManual(event)" style="display:flex; gap:5px;">
-                            <input type="hidden" id="id_jadwal_detail"><input type="hidden" id="tgl_detail">
-                            <input type="text" id="manual_nim" placeholder="NIM" required class="input-form" style="flex:1; margin:0;">
-                            <select id="manual_status" class="input-form" style="width:100px; margin:0;"><option value="Sakit">Sakit</option><option value="Izin">Izin</option><option value="Hadir">Hadir</option></select>
-                            <button type="submit" class="btn btn-green">Simpan</button>
-                        </form>
-                    </div>
+            <div style="display:grid; grid-template-columns: 1fr 1fr auto; gap:10px; align-items:end;">
+                <div>
+                    <label style="font-size:11px; font-weight:bold; color:#64748b; display:block; margin-bottom:5px;">Dari Tanggal</label>
+                    <input type="date" id="filter_tgl_mulai" class="input-form" style="width:100%; margin:0;">
+                </div>
+                <div>
+                    <label style="font-size:11px; font-weight:bold; color:#64748b; display:block; margin-bottom:5px;">Sampai</label>
+                    <input type="date" id="filter_tgl_akhir" class="input-form" style="width:100%; margin:0;">
+                </div>
+                <div>
+                    <button onclick="loadRekap()" class="btn btn-blue" style="height:38px; padding:0 20px;"><i class="fa-solid fa-filter"></i> Filter</button>
                 </div>
             </div>
-        <?php endif; ?>
+        </div>
+
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tanggal</th>
+                        <th>Mata Kuliah</th>
+                        <th>Kelas</th>
+                        <th>Materi</th>
+                        <th>Hadir</th>
+                        <th style="text-align:center;">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="tabelRekapBody">
+                    <tr><td colspan="6" align="center" style="padding:20px;">Memuat data...</td></tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 
-    <script>
-        <?= $swal_script ?>
+    <div id="modalDetailRekap" class="modal" onclick="tutupModal(event)">
+        <div class="modal-content">
+            <h3 style="margin-bottom:5px;">Detail Kehadiran</h3>
+            <p id="judulDetail" style="color:#666; font-size:12px; margin-bottom:15px;"></p>
+            <div style="max-height:250px; overflow-y:auto; border:1px solid #eee; margin-bottom:15px;">
+                <table style="margin:0;"><tbody id="bodyDetailMhs"></tbody></table>
+            </div>
+            <div style="background:#f0fdf4; padding:10px; border-radius:8px; border:1px dashed #22c55e;">
+                <h4 style="font-size:12px; margin-bottom:5px; color:#166534;">+ Input Manual</h4>
+                <form onsubmit="tambahManual(event)" style="display:flex; gap:5px;">
+                    <input type="hidden" id="id_jadwal_detail"><input type="hidden" id="tgl_detail">
+                    <input type="text" id="manual_nim" placeholder="NIM" required class="input-form" style="flex:1; margin:0;">
+                    <select id="manual_status" class="input-form" style="width:100px; margin:0;"><option value="Sakit">Sakit</option><option value="Izin">Izin</option><option value="Hadir">Hadir</option></select>
+                    <button type="submit" class="btn btn-green">Simpan</button>
+                </form>
+            </div>
+        </div>
+    </div>
+<?php endif; ?>
 
-        function toggleSidebar() { 
-            document.getElementById('mySidebar').classList.toggle('active'); 
-            document.getElementById('mainContent').classList.toggle('active');
-            document.querySelector('.overlay-sidebar').classList.toggle('active'); 
+<script>
+    <?= $swal_script ?>
+
+    $(document).ready(function(){
+        // Cek apakah kita ada di halaman rekap (agar tidak error di halaman lain)
+        if ($('#tabelRekapBody').length > 0) {
+            loadRekap();
         }
+    });
 
-        function logout() {
-            document.cookie = "status_login=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-            document.cookie = "nip=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-            document.cookie = "role=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-            window.location.href = '../index.php';
-        }
+    // --- FUNGSI UMUM ---
+    function toggleSidebar() { 
+        document.getElementById('mySidebar').classList.toggle('active'); 
+        document.getElementById('mainContent').classList.toggle('active');
+        document.querySelector('.overlay-sidebar').classList.toggle('active'); 
+    }
 
-        function tutupModal(e) { if (e.target.classList.contains('modal')) e.target.style.display = 'none'; }
+    function logout() {
+        document.cookie = "status_login=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        document.cookie = "nip=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        document.cookie = "role=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        window.location.href = '../index.php';
+    }
 
-        function bukaModalMatkul(el) {
-            // Ambil data dari atribut data-* yang kita buat di <tr> tadi
-            var kode = $(el).data('kode');
-            var nama = $(el).data('nama');
-            var sks = $(el).data('sks');
+    function tutupModal(e) { 
+        if (e.target.classList.contains('modal')) e.target.style.display = 'none'; 
+    }
 
-            // Masukkan data tersebut ke dalam input form di Modal
-            $('#edit_kode_lama').val(kode); // Untuk referensi update database
-            $('#edit_kode').val(kode);      // Untuk tampilan (readonly)
-            $('#edit_nama').val(nama);
-            $('#edit_sks').val(sks);
+    // --- FUNGSI HALAMAN REKAP ---
+    function loadRekap() {
+        let kw = $('#filter_keyword').val();
+        let tm = $('#filter_tgl_mulai').val();
+        let ta = $('#filter_tgl_akhir').val();
 
-            // Munculkan Modal
-            $('#modalEditMatkul').css('display', 'flex');
-        }
+        $('#tabelRekapBody').html('<tr><td colspan="6" align="center">Sedang mencari...</td></tr>');
 
-        // Fungsi simpan (biarkan seperti sebelumnya)
-        function simpanEditMatkul(e) {
-            e.preventDefault();
-            $.post('dosen_ajax.php', {
-                action: 'edit_matkul', 
-                kode_lama: $('#edit_kode_lama').val(), 
-                kode_baru: $('#edit_kode').val(),
-                nama: $('#edit_nama').val(), 
-                sks: $('#edit_sks').val()
-            }, function(res) { 
-                Swal.fire({title:'Info', text:res, icon:'info', timer:1500, showConfirmButton:false})
-                .then(() => { location.reload(); }); 
+        $.post('dosen_ajax.php', { 
+            action: 'filter_rekap', 
+            keyword: kw, 
+            tgl_mulai: tm, 
+            tgl_akhir: ta,
+            nip: '<?= $nip_dosen ?>'
+        }, function(res) {
+            $('#tabelRekapBody').html(res);
+        });
+    }
+
+    function bukaDetail(id, tgl, matkul, kelas) {
+        $('#judulDetail').text(matkul + " - " + tgl); 
+        $('#id_jadwal_detail').val(id); 
+        $('#tgl_detail').val(tgl);
+        loadDetailIsi(id, tgl); 
+        $('#modalDetailRekap').css('display', 'flex');
+    }
+
+    function loadDetailIsi(id, tgl) {
+        $('#bodyDetailMhs').html('<tr><td align="center">Loading...</td></tr>');
+        $.post('dosen_ajax.php', { action: 'load_detail_mhs', id_jadwal: id, tanggal: tgl }, function(res) { 
+            $('#bodyDetailMhs').html(res); 
+        });
+    }
+
+    function tambahManual(e) {
+        e.preventDefault();
+        let id = $('#id_jadwal_detail').val();
+        let tgl = $('#tgl_detail').val();
+        $.post('dosen_ajax.php', { 
+            action: 'tambah_presensi_manual', 
+            id_jadwal: id, 
+            tanggal: tgl, 
+            nim: $('#manual_nim').val(), 
+            status: $('#manual_status').val() 
+        }, function(res) { 
+            Swal.fire('Info', res, 'info'); 
+            $('#manual_nim').val(''); 
+            loadDetailIsi(id, tgl); 
+        });
+    }
+
+    // --- FUNGSI HALAMAN MATKUL ---
+    function bukaModalMatkul(el) {
+        var kode = $(el).data('kode');
+        var nama = $(el).data('nama');
+        var sks = $(el).data('sks');
+
+        $('#edit_kode_lama').val(kode); 
+        $('#edit_kode').val(kode);      
+        $('#edit_nama').val(nama);
+        $('#edit_sks').val(sks);
+
+        $('#modalEditMatkul').css('display', 'flex');
+    }
+
+    function simpanEditMatkul(e) {
+        e.preventDefault();
+        $.post('dosen_ajax.php', {
+            action: 'edit_matkul', 
+            kode_lama: $('#edit_kode_lama').val(), 
+            kode_baru: $('#edit_kode').val(),
+            nama: $('#edit_nama').val(), 
+            sks: $('#edit_sks').val()
+        }, function(res) { 
+            Swal.fire({title:'Info', text:res, icon:'info', timer:1500, showConfirmButton:false})
+            .then(() => { location.reload(); }); 
+        });
+    }
+
+    function hapusMatkulCurrent() {
+        let kode = $('#edit_kode_lama').val();
+        Swal.fire({
+            title: 'Hapus Mata Kuliah?', text: "Data jadwal terkait juga akan terhapus!", icon: 'warning', 
+            showCancelButton: true, confirmButtonColor: '#d33'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.post('dosen_ajax.php', { action: 'hapus_matkul', kode: kode }, function(res) { 
+                    Swal.fire('Terhapus!', res, 'success').then(() => { location.reload(); });
+                });
+            }
+        });
+    }
+
+    // --- FUNGSI HALAMAN JADWAL ---
+    function aksiKelas(act, id) {
+        Swal.fire({title:'Konfirmasi?', icon:'question', showCancelButton:true}).then((r)=>{
+            if(r.isConfirmed) $.post('dosen_ajax.php', {action:act, id_jadwal:id}, function(res){ 
+                Swal.fire('Sukses',res,'success').then(()=>location.reload()); 
             });
-        }
+        });
+    }
 
-        // Fungsi hapus (biarkan seperti sebelumnya)
-        function hapusMatkulCurrent() {
-            let kode = $('#edit_kode_lama').val();
-            Swal.fire({
-                title: 'Hapus Mata Kuliah?', 
-                text: "Data jadwal terkait juga akan terhapus!", 
-                icon: 'warning', 
-                showCancelButton: true, 
-                confirmButtonColor: '#d33'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.post('dosen_ajax.php', { action: 'hapus_matkul', kode: kode }, function(res) { 
-                        Swal.fire('Terhapus!', res, 'success').then(() => { location.reload(); });
-                    });
-                }
-            });
-        }
-        // --- JS JADWAL ---
-        function aksiKelas(act, id) {
-            Swal.fire({title:'Konfirmasi?', icon:'question', showCancelButton:true}).then((r)=>{
-                if(r.isConfirmed) $.post('dosen_ajax.php', {action:act, id_jadwal:id}, function(res){ Swal.fire('Sukses',res,'success').then(()=>location.reload()); });
-            });
-        }
-        function bukaModalJadwal(el) {
-            let id = $(el).data('id'); window.currentIdJadwal = id;
-            $('#edit_id_jadwal').val(id); $('#judulMatkulModal').text($(el).data('matkul') + " (" + $(el).data('kelas') + ")");
-            $('#edit_hari').val($(el).data('hari')); $('#edit_jam_mulai').val($(el).data('mulai'));
-            $('#edit_jam_selesai').val($(el).data('selesai')); $('#edit_ruang').val($(el).data('ruang'));
-            $('#edit_kelas').val($(el).data('kelas')); $('#edit_kuota').val($(el).data('kuota'));
+    function bukaModalJadwal(el) {
+        let id = $(el).data('id'); window.currentIdJadwal = id;
+        $('#edit_id_jadwal').val(id); 
+        $('#judulMatkulModal').text($(el).data('matkul') + " (" + $(el).data('kelas') + ")");
+        $('#edit_hari').val($(el).data('hari')); 
+        $('#edit_jam_mulai').val($(el).data('mulai'));
+        $('#edit_jam_selesai').val($(el).data('selesai')); 
+        $('#edit_ruang').val($(el).data('ruang'));
+        $('#edit_kelas').val($(el).data('kelas')); 
+        $('#edit_kuota').val($(el).data('kuota'));
 
-            if ($(el).data('status') === 'Berlangsung') $('#formEditJadwalArea').hide(); else $('#formEditJadwalArea').show();
+        if ($(el).data('status') === 'Berlangsung') $('#formEditJadwalArea').hide(); else $('#formEditJadwalArea').show();
 
-            $('#listMahasiswaBody').html('<tr><td align="center">Loading...</td></tr>');
-            $.post('dosen_ajax.php', { action: 'cek_monitoring', id_jadwal: id }, function(res) {
-                let d = JSON.parse(res); $('#txtHadir').text(d.jumlah_hadir);
-                let html = ''; d.list_mhs.forEach(m => html += `<tr><td style="padding:5px;">${m.jam}</td><td style="padding:5px;">${m.nim}</td><td style="padding:5px;">${m.nama}</td></tr>`);
-                $('#listMahasiswaBody').html(html || '<tr><td align="center" style="color:#999;">Belum ada presensi</td></tr>');
-            });
-            $('#modalEditJadwal').css('display', 'flex');
-        }
-        function simpanEditJadwal(e) {
-            e.preventDefault();
-            $.post('dosen_ajax.php', { action: 'edit_jadwal', id: $('#edit_id_jadwal').val(), hari: $('#edit_hari').val(), jam_m: $('#edit_jam_mulai').val(), jam_s: $('#edit_jam_selesai').val(), ruang: $('#edit_ruang').val(), kelas: $('#edit_kelas').val(), kuota: $('#edit_kuota').val() }, 
-            function(res) { Swal.fire('Info',res,'success').then(()=>location.reload()); });
-        }
-        function hapusJadwalCurrent() {
-            Swal.fire({title:'Hapus Jadwal?', icon:'warning', showCancelButton:true, confirmButtonColor:'#d33'}).then((r)=>{
-                if(r.isConfirmed) $.post('dosen_ajax.php', {action:'hapus_jadwal', id:window.currentIdJadwal}, function(res){ Swal.fire('Terhapus',res,'success').then(()=>location.reload()); });
-            });
-        }
+        $('#listMahasiswaBody').html('<tr><td align="center">Loading...</td></tr>');
+        $.post('dosen_ajax.php', { action: 'cek_monitoring', id_jadwal: id }, function(res) {
+            let d = JSON.parse(res); 
+            $('#txtHadir').text(d.jumlah_hadir);
+            let html = ''; 
+            d.list_mhs.forEach(m => html += `<tr><td style="padding:5px;">${m.jam}</td><td style="padding:5px;">${m.nim}</td><td style="padding:5px;">${m.nama}</td></tr>`);
+            $('#listMahasiswaBody').html(html || '<tr><td align="center" style="color:#999;">Belum ada presensi</td></tr>');
+        });
+        $('#modalEditJadwal').css('display', 'flex');
+    }
 
-        // --- JS REKAP ---
-        function bukaDetail(id, tgl, matkul, kelas) {
-            $('#judulDetail').text(matkul + " - " + tgl); $('#id_jadwal_detail').val(id); $('#tgl_detail').val(tgl);
-            loadDetailIsi(id, tgl); $('#modalDetailRekap').css('display', 'flex');
-        }
-        function loadDetailIsi(id, tgl) {
-            $('#bodyDetailMhs').html('<tr><td align="center">Loading...</td></tr>');
-            $.post('dosen_ajax.php', { action: 'load_detail_mhs', id_jadwal: id, tanggal: tgl }, function(res) { $('#bodyDetailMhs').html(res); });
-        }
-        function tambahManual(e) {
-            e.preventDefault();
-            let id = $('#id_jadwal_detail').val(), tgl = $('#tgl_detail').val();
-            $.post('dosen_ajax.php', { action: 'tambah_presensi_manual', id_jadwal: id, tanggal: tgl, nim: $('#manual_nim').val(), status: $('#manual_status').val() }, 
-            function(res) { Swal.fire('Info',res,'info'); $('#manual_nim').val(''); loadDetailIsi(id, tgl); });
-        }
-    </script>
+    function simpanEditJadwal(e) {
+        e.preventDefault();
+        $.post('dosen_ajax.php', { 
+            action: 'edit_jadwal', 
+            id: $('#edit_id_jadwal').val(), 
+            hari: $('#edit_hari').val(), 
+            jam_m: $('#edit_jam_mulai').val(), 
+            jam_s: $('#edit_jam_selesai').val(), 
+            ruang: $('#edit_ruang').val(), 
+            kelas: $('#edit_kelas').val(), 
+            kuota: $('#edit_kuota').val() 
+        }, function(res) { 
+            Swal.fire('Info',res,'success').then(()=>location.reload()); 
+        });
+    }
+
+    function hapusJadwalCurrent() {
+        Swal.fire({title:'Hapus Jadwal?', icon:'warning', showCancelButton:true, confirmButtonColor:'#d33'}).then((r)=>{
+            if(r.isConfirmed) $.post('dosen_ajax.php', {action:'hapus_jadwal', id:window.currentIdJadwal}, function(res){ 
+                Swal.fire('Terhapus',res,'success').then(()=>location.reload()); 
+            });
+        });
+    }
+</script>
 </body>
 </html>
