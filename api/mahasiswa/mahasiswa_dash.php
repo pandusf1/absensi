@@ -1,68 +1,34 @@
 <?php
-// ==============================================
-// 1. MODE DEBUG (AKTIFKAN INI SAAT LAYAR PUTIH)
-// ==============================================
+// SETTING DEBUG
 ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-// Cek apakah script jalan
-echo "";
+date_default_timezone_set('Asia/Jakarta');
 
-// ==============================================
-// 2. SETUP SESSION UNTUK VERCEL
-// ==============================================
-// Set cookie params AGAR session bisa dibaca di semua folder
-session_set_cookie_params(0, '/'); 
-session_start();
-
-echo "";
-
-// Cek status login (Debug: Tampilkan isi session jika ada masalah)
-if (!isset($_SESSION['status_login']) || $_SESSION['role'] != 'mahasiswa') {
-    // Jangan redirect dulu, kita cek kenapa ditolak
-    echo "<h1>Akses Ditolak!</h1>";
-    echo "<p>Session Status Login: " . (isset($_SESSION['status_login']) ? $_SESSION['status_login'] : 'KOSONG') . "</p>";
-    echo "<p>Session Role: " . (isset($_SESSION['role']) ? $_SESSION['role'] : 'KOSONG') . "</p>";
-    echo "<a href='../index.php'>Kembali ke Login</a>";
+// 1. CEK LOGIN PAKAI COOKIE (BUKAN SESSION LAGI)
+if (!isset($_COOKIE['status_login']) || $_COOKIE['role'] != 'mahasiswa') {
+    // Kalau cookie kosong, kembalikan ke login
+    header("Location: ../../index.php"); 
     exit;
 }
 
-// ==============================================
-// 3. KONEKSI DATABASE (CRITICAL POINT)
-// ==============================================
-// Coba panggil database
-$path_db = __DIR__ . '/../database.php';
+require_once __DIR__ . '/../database.php';
 
-if (!file_exists($path_db)) {
-    die("<h1>FATAL ERROR:</h1> File database tidak ditemukan di: <b>$path_db</b><br>Cek struktur foldermu!");
-}
+// 2. AMBIL DATA DARI COOKIE
+$nim_mhs = $_COOKIE['nim']; 
 
-require_once $path_db;
+// 3. AMBIL PROFIL DATABASE (Biar Data Valid)
+// Gunakan backtick `data` karena nama tabel sensitif
+$q_mhs = mysqli_query($conn, "SELECT * FROM `data` WHERE nim = '$nim_mhs'");
 
-if (!isset($conn)) {
-    die("<h1>FATAL ERROR:</h1> File database.php terpanggil, tapi variabel <b>\$conn</b> tidak ada. Cek isi database.php!");
-}
-
-// ==============================================
-// 4. LOGIKA UTAMA
-// ==============================================
-$nim_mhs = $_SESSION['nim']; 
-
-// Pastikan pakai backtick `data` karena nama tabelmu 'data'
-$query_str = "SELECT * FROM `data` WHERE nim = '$nim_mhs'";
-$q_mhs = mysqli_query($conn, $query_str);
-
-if (!$q_mhs) { 
-    die("<h1>SQL ERROR:</h1> Query gagal dieksekusi.<br>Pesan: " . mysqli_error($conn)); 
-}
-
+if (!$q_mhs) { die("Error SQL: " . mysqli_error($conn)); }
 $mhs = mysqli_fetch_assoc($q_mhs);
 
 if(!$mhs) { 
-    // Jika data tidak ada di tabel, tapi session ada
-    session_destroy(); 
-    die("<h1>DATA ERROR:</h1> Mahasiswa dengan NIM $nim_mhs tidak ditemukan di database. (Mungkin terhapus?)"); 
+    // Data di database hilang tapi cookie ada? Hapus cookie & logout
+    setcookie('status_login', '', time() - 3600, '/');
+    header("Location: ../../index.php");
+    die("Error: Data NIM tidak ditemukan."); 
 }
 
 $kelas_mhs = $mhs['kelas'];

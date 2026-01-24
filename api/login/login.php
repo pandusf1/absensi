@@ -1,15 +1,14 @@
 <?php
-session_start();
 require_once __DIR__ . '/../database.php';
+
 function show_error($text) {
     echo '<!DOCTYPE html>
     <html lang="id">
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Login Gagal</title>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-        <style>body { font-family: "Poppins", sans-serif; background: #f4f6fb; }</style>
+        <style>body { font-family: sans-serif; background: #f4f6fb; }</style>
     </head>
     <body>
         <script>
@@ -31,76 +30,60 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
     $username = mysqli_real_escape_string($conn, $_POST['username']); 
     $password = mysqli_real_escape_string($conn, $_POST['password']);
+    
+    // Waktu expired cookie (misal: 24 jam)
+    $expire = time() + (24 * 60 * 60); 
 
     // ===============================================
-    // 1. CEK MAHASISWA
+    // 1. CEK MAHASISWA (TABEL 'data')
     // ===============================================
-    $cek_mhs = mysqli_query($conn, "SELECT * FROM data WHERE nim='$username' OR email='$username'");
-    
+    $q_mhs = "SELECT * FROM `data` WHERE nim='$username' OR email='$username'";
+    $cek_mhs = mysqli_query($conn, $q_mhs);
+
     if (mysqli_num_rows($cek_mhs) > 0) {
         $row = mysqli_fetch_assoc($cek_mhs);
         
         if (password_verify($password, $row['password'])) {
-            // SET SESSION
-            $_SESSION['role'] = 'mahasiswa';
-            $_SESSION['nim'] = $row['nim'];
-            $_SESSION['nama'] = $row['nama'];
-            $_SESSION['status_login'] = true;
+            // [GANTI SESSION DENGAN COOKIE]
+            // Simpan data di browser user agar tahan banting di Vercel
+            setcookie('role', 'mahasiswa', $expire, '/');
+            setcookie('nim', $row['nim'], $expire, '/');
+            setcookie('nama', $row['nama'], $expire, '/');
+            setcookie('status_login', 'true', $expire, '/');
 
-            // [UBAH DISINI] LANGSUNG REDIRECT TANPA ALERT
             header("Location: ../mahasiswa/mahasiswa_dash.php");
             exit;
-
         } else {
             show_error('Kata sandi Mahasiswa salah.');
         }
     }
 
     // ===============================================
-    // 2. CEK DOSEN
+    // 2. CEK DOSEN (TABEL 'dosen')
     // ===============================================
-    $cek_dosen = mysqli_query($conn, "SELECT * FROM dosen WHERE nip='$username' OR email='$username'");
+    $q_dosen = "SELECT * FROM dosen WHERE nip='$username' OR email='$username'";
+    $cek_dosen = mysqli_query($conn, $q_dosen);
 
     if (mysqli_num_rows($cek_dosen) > 0) {
         $row = mysqli_fetch_assoc($cek_dosen);
 
         if (password_verify($password, $row['password'])) {
-            // SET SESSION
-            $_SESSION['role'] = 'dosen';
-            $_SESSION['nip'] = $row['nip'];
-            $_SESSION['nama'] = $row['nama_dosen'];
-            $_SESSION['status_login'] = true;
+            // [GANTI SESSION DENGAN COOKIE]
+            setcookie('role', 'dosen', $expire, '/');
+            setcookie('nip', $row['nip'], $expire, '/');
+            setcookie('nama', $row['nama_dosen'], $expire, '/');
+            setcookie('status_login', 'true', $expire, '/');
 
-            // [UBAH DISINI] LANGSUNG REDIRECT TANPA ALERT
             header("Location: ../dosen/dosen_dash.php");
             exit;
-
         } else {
             show_error('Kata sandi Dosen salah.');
         }
     }
 
     // ===============================================
-    // 3. JIKA AKUN TIDAK ADA
+    // 3. TIDAK KETEMU
     // ===============================================
-    // Kita tetap pakai alert disini agar user tidak bingung kenapa halaman cuma refresh
-    echo '<!DOCTYPE html>
-    <html lang="id">
-    <head>
-        <meta charset="UTF-8">
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    </head>
-    <body>
-        <script>
-            Swal.fire({
-                title: "Tidak Ditemukan",
-                text: "NIM/NIP tidak terdaftar.",
-                icon: "warning"
-            }).then(() => {
-                window.location = "../index.php";
-            });
-        </script>
-    </body>
-    </html>';
+    show_error('NIM/NIP tidak terdaftar.');
 }
 ?>
