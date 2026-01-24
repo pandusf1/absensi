@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/database.php';
+// Logika PHP ditaruh di paling atas
 $page = $_GET['page'] ?? 'home';
 ?>
 
@@ -10,78 +10,108 @@ $page = $_GET['page'] ?? 'home';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SIAKAD POLINES</title>
     
-    <style>
-      *{box-sizing:border-box;font-family:Arial, Helvetica, sans-serif}
-      body{margin:0;background:#f4f6fb}
+<style>
+  * { box-sizing: border-box; font-family: Arial, Helvetica, sans-serif; }
+  body { margin: 0; background: #f4f6fb; }
 
-      header{
-        background:#fff;
-        padding:16px 24px;
-        display:flex;
-        align-items:center;
-        box-shadow:0 2px 6px rgba(0,0,0,.05)
-      }
-      header img{height:36px;margin-right:12px}
+  header {
+    background: #fff;
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,.05);
+  }
+  header img { height: 36px; margin-right: 12px; }
 
-      .container{max-width:1100px;margin:50px auto;padding:0 20px}
-      .card{
-        background:#fff;
-        border-radius:16px;
-        padding:32px;
-        box-shadow:0 10px 30px rgba(0,0,0,.08)
-      }
-      .grid{
-        display:grid;
-        grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
-        gap:30px
-      }
-      h1,h2,h3{margin-top:0}
+  .container {
+    max-width: 1100px;
+    margin: 50px auto;
+    padding: 0 20px;
+  }
 
-      input,select,button{
-        width:100%;
-        padding:12px;
-        border-radius:8px;
-        border:1px solid #ddd;
-        margin-bottom:14px
-      }
-      button{
-        background:#2563eb;
-        color:#fff;
-        border:none;
-        font-weight:bold;
-        cursor:pointer
-      }
-      button:hover{opacity:.9}
+  .card {
+    background: #fff;
+    border-radius: 16px;
+    padding: 32px;
+    box-shadow: 0 10px 30px rgba(0,0,0,.08);
+    /* PERBAIKAN: Tambahkan ini agar card tidak meluap dari container */
+    width: 100%; 
+  }
 
-      .link{text-align:center;font-size:14px}
-      .link a{text-decoration:none;color:#2563eb}
+  .grid {
+    display: grid;
+    /* PERBAIKAN: Ubah 320px jadi 260px agar muat di HP kecil */
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 30px;
+  }
 
-      /* HOME */
-      .home-header{
-        text-align:center;
-        margin-bottom:40px
-      }
-      .home-header img{
-        width:150px;
-        margin-bottom:18px
-      }
-      .home-header h1{
-        font-size:32px;
-        margin-bottom:8px
-      }
-      .home-header p{
-        color:#555
+  h1, h2, h3 { margin-top: 0; }
+
+  input, select, button {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    margin-bottom: 14px;
+  }
+
+  button {
+    background: #2563eb;
+    color: #fff;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  button:hover { opacity: .9; }
+
+  .link { text-align: center; font-size: 14px; }
+  .link a { text-decoration: none; color: #2563eb; }
+
+  /* HOME */
+  .home-header { text-align: center; margin-bottom: 40px; }
+  .home-header img { width: 150px; margin-bottom: 18px; }
+  .home-header h1 { font-size: 32px; margin-bottom: 8px; }
+  .home-header p { color: #555; }
+
+  .role-card { text-align: center; }
+  
+  /* PERBAIKAN: Tambahkan max-width agar gambar tidak memaksa lebar card */
+  .role-card img { 
+    width: 180px; 
+    max-width: 100%; 
+    height: auto; 
+    margin-bottom: 18px; 
+  }
+
+  footer { text-align: center; font-size: 13px; color: #777; margin: 40px 0; }
+
+  /* MEDIA QUERY (Tampilan HP) */
+  @media (max-width: 768px) { 
+      .container {
+        /* Kurangi margin atas di HP */
+        margin: 30px auto; 
+        /* Kurangi padding container biar lega */
+        padding: 0 16px; 
       }
 
-      .role-card{text-align:center}
-      .role-card img{width:180px;margin-bottom:18px}
-
-      footer{text-align:center;font-size:13px;color:#777;margin:40px 0}
-
-      @media (max-width: 768px) { 
-          h2 { font-size: 20px; } /* Disesuaikan sedikit agar rapi di HP */
+      .card {
+        /* Kurangi padding card di HP (32px itu terlalu tebal buat HP) */
+        padding: 24px 20px; 
       }
-    </style>
+      
+      .grid {
+        /* Paksa 1 kolom di HP biar rapi ke bawah */
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+
+      h1 { font-size: 20px; }
+      h2 { font-size: 20px; }
+      
+      .home-header img { width: 120px; } 
+      .role-card img { width: 140px; }  
+  }
+</style>
 </head>
 <body>
 
@@ -94,7 +124,7 @@ case 'home': ?>
     <div class="container" style="max-width: 500px;">
         <div class="card">
             <div class="home-header" style="margin-bottom: 20px;">
-                <img src="../aset/img/polines.png" alt="Logo POLINES" style="width: 100px;">
+                <img src="aset/img/polines.png" alt="Logo POLINES" style="width: 100px;">
                 <h2 style="font-size: 24px;">Sistem Informasi Akademik</h2>
                 <h2 style="font-size: 20px; margin-bottom: 20px; margin-top:-10px; color:#555;">Politeknik Negeri Semarang</h2>
             </div>
@@ -124,21 +154,21 @@ case 'pilih_peran': ?>
     <div class="container">
         <div class="card">
             <div class="home-header">
-                <img src="../aset/img/polines.png" alt="Logo POLINES">
+                <img src="aset/img/polines.png" alt="Logo POLINES">
                 <h1>Pendaftaran Akun Baru</h1>
                 <p>Silakan pilih peran Anda untuk mendaftar</p>
             </div>
 
             <div class="grid">
                 <div class="card role-card">
-                    <img src="../aset/img/mahasiswa.png" alt="Mahasiswa">
+                    <img src="aset/img/mahasiswa.png" alt="Mahasiswa">
                     <h3>Mahasiswa</h3>
                     <p>Daftar sebagai mahasiswa untuk mengakses informasi akademik</p>
                     <a href="?page=daftar_mhs"><button>Daftar sebagai Mahasiswa</button></a>
                 </div>
 
                 <div class="card role-card">
-                    <img src="../aset/img/dosen.png" alt="Dosen">
+                    <img src="aset/img/dosen.png" alt="Dosen">
                     <h3>Dosen</h3>
                     <p>Daftar sebagai dosen untuk mengelola data akademik</p>
                     <a href="?page=daftar_dosen"><button>Daftar sebagai Dosen</button></a>
