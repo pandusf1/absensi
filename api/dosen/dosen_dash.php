@@ -10,7 +10,7 @@ date_default_timezone_set('Asia/Jakarta');
 
 // Cek Login Pakai COOKIE (Solusi agar tidak mental ke index)
 if (!isset($_COOKIE['status_login']) || $_COOKIE['role'] != 'dosen') {
-    header("Location: ../../index.php"); 
+    header("Location: ../index.php"); 
     exit;
 }
 
@@ -195,7 +195,7 @@ if(isset($_POST['simpan_jadwal'])) {
 
     <nav class="sidebar" id="mySidebar">
         <div class="sidebar-header">
-            <img src="../../aset/img/polines.png" onerror="this.src='https://via.placeholder.com/40'" alt="Logo" style="width: 35px;">
+            <img src="../aset/img/polines.png" onerror="this.src='https://via.placeholder.com/40'" alt="Logo" style="width: 35px;">
             <div>
                 <h3 style="margin:0; font-size:14px; color:white;">PORTAL DOSEN</h3>
                 <small style="font-size:11px; color:#94a3b8;">Sistem Akademik</small>
@@ -503,7 +503,7 @@ if(isset($_POST['simpan_jadwal'])) {
             document.cookie = "status_login=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
             document.cookie = "nip=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
             document.cookie = "role=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-            window.location.href = '../../index.php';
+            window.location.href = '../index.php';
         }
 
         function tutupModal(e) { if (e.target.classList.contains('modal')) e.target.style.display = 'none'; }
