@@ -130,15 +130,6 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
                     ?>
                 </h3>
             </div>
-            <div style="display:flex; align-items:center; gap:10px;">
-                <div style="text-align:right; display:none sm:block;">
-                    <span style="font-weight:600; display:block;"><?= htmlspecialchars($mhs['nama']) ?></span>
-                    <small style="color:#64748b;"><?= htmlspecialchars($mhs['nim']) ?></small>
-                </div>
-                <div style="width:35px; height:35px; background:#3b82f6; color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold;">
-                    <?= substr($mhs['nama'],0,1) ?>
-                </div>
-            </div>
         </div>
 
         <?php if ($page == 'home'): ?>
