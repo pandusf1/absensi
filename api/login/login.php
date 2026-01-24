@@ -1,92 +1,118 @@
 <?php
-// ==========================================
-// LOGIN DETEKTIF (MODE DEBUG PENUH)
-// ==========================================
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
 session_start();
 
-// 1. Cek Koneksi Database
-echo "<h3>1. Cek Koneksi Database...</h3>";
-$db_path = __DIR__ . '/../database.php';
-if (!file_exists($db_path)) { die("❌ CRITICAL: File database.php hilang!"); }
-require_once $db_path;
+// 1. Panggil Database dengan Path yang Aman (__DIR__)
+require_once __DIR__ . '/../database.php';
 
-if (!isset($conn)) { die("❌ CRITICAL: Variabel \$conn tidak ada!"); }
-echo "✅ Koneksi Database OK.<br>";
+// Fungsi untuk menampilkan pesan error dengan SweetAlert
+function show_error($text) {
+    echo '<!DOCTYPE html>
+    <html lang="id">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Login Gagal</title>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <style>body { font-family: "Poppins", sans-serif; background: #f4f6fb; }</style>
+    </head>
+    <body>
+        <script>
+            Swal.fire({
+                title: "Gagal Masuk",
+                text: "' . $text . '",
+                icon: "error",
+                confirmButtonText: "Coba Lagi"
+            }).then(() => {
+                window.location = "../index.php";
+            });
+        </script>
+    </body>
+    </html>';
+    exit;
+}
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
+    // Sanitasi input
     $username = mysqli_real_escape_string($conn, $_POST['username']); 
     $password = mysqli_real_escape_string($conn, $_POST['password']);
+
+    // ===============================================
+    // 1. CEK MAHASISWA (TABEL 'data')
+    // ===============================================
+    // PENTING: Pakai tanda backtick (`) di sekitar kata data
+    $query_mhs = "SELECT * FROM `data` WHERE nim='$username' OR email='$username'";
+    $cek_mhs = mysqli_query($conn, $query_mhs);
     
-    echo "<h3>2. Data Masuk</h3>";
-    echo "Username: " . $username . "<br>";
-    echo "Password Input: " . $password . "<br>";
-
-    // ===============================================
-    // CEK MAHASISWA (TABEL 'data')
-    // ===============================================
-    echo "<h3>3. Mencari di Tabel Mahasiswa ('data')...</h3>";
-    // PAKAI TANDA BACKTICK `data` AGAR AMAN
-    $q_mhs = "SELECT * FROM `data` WHERE nim='$username' OR email='$username'";
-    $cek_mhs = mysqli_query($conn, $q_mhs);
-
+    // Cek error query
     if (!$cek_mhs) {
-        echo "❌ Error SQL Mahasiswa: " . mysqli_error($conn) . "<br>";
-    } else {
-        if (mysqli_num_rows($cek_mhs) > 0) {
-            echo "✅ Ketemu di Mahasiswa! Cek Password...<br>";
-            $row = mysqli_fetch_assoc($cek_mhs);
-            if (password_verify($password, $row['password'])) {
-                die("<h1>🎉 LOGIN SUKSES (MAHASISWA)</h1>Silakan kembalikan script ke asal.");
-            } else {
-                echo "❌ Password Salah untuk Mahasiswa.<br>";
-            }
+        die("Error Query Mahasiswa: " . mysqli_error($conn));
+    }
+
+    if (mysqli_num_rows($cek_mhs) > 0) {
+        $row = mysqli_fetch_assoc($cek_mhs);
+        
+        if (password_verify($password, $row['password'])) {
+            // SET SESSION MAHASISWA
+            $_SESSION['role'] = 'mahasiswa';
+            $_SESSION['nim'] = $row['nim'];
+            $_SESSION['nama'] = $row['nama'];
+            $_SESSION['status_login'] = true;
+
+            // REDIRECT KE DASHBOARD MAHASISWA
+            header("Location: ../mahasiswa/mahasiswa_dash.php");
+            exit;
+
         } else {
-            echo "ℹ️ Tidak ditemukan di Mahasiswa.<br>";
+            show_error('Kata sandi Mahasiswa salah.');
         }
     }
 
     // ===============================================
-    // CEK DOSEN (TABEL 'dosen')
+    // 2. CEK DOSEN (TABEL 'dosen')
     // ===============================================
-    echo "<h3>4. Mencari di Tabel Dosen...</h3>";
-    $q_dosen = "SELECT * FROM dosen WHERE nip='$username' OR email='$username'";
-    $cek_dosen = mysqli_query($conn, $q_dosen);
-
-    // INI YANG SERING BIKIN CRASH (Error Query)
-    if (!$cek_dosen) {
-        die("<h1 style='color:red'>❌ FATAL ERROR SQL DOSEN:</h1>" . mysqli_error($conn));
-    }
+    $query_dosen = "SELECT * FROM dosen WHERE nip='$username' OR email='$username'";
+    $cek_dosen = mysqli_query($conn, $query_dosen);
 
     if (mysqli_num_rows($cek_dosen) > 0) {
-        echo "✅ Ketemu di Tabel Dosen!<br>";
         $row = mysqli_fetch_assoc($cek_dosen);
-        
-        echo "Hash di Database: " . $row['password'] . "<br>";
-        
-        // Cek Password
+
         if (password_verify($password, $row['password'])) {
-            echo "<h1>🎉 PASSWORD MATCH! (LOGIN SUKSES)</h1>";
-            echo "Session Role diset ke: Dosen<br>";
-            // $_SESSION set disini untuk tes
+            // SET SESSION DOSEN
             $_SESSION['role'] = 'dosen';
+            $_SESSION['nip'] = $row['nip'];
+            $_SESSION['nama'] = $row['nama_dosen'];
             $_SESSION['status_login'] = true;
-            echo "<a href='../dosen/dosen_dash.php'>👉 Klik Manual ke Dashboard Dosen</a>";
+
+            // REDIRECT KE DASHBOARD DOSEN
+            header("Location: ../dosen/dosen_dash.php");
             exit;
+
         } else {
-            die("<h1 style='color:red'>❌ PASSWORD DOSEN SALAH!</h1>Pastikan input '123' (tanpa kutip) dan database berisi hash yang benar.");
+            show_error('Kata sandi Dosen salah.');
         }
-    } else {
-        echo "❌ NIP Tidak ditemukan di tabel Dosen.<br>";
     }
 
-    echo "<hr><h3>⚠️ KESIMPULAN:</h3> User tidak ditemukan di Mahasiswa maupun Dosen.";
-
-} else {
-    echo "Silakan Login dari halaman index.php";
+    // ===============================================
+    // 3. JIKA TIDAK DITEMUKAN
+    // ===============================================
+    echo '<!DOCTYPE html>
+    <html lang="id">
+    <head>
+        <meta charset="UTF-8">
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    </head>
+    <body>
+        <script>
+            Swal.fire({
+                title: "Tidak Ditemukan",
+                text: "NIM/NIP tidak terdaftar.",
+                icon: "warning"
+            }).then(() => {
+                window.location = "../index.php";
+            });
+        </script>
+    </body>
+    </html>';
 }
 ?>
