@@ -403,8 +403,6 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
     <script>
         // 2. FACE API LOGIC DENGAN ERROR HANDLING
         let isModelLoaded = false;
-        const userHasFace = <?= $punya_wajah ?>;
-
         let TINY_FACE_OPTIONS;
 
         try {
@@ -433,6 +431,7 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
         // --- SCRIPT KHUSUS PAGE JADWAL ---
         <?php if ($page == 'jadwal'): ?>
         let currentJadwalId = null, video = document.getElementById('video'), stream = null, detectInterval;
+        const userHasFace = <?= $punya_wajah ?>;
 
 
 function bukaKamera(id) {
@@ -489,10 +488,22 @@ function startDetection(targetDescriptor) {
             canvas.style.height = video.clientHeight + 'px';
             
             detectInterval = setInterval(async () => {
-                // ... (kode deteksi sama seperti sebelumnya) ...
+                const detection = await faceapi.detectSingleFace(video, TINY_FACE_OPTIONS).withFaceLandmarks().withFaceDescriptor();
+                const ctx = canvas.getContext('2d'); ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                if (detection) {
+                    const match = new faceapi.FaceMatcher(targetDescriptor, 0.45).findBestMatch(detection.descriptor);
+                    const box = detection.detection.box;
+                    const drawBox = new faceapi.draw.DrawBox(box, { label: match.toString(), boxColor: match.label === '<?= $nim_mhs ?>' ? "green" : "red" });
+                    drawBox.draw(canvas);
+                    
+                    if (match.label === '<?= $nim_mhs ?>') { 
+                        clearInterval(detectInterval); 
+                        simpanAbsen(currentJadwalId); 
+                    }
+                }
             }, 300);
         }
-
         function simpanAbsen(id) {
             $.post('mahasiswa_ajax.php', { action: 'simpan_absen', id_jadwal: id, nim: '<?= $nim_mhs ?>' }, function(res){
                 Swal.fire({ title: "Berhasil", text: "Absensi Berhasil!", icon: "success", timer: 1500, showConfirmButton: false })
