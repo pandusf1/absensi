@@ -217,7 +217,7 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
                 <thead><tr><th>Jam</th><th>Mata Kuliah</th><th>Dosen</th><th>Ruang</th><th style="text-align:center;">Aksi</th></tr></thead>
                 <tbody>
                     <?php
-                    // Query 1: Jadwal Hari Ini (LEFT JOIN Dosen)
+                    // --- QUERY 1: JADWAL HARI INI ---
                     $qj = mysqli_query($conn, "SELECT j.*, m.nama_matkul, m.kode_matkul, d.nama_dosen 
                         FROM jadwal j 
                         JOIN matkul m ON j.kode_matkul = m.kode_matkul 
@@ -225,36 +225,18 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
                         WHERE j.kelas = '$kelas_mhs' AND j.hari = '$hari_ini' 
                         ORDER BY j.jam_mulai ASC");
                     
+                    // Cek apakah ada data
                     if($qj && mysqli_num_rows($qj) > 0):
                         while($r = mysqli_fetch_assoc($qj)):
-                            // --- PENGAMAN (ANTI-CRASH) ---
-                            // Kita cek dulu apakah query berhasil sebelum hitung baris
+                            // --- SAFETY CHECK (PENTING!) ---
+                            // Gunakan @ untuk suppress error jika tabel belum ada
+                            $q_real = @mysqli_query($conn, "SELECT * FROM realisasi_mengajar WHERE id_jadwal='".$r['id_jadwal']."' AND tanggal='$tgl_ini' AND status='Berlangsung'");
+                            $is_mulai = ($q_real && mysqli_num_rows($q_real) > 0);
                             
-                            // Cek Realisasi Dosen
-                            $q_real = mysqli_query($conn, "SELECT * FROM realisasi_mengajar WHERE id_jadwal='".$r['id_jadwal']."' AND tanggal='$tgl_ini' AND status='Berlangsung'");
-                            $is_mulai = ($q_real && mysqli_num_rows($q_real) > 0); // Pakai && biar aman
-                            
-                            // Cek Absensi Mahasiswa
-                            $q_absen = mysqli_query($conn, "SELECT * FROM presensi_kuliah WHERE id_jadwal='".$r['id_jadwal']."' AND tanggal='$tgl_ini' AND nim='$nim_mhs'");
-                            $sudah_absen = ($q_absen && mysqli_num_rows($q_absen) > 0); // Pakai && biar aman
-                        ?>
-                        <tr>
-                            <td><?= substr($r['jam_mulai'],0,5) ?> - <?= substr($r['jam_selesai'],0,5) ?></td>
-                            <td><?= $r['nama_matkul'] ?></td>
-                            <td><?= $r['nama_dosen'] ?? '<span style="color:red; font-size:10px;">(Data Dosen Kosong)</span>' ?></td>
-                            <td><?= $r['ruang'] ?></td>
-                            <td style="text-align:center;">
-                                <?php if($sudah_absen): ?>
-                                    <button class="btn btn-green" style="cursor: default;"><i class="fa-solid fa-check"></i> Hadir</button>
-                                <?php elseif($is_mulai): ?>
-                                    <button class="btn btn-blue" onclick="bukaKamera(<?= $r['id_jadwal'] ?>)">Absen</button>
-                                <?php else: ?>
-                                    <button class="btn btn-disabled"><i class="fa-solid fa-lock"></i> Tutup</button>
-                                <?php endif; ?>
-                            </td>
-                        </tr>
-                        <?php endwhile; ?>                    
-                        <tr>
+                            $q_absen = @mysqli_query($conn, "SELECT * FROM presensi_kuliah WHERE id_jadwal='".$r['id_jadwal']."' AND tanggal='$tgl_ini' AND nim='$nim_mhs'");
+                            $sudah_absen = ($q_absen && mysqli_num_rows($q_absen) > 0);
+                    ?>
+                    <tr>
                         <td><?= substr($r['jam_mulai'],0,5) ?> - <?= substr($r['jam_selesai'],0,5) ?></td>
                         <td><?= $r['nama_matkul'] ?></td>
                         <td><?= $r['nama_dosen'] ?? '-' ?></td>
@@ -265,6 +247,7 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
                             <?php else: ?><button class="btn btn-disabled">Tutup</button><?php endif; ?>
                         </td>
                     </tr>
+                    <?php endwhile; else: ?>
                     <tr><td colspan="5" align="center" style="padding:15px; color:#999;">Tidak ada jadwal kuliah hari ini.</td></tr>
                     <?php endif; ?>
                 </tbody>
@@ -273,67 +256,55 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
     </div>
 
     <div class="card" style="margin-top: 20px;">
-        <h3 style="margin-bottom:15px; color:#64748b;"><i class="fa-solid fa-calendar-week"></i> Semua Jadwal Kelas</h3>
+        <h3 style="margin-bottom:15px; color:#64748b;"><i class="fa-solid fa-calendar-week"></i>Jadwal Kelas</h3>
         <div class="table-responsive">
             <table>
                 <thead><tr><th>Hari</th><th>Jam</th><th>Mata Kuliah</th><th>Dosen</th><th>Ruang</th></tr></thead>
                 <tbody>
-                <?php
-                // 1. QUERY YANG LEBIH AMAN (Tanpa FIELD, pakai CASE WHEN)
-                $sql_all = "SELECT j.*, m.nama_matkul, d.nama_dosen 
-                            FROM jadwal j 
-                            JOIN matkul m ON j.kode_matkul = m.kode_matkul 
-                            LEFT JOIN dosen d ON j.nip = d.nip 
-                            WHERE j.kelas = '$kelas_mhs' 
-                            ORDER BY 
-                            CASE j.hari
-                                WHEN 'Senin' THEN 1
-                                WHEN 'Selasa' THEN 2
-                                WHEN 'Rabu' THEN 3
-                                WHEN 'Kamis' THEN 4
-                                WHEN 'Jumat' THEN 5
-                                WHEN 'Sabtu' THEN 6
-                                WHEN 'Minggu' THEN 7
-                                ELSE 8
-                            END, j.jam_mulai ASC";
+<?php
+                    // --- QUERY 2: SEMUA JADWAL ---
+                    $sql_all = "SELECT j.*, m.nama_matkul, d.nama_dosen 
+                        FROM jadwal j 
+                        JOIN matkul m ON j.kode_matkul = m.kode_matkul 
+                        LEFT JOIN dosen d ON j.nip = d.nip 
+                        WHERE j.kelas = '$kelas_mhs' 
+                        ORDER BY 
+                        CASE j.hari
+                            WHEN 'Senin' THEN 1 WHEN 'Selasa' THEN 2 WHEN 'Rabu' THEN 3
+                            WHEN 'Kamis' THEN 4 WHEN 'Jumat' THEN 5 WHEN 'Sabtu' THEN 6
+                            ELSE 7
+                        END, j.jam_mulai ASC";
 
-                $q_all = mysqli_query($conn, $sql_all);
-                
-                // 2. CEK ERROR (PENTING: Agar halaman tidak berhenti loading)
-                if (!$q_all) {
-                    // Jika query gagal, tampilkan pesan error SQL-nya
-                    echo "<tr><td colspan='5' style='color:red; text-align:center; padding:20px;'>";
-                    echo "<b>Error Database:</b> " . mysqli_error($conn);
-                    echo "</td></tr>";
-                } 
-                // 3. JIKA DATA ADA
-                elseif (mysqli_num_rows($q_all) > 0) {
-                    while($all = mysqli_fetch_assoc($q_all)):
-                ?>
-                <tr>
-                    <td>
-                        <?php if($all['hari'] == $hari_ini):?>
-                            <span style="background:#dbeafe; color:#1e40af; padding:4px 8px; border-radius:4px; font-weight:bold;"><?= $all['hari'] ?></span>
-                        <?php else: echo $all['hari']; endif; ?>
-                    </td>
-                    <td><?= substr($all['jam_mulai'],0,5) ?> - <?= substr($all['jam_selesai'],0,5) ?></td>
-                    <td><?= $all['nama_matkul'] ?></td>
-                    <td><?= $all['nama_dosen'] ?? '-' ?></td>
-                    <td><?= $all['ruang'] ?></td>
-                </tr>
-                <?php 
-                    endwhile; 
-                } 
-                // 4. JIKA DATA KOSONG
-                else { 
-                ?>
-                <tr>
-                    <td colspan="5" style="text-align:center; padding:30px;">
-                        Belum ada jadwal untuk kelas <b><?= $kelas_mhs ?></b>.<br>
-                        <small style="color:red;">Pastikan penulisan kelas di data mahasiswa sama persis dengan di jadwal (Spasi/Huruf Besar).</small>
-                    </td>
-                </tr>
-                <?php } ?>
+                    $q_all = mysqli_query($conn, $sql_all);
+                    
+                    // --- DEBUG ERROR (Agar tidak crash) ---
+                    if (!$q_all) {
+                        echo "<tr><td colspan='5' style='color:red; text-align:center;'>Error SQL: ".mysqli_error($conn)."</td></tr>";
+                    }
+                    elseif (mysqli_num_rows($q_all) > 0) {
+                        while($all = mysqli_fetch_assoc($q_all)):
+                    ?>
+                    <tr>
+                        <td>
+                            <?php if($all['hari'] == $hari_ini):?>
+                                <span style="background:#dbeafe; color:#1e40af; padding:4px 8px; border-radius:4px; font-weight:bold;"><?= $all['hari'] ?></span>
+                            <?php else: echo $all['hari']; endif; ?>
+                        </td>
+                        <td><?= substr($all['jam_mulai'],0,5) ?> - <?= substr($all['jam_selesai'],0,5) ?></td>
+                        <td><?= $all['nama_matkul'] ?></td>
+                        <td><?= $all['nama_dosen'] ?? '-' ?></td>
+                        <td><?= $all['ruang'] ?></td>
+                    </tr>
+                    <?php 
+                        endwhile; 
+                    } else { 
+                    ?>
+                    <tr>
+                        <td colspan="5" style="text-align:center; padding:30px;">
+                            Belum ada jadwal untuk kelas <b><?= $kelas_mhs ?></b>.
+                        </td>
+                    </tr>
+                    <?php } ?>
                 </tbody>
             </table>
         </div>
