@@ -17,8 +17,8 @@ if ($action == 'edit_matkul') {
     $sks       = mysqli_real_escape_string($conn, $_POST['sks']);
 
     $q = "UPDATE matkul SET kode_matkul='$kode_baru', nama_matkul='$nama', sks='$sks' WHERE kode_matkul='$kode_lama'";
-    if(mysqli_query($conn, $q)) echo "✅ Mata Kuliah Berhasil Diupdate!";
-    else echo "❌ Gagal Update: " . mysqli_error($conn);
+    if(mysqli_query($conn, $q)) echo "Mata Kuliah Berhasil Diupdate!";
+    else echo "Gagal Update: " . mysqli_error($conn);
 }
 
 // ---------------------------------------------------------
@@ -152,17 +152,15 @@ elseif ($action == 'filter_rekap') {
     if(!empty($tm)) { $where .= " AND r.tanggal >= '$tm'"; }
     if(!empty($ta)) { $where .= " AND r.tanggal <= '$ta'"; }
 
-    // --- PERUBAHAN DISINI (LOGIKA TOTAL MHS) ---
     // Total Mhs diambil dari tabel 'data' (mahasiswa) yang kelasnya sama dengan jadwal
-    $sql = "SELECT r.*, m.nama_matkul, j.kelas, 
-        (SELECT COUNT(*) FROM presensi_kuliah pk WHERE pk.id_jadwal = r.id_jadwal AND pk.tanggal = r.tanggal AND pk.status = 'Hadir') as hadir,
-        (SELECT COUNT(*) FROM data d_mhs WHERE d_mhs.kelas = j.kelas) as total_mhs
+$sql = "SELECT r.*, m.nama_matkul, j.kelas, j.kuota as total_mhs,
+        (SELECT COUNT(*) FROM presensi_kuliah pk WHERE pk.id_jadwal = r.id_jadwal AND pk.tanggal = r.tanggal AND pk.status = 'Hadir') as hadir
         FROM realisasi_mengajar r 
         JOIN jadwal j ON r.id_jadwal = j.id_jadwal 
         JOIN matkul m ON j.kode_matkul = m.kode_matkul 
         $where 
         ORDER BY r.tanggal DESC, r.jam_mulai_real DESC";
-
+        
     $q = mysqli_query($conn, $sql);
 
     if(mysqli_num_rows($q) > 0) {
@@ -174,7 +172,6 @@ elseif ($action == 'filter_rekap') {
             echo "<td>" . $row['nama_matkul'] . "</td>";
             echo "<td>" . $row['kelas'] . "</td>";
             // Materi (Opsional jika ada kolom materi)
-            $materi = isset($row['materi_pembahasan']) ? $row['materi_pembahasan'] : '-';
             echo "<td>" . (strlen($materi) > 30 ? substr($materi,0,30).'...' : $materi) . "</td>";
             
             // Kolom Hadir / Total
@@ -247,16 +244,16 @@ elseif ($action == 'tambah_presensi_manual') {
     $cek_mhs = mysqli_query($conn, "SELECT nama FROM data WHERE nim='$nim'");
     
     if(mysqli_num_rows($cek_mhs) == 0) { 
-        echo "❌ NIM Tidak Ditemukan!"; 
+        echo "NIM Tidak Ditemukan!"; 
     } else {
         // Cek apakah sudah absen sebelumnya (hindari duplikat)
         $cek_double = mysqli_query($conn, "SELECT id_presensi FROM presensi_kuliah WHERE id_jadwal='$id' AND tanggal='$tgl' AND nim='$nim'");
         
         if(mysqli_num_rows($cek_double) > 0) {
-            echo "⚠️ Mahasiswa ini sudah ada di daftar!";
+            echo "Mahasiswa ini sudah ada di daftar!";
         } else {
             $ins = "INSERT INTO presensi_kuliah (id_jadwal, nim, tanggal, waktu_hadir, status, koordinat) VALUES ('$id', '$nim', '$tgl', '$jam', '$stt', 'Manual')";
-            if(mysqli_query($conn, $ins)) echo "✅ Data Tersimpan!"; else echo "Gagal Menyimpan.";
+            if(mysqli_query($conn, $ins)) echo "Data Tersimpan!"; else echo "Gagal Menyimpan.";
         }
     }
 }
