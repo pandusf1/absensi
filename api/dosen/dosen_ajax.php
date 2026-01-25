@@ -144,7 +144,7 @@ elseif ($action == 'filter_rekap') {
     // Query Dasar: Filter NIP & Status Selesai
     $where = "WHERE j.nip = '$nip' AND r.status = 'Selesai'";
     
-    // Filter Keyword (Nama Matkul atau Kelas)
+    // Filter Keyword
     if(!empty($kw)) {
         $where .= " AND (m.nama_matkul LIKE '%$kw%' OR j.kelas LIKE '%$kw%')";
     }
@@ -152,9 +152,11 @@ elseif ($action == 'filter_rekap') {
     if(!empty($tm)) { $where .= " AND r.tanggal >= '$tm'"; }
     if(!empty($ta)) { $where .= " AND r.tanggal <= '$ta'"; }
 
+    // --- PERUBAHAN DISINI (LOGIKA TOTAL MHS) ---
+    // Total Mhs diambil dari tabel 'data' (mahasiswa) yang kelasnya sama dengan jadwal
     $sql = "SELECT r.*, m.nama_matkul, j.kelas, 
         (SELECT COUNT(*) FROM presensi_kuliah pk WHERE pk.id_jadwal = r.id_jadwal AND pk.tanggal = r.tanggal AND pk.status = 'Hadir') as hadir,
-        (SELECT COUNT(*) FROM presensi_kuliah pk WHERE pk.id_jadwal = r.id_jadwal AND pk.tanggal = r.tanggal) as total_mhs
+        (SELECT COUNT(*) FROM data d_mhs WHERE d_mhs.kelas = j.kelas) as total_mhs
         FROM realisasi_mengajar r 
         JOIN jadwal j ON r.id_jadwal = j.id_jadwal 
         JOIN matkul m ON j.kode_matkul = m.kode_matkul 
@@ -165,15 +167,18 @@ elseif ($action == 'filter_rekap') {
 
     if(mysqli_num_rows($q) > 0) {
         while($row = mysqli_fetch_assoc($q)) {
-            // [FIX] Clickable row logic
+            // Logika Baris diklik untuk detail
             echo "<tr class='tr-clickable' onclick=\"bukaDetail(" . $row['id_jadwal'] . ", '" . $row['tanggal'] . "', '" . htmlspecialchars($row['nama_matkul']) . "', '" . htmlspecialchars($row['kelas']) . "')\">";
             
             echo "<td>" . date('d/m/Y', strtotime($row['tanggal'])) . "</td>";
             echo "<td>" . $row['nama_matkul'] . "</td>";
             echo "<td>" . $row['kelas'] . "</td>";
-            echo "<td><b style='color:#16a34a'>" . $row['hadir'] . "</b> / " . $row['total_mhs'] . "</td>";
+            // Materi (Opsional jika ada kolom materi)
+            $materi = isset($row['materi_pembahasan']) ? $row['materi_pembahasan'] : '-';
+            echo "<td>" . (strlen($materi) > 30 ? substr($materi,0,30).'...' : $materi) . "</td>";
             
-            // Removed Action Button Column
+            // Kolom Hadir / Total
+            echo "<td><b style='color:#16a34a'>" . $row['hadir'] . "</b> / " . $row['total_mhs'] . "</td>";
             
             echo "</tr>";
         }

@@ -419,9 +419,7 @@ if(isset($_POST['simpan_jadwal'])) {
             </div>
 
 <?php elseif ($page == 'rekap'): ?>
-    <div class="card">
-        <h3 style="margin-bottom:15px;">Laporan Presensi</h3>
-        
+    <div class="card">        
         <div style="background:#f8fafc; padding:15px; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:15px;">
             <div style="margin-bottom:10px;">
                 <label style="font-size:11px; font-weight:bold; color:#64748b; display:block; margin-bottom:5px;">Pencarian (Matkul/Kelas)</label>
