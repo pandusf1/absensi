@@ -69,14 +69,43 @@ elseif ($action == 'mulai_kelas') {
 // ---------------------------------------------------------
 // 4. SELESAI KELAS
 // ---------------------------------------------------------
+// ---------------------------------------------------------
+// 4. SELESAI KELAS (+ FITUR AUTO ALPHA)
+// ---------------------------------------------------------
 elseif ($action == 'selesai_kelas') {
     $id = $_POST['id_jadwal'];
     $tgl = date('Y-m-d');
     $jam = date('H:i:s');
 
+    // [BARU] LOGIKA AUTO ALPHA
+    // Masukkan data ke presensi_kuliah untuk mahasiswa yang belum absen
+    $q_alpha = "INSERT INTO presensi_kuliah (id_jadwal, nim, tanggal, waktu_hadir, status, koordinat)
+                SELECT 
+                    '$id',              
+                    d.nim,              
+                    '$tgl',             
+                    '$jam',             
+                    'Alpha',            
+                    'System'            
+                FROM data d
+                JOIN jadwal j ON d.kelas = j.kelas
+                WHERE j.id_jadwal = '$id' 
+                AND d.nim NOT IN (
+                    SELECT nim FROM presensi_kuliah 
+                    WHERE id_jadwal = '$id' AND tanggal = '$tgl'
+                )";
+    
+    // Jalankan Query Alpha dulu sebelum menutup kelas
+    mysqli_query($conn, $q_alpha);
+
+    // Update Status Kelas Menjadi Selesai (Logika Lama)
     $q = "UPDATE realisasi_mengajar SET jam_selesai_real = '$jam', status = 'Selesai' WHERE id_jadwal = '$id' AND tanggal = '$tgl'";
-    if(mysqli_query($conn, $q)) echo "Kelas SELESAI!";
-    else echo "Error: " . mysqli_error($conn);
+    
+    if(mysqli_query($conn, $q)) {
+        echo "Kelas DITUTUP! Mahasiswa yang belum absen otomatis tercatat Alpha.";
+    } else {
+        echo "Error: " . mysqli_error($conn);
+    }
 }
 
 // ---------------------------------------------------------
