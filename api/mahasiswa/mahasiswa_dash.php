@@ -48,8 +48,7 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
     
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
-    <script src="../aset/js/face-api.min.js"></script> 
+    <script src="../../aset/js/face-api.min.js"></script> 
 
     <style>
         /* CSS DESIGN SYSTEM */
@@ -90,7 +89,7 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
 
     <nav class="sidebar" id="mySidebar">
         <div class="sidebar-header">
-            <img src="../aset/img/polines.png" onerror="this.src='https://via.placeholder.com/40'" alt="Logo" style="width: 35px;">
+            <img src="../../aset/img/polines.png" onerror="this.src='https://via.placeholder.com/40'" alt="Logo" style="width: 35px;">
             <div>
                 <h3 style="margin:0; font-size:14px; color:white;">PORTAL MAHASISWA</h3>
                 <small style="font-size:11px; color:#94a3b8;">Sistem Absensi Polines</small>
@@ -159,11 +158,10 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
             </div>
 
         <?php elseif ($page == 'jadwal'): ?>
-            <div style="background: #fee2e2; border: 1px solid #ef4444; padding: 10px; margin-bottom: 20px; border-radius: 5px; color: #b91c1c;">
-                <strong>🔍 Debug System:</strong><br>
-                Hari Ini: <b><?= $hari_ini ?></b><br>
-                Kelas Anda: <b><?= $kelas_mhs ?></b><br>
-                <small>Pastikan data di Database tabel 'jadwal' kolom 'hari' sama persis dengan '<?= $hari_ini ?>' (Perhatikan huruf besar/kecil dan spasi!).</small>
+            <div style="background: #f0fdf4; border: 1px solid #16a34a; padding: 10px; margin-bottom: 20px; border-radius: 5px; color: #166534; font-size:11px;">
+                <strong>🔍 Info Debug:</strong><br>
+                Hari Ini: <b><?= $hari_ini ?></b> | Kelas Anda: <b>"<?= $kelas_mhs ?>"</b><br>
+                <small>Jika tabel bawah kosong, cek Database tabel 'jadwal'. Pastikan kolom 'kelas' tulisannya SAMA PERSIS dengan "<?= $kelas_mhs ?>" (Spasi/Strip berpengaruh).</small>
             </div>
 
             <div class="card">
@@ -207,20 +205,46 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
                         <thead><tr><th>Hari</th><th>Jam</th><th>Mata Kuliah</th><th>Dosen</th><th>Ruang</th></tr></thead>
                         <tbody>
                             <?php
-                            $q_all = mysqli_query($conn, "SELECT j.*, m.nama_matkul, d.nama_dosen FROM jadwal j JOIN matkul m ON j.kode_matkul = m.kode_matkul LEFT JOIN dosen d ON j.nip = d.nip WHERE j.kelas = '$kelas_mhs' ORDER BY FIELD(j.hari, 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'), j.jam_mulai ASC");
-                            if($q_all && mysqli_num_rows($q_all) > 0):
+                            // Query AMAN (Tanpa FIELD, Pakai CASE)
+                            $sql_all = "SELECT j.*, m.nama_matkul, d.nama_dosen 
+                                FROM jadwal j 
+                                JOIN matkul m ON j.kode_matkul = m.kode_matkul 
+                                LEFT JOIN dosen d ON j.nip = d.nip 
+                                WHERE j.kelas = '$kelas_mhs' 
+                                ORDER BY 
+                                CASE j.hari
+                                    WHEN 'Senin' THEN 1
+                                    WHEN 'Selasa' THEN 2
+                                    WHEN 'Rabu' THEN 3
+                                    WHEN 'Kamis' THEN 4
+                                    WHEN 'Jumat' THEN 5
+                                    WHEN 'Sabtu' THEN 6
+                                    WHEN 'Minggu' THEN 7
+                                    ELSE 8
+                                END, j.jam_mulai ASC";
+
+                            $q_all = mysqli_query($conn, $sql_all);
+                            
+                            if (!$q_all) {
+                                echo "<tr><td colspan='5' style='color:red; text-align:center;'>Error Database: ".mysqli_error($conn)."</td></tr>";
+                            } elseif (mysqli_num_rows($q_all) > 0) {
                                 while($all = mysqli_fetch_assoc($q_all)):
                             ?>
                             <tr>
-                                <td><?php if($all['hari']==$hari_ini):?><span style="background:#dbeafe; color:#1e40af; padding:4px 8px; border-radius:4px; font-weight:bold;"><?= $all['hari'] ?></span><?php else: echo $all['hari']; endif; ?></td>
+                                <td>
+                                    <?php if($all['hari']==$hari_ini):?>
+                                        <span style="background:#dbeafe; color:#1e40af; padding:4px 8px; border-radius:4px; font-weight:bold;"><?= $all['hari'] ?></span>
+                                    <?php else: echo $all['hari']; endif; ?>
+                                </td>
                                 <td><?= substr($all['jam_mulai'],0,5) ?> - <?= substr($all['jam_selesai'],0,5) ?></td>
                                 <td><?= $all['nama_matkul'] ?></td>
                                 <td><?= $all['nama_dosen'] ?? '-' ?></td>
                                 <td><?= $all['ruang'] ?></td>
                             </tr>
-                            <?php endwhile; else: ?>
-                            <tr><td colspan="5" style="text-align:center;">Belum ada jadwal.</td></tr>
-                            <?php endif; ?>
+                            <?php endwhile; 
+                            } else { ?>
+                            <tr><td colspan="5" style="text-align:center; padding:30px;">Belum ada data jadwal untuk kelas <b><?= $kelas_mhs ?></b>.</td></tr>
+                            <?php } ?>
                         </tbody>
                     </table>
                 </div>
@@ -244,6 +268,7 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
                         <tbody>
                             <?php
                             $qr = mysqli_query($conn, "SELECT p.*, m.nama_matkul FROM presensi_kuliah p JOIN jadwal j ON p.id_jadwal = j.id_jadwal JOIN matkul m ON j.kode_matkul = m.kode_matkul WHERE p.nim = '$nim_mhs' ORDER BY p.tanggal DESC, p.waktu_hadir DESC");
+                            
                             if($qr && mysqli_num_rows($qr) > 0):
                                 while($row = mysqli_fetch_assoc($qr)):
                                     $st = $row['status']; 
@@ -280,7 +305,7 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
     </div>
 
     <script>
-        // 1. PINDAHKAN FUNGSI DASAR KE ATAS (Agar tidak macet)
+        // 1. PINDAHKAN FUNGSI DASAR KE ATAS
         function toggleSidebar() { 
             document.getElementById('mySidebar').classList.toggle('active'); 
             document.getElementById('mainContent').classList.toggle('active');
@@ -291,12 +316,13 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
             document.cookie = "status_login=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
             document.cookie = "nim=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
             document.cookie = "role=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            // FIX: Mundur 1 langkah karena index ada di folder API (api/index.php)
             window.location.href = '../index.php';
         }
 
         function tutupModal() { $('#modalKamera').hide(); }
 
-        // 2. FACE API LOGIC (Dengan Try-Catch agar tidak bikin error)
+        // 2. FACE API LOGIC (PATH AMAN: ../../aset)
         let isModelLoaded = false;
         let TINY_FACE_OPTIONS;
 
@@ -305,9 +331,9 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
                 TINY_FACE_OPTIONS = new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.5 });
                 
                 Promise.all([
-                    faceapi.nets.tinyFaceDetector.loadFromUri('../aset/models'),
-                    faceapi.nets.faceLandmark68Net.loadFromUri('../aset/models'),
-                    faceapi.nets.faceRecognitionNet.loadFromUri('../aset/models')
+                    faceapi.nets.tinyFaceDetector.loadFromUri('../../aset/models'),
+                    faceapi.nets.faceLandmark68Net.loadFromUri('../../aset/models'),
+                    faceapi.nets.faceRecognitionNet.loadFromUri('../../aset/models')
                 ]).then(() => { 
                     isModelLoaded = true; 
                     console.log("AI Loaded"); 
@@ -315,10 +341,10 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
                     console.error("Gagal Load Model:", err); 
                 });
             } else {
-                console.warn("FaceAPI belum terload. Cek path ../aset/js/face-api.min.js");
+                console.warn("Library FaceAPI tidak terload! Cek path.");
             }
-        } catch(e) {
-            console.warn("AI Script Error:", e);
+        } catch (e) {
+            console.error("Error Inisialisasi AI:", e);
         }
 
         <?php if ($page == 'jadwal'): ?>
