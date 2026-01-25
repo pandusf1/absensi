@@ -125,7 +125,7 @@ case 'home': ?>
     <div class="container" style="max-width: 500px;">
         <div class="card">
             <div class="home-header" style="margin-bottom: 20px;">
-                <img src="aset/img/polines.png" onerror="this.src='https://via.placeholder.com/100'" alt="Logo POLINES" style="width: 100px;">
+                <img src="api/aset/img/polines.png" onerror="this.src='https://via.placeholder.com/100'" alt="Logo POLINES" style="width: 100px;">
                 <h2 style="font-size: 24px;">Sistem Informasi Akademik</h2>
                 <h2 style="font-size: 20px; margin-bottom: 20px; margin-top:-10px; color:#555;">Politeknik Negeri Semarang</h2>
             </div>
@@ -185,21 +185,21 @@ case 'pilih_peran': ?>
     <div class="container">
         <div class="card">
             <div class="home-header">
-                <img src="aset/img/polines.png" alt="Logo POLINES">
+                <img src="api/aset/img/polines.png" alt="Logo POLINES">
                 <h1>Pendaftaran Akun Baru</h1>
                 <p>Silakan pilih peran Anda untuk mendaftar</p>
             </div>
 
             <div class="grid">
                 <div class="card role-card">
-                    <img src="aset/img/mahasiswa.png" alt="Mahasiswa">
+                    <img src="api/aset/img/mahasiswa.png" alt="Mahasiswa">
                     <h3>Mahasiswa</h3>
                     <p>Daftar sebagai mahasiswa untuk mengakses informasi akademik</p>
                     <a href="?page=daftar_mhs"><button>Daftar sebagai Mahasiswa</button></a>
                 </div>
 
                 <div class="card role-card">
-                    <img src="aset/img/dosen.png" alt="Dosen">
+                    <img src="api/aset/img/dosen.png" alt="Dosen">
                     <h3>Dosen</h3>
                     <p>Daftar sebagai dosen untuk mengelola data akademik</p>
                     <a href="?page=daftar_dosen"><button>Daftar sebagai Dosen</button></a>
