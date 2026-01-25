@@ -48,7 +48,8 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
     
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="../../aset/js/face-api.min.js"></script> 
+    
+    <script src="../aset/js/face-api.min.js"></script> 
 
     <style>
         /* CSS DESIGN SYSTEM */
@@ -158,6 +159,13 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
             </div>
 
         <?php elseif ($page == 'jadwal'): ?>
+            <div style="background: #fee2e2; border: 1px solid #ef4444; padding: 10px; margin-bottom: 20px; border-radius: 5px; color: #b91c1c;">
+                <strong>🔍 Debug System:</strong><br>
+                Hari Ini: <b><?= $hari_ini ?></b><br>
+                Kelas Anda: <b><?= $kelas_mhs ?></b><br>
+                <small>Pastikan data di Database tabel 'jadwal' kolom 'hari' sama persis dengan '<?= $hari_ini ?>' (Perhatikan huruf besar/kecil dan spasi!).</small>
+            </div>
+
             <div class="card">
                 <h3 style="margin-bottom:15px; color:#3b82f6;"><i class="fa-solid fa-calendar-day"></i> Jadwal Hari Ini (<?= $hari_ini . ', ' . date('d M Y') ?>)</h3>
                 <div class="table-responsive">
@@ -165,14 +173,7 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
                         <thead><tr><th>Jam</th><th>Mata Kuliah</th><th>Dosen</th><th>Ruang</th><th style="text-align:center;">Aksi Absen</th></tr></thead>
                         <tbody>
                             <?php
-                            // Query Jadwal Hari Ini
-                            $qj = mysqli_query($conn, "SELECT j.*, m.nama_matkul, m.kode_matkul, d.nama_dosen 
-                                FROM jadwal j 
-                                JOIN matkul m ON j.kode_matkul = m.kode_matkul 
-                                LEFT JOIN dosen d ON j.nip = d.nip 
-                                WHERE j.kelas = '$kelas_mhs' AND j.hari = '$hari_ini' 
-                                ORDER BY j.jam_mulai ASC");
-                            
+                            $qj = mysqli_query($conn, "SELECT j.*, m.nama_matkul, m.kode_matkul, d.nama_dosen FROM jadwal j JOIN matkul m ON j.kode_matkul = m.kode_matkul LEFT JOIN dosen d ON j.nip = d.nip WHERE j.kelas = '$kelas_mhs' AND j.hari = '$hari_ini' ORDER BY j.jam_mulai ASC");
                             if($qj && mysqli_num_rows($qj) > 0):
                                 while($r = mysqli_fetch_assoc($qj)):
                                     $q_real = mysqli_query($conn, "SELECT * FROM realisasi_mengajar WHERE id_jadwal='".$r['id_jadwal']."' AND tanggal='$tgl_ini' AND status='Berlangsung'");
@@ -192,7 +193,7 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
                                 </td>
                             </tr>
                             <?php endwhile; else: ?>
-                            <tr><td colspan="5" style="text-align:center; padding:20px; color:#999;"><i class="fa-solid fa-mug-hot"></i> Tidak ada jadwal kuliah hari ini.</td></tr>
+                            <tr><td colspan="5" style="text-align:center; padding:20px; color:#999;">Tidak ada jadwal kuliah hari ini.</td></tr>
                             <?php endif; ?>
                         </tbody>
                     </table>
@@ -206,47 +207,20 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
                         <thead><tr><th>Hari</th><th>Jam</th><th>Mata Kuliah</th><th>Dosen</th><th>Ruang</th></tr></thead>
                         <tbody>
                             <?php
-                            // Menggunakan CASE WHEN sebagai pengganti FIELD untuk sorting hari (Lebih Aman)
-                            $sql_all = "SELECT j.*, m.nama_matkul, d.nama_dosen 
-                                FROM jadwal j 
-                                JOIN matkul m ON j.kode_matkul = m.kode_matkul 
-                                LEFT JOIN dosen d ON j.nip = d.nip 
-                                WHERE j.kelas = '$kelas_mhs' 
-                                ORDER BY 
-                                CASE j.hari
-                                    WHEN 'Senin' THEN 1
-                                    WHEN 'Selasa' THEN 2
-                                    WHEN 'Rabu' THEN 3
-                                    WHEN 'Kamis' THEN 4
-                                    WHEN 'Jumat' THEN 5
-                                    WHEN 'Sabtu' THEN 6
-                                    WHEN 'Minggu' THEN 7
-                                    ELSE 8
-                                END, j.jam_mulai ASC";
-
-                            $q_all = mysqli_query($conn, $sql_all);
-                            
-                            // DEBUGGING: Cek jika error SQL
-                            if (!$q_all) {
-                                echo "<tr><td colspan='5' style='color:red; text-align:center;'>Error Query: ".mysqli_error($conn)."</td></tr>";
-                            } elseif (mysqli_num_rows($q_all) > 0) {
+                            $q_all = mysqli_query($conn, "SELECT j.*, m.nama_matkul, d.nama_dosen FROM jadwal j JOIN matkul m ON j.kode_matkul = m.kode_matkul LEFT JOIN dosen d ON j.nip = d.nip WHERE j.kelas = '$kelas_mhs' ORDER BY FIELD(j.hari, 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'), j.jam_mulai ASC");
+                            if($q_all && mysqli_num_rows($q_all) > 0):
                                 while($all = mysqli_fetch_assoc($q_all)):
                             ?>
                             <tr>
-                                <td>
-                                    <?php if($all['hari']==$hari_ini):?>
-                                        <span style="background:#dbeafe; color:#1e40af; padding:4px 8px; border-radius:4px; font-weight:bold;"><?= $all['hari'] ?></span>
-                                    <?php else: echo $all['hari']; endif; ?>
-                                </td>
+                                <td><?php if($all['hari']==$hari_ini):?><span style="background:#dbeafe; color:#1e40af; padding:4px 8px; border-radius:4px; font-weight:bold;"><?= $all['hari'] ?></span><?php else: echo $all['hari']; endif; ?></td>
                                 <td><?= substr($all['jam_mulai'],0,5) ?> - <?= substr($all['jam_selesai'],0,5) ?></td>
                                 <td><?= $all['nama_matkul'] ?></td>
                                 <td><?= $all['nama_dosen'] ?? '-' ?></td>
                                 <td><?= $all['ruang'] ?></td>
                             </tr>
-                            <?php endwhile; 
-                            } else { ?>
-                            <tr><td colspan="5" style="text-align:center;">Belum ada jadwal untuk kelas <?= $kelas_mhs ?>.</td></tr>
-                            <?php } ?>
+                            <?php endwhile; else: ?>
+                            <tr><td colspan="5" style="text-align:center;">Belum ada jadwal.</td></tr>
+                            <?php endif; ?>
                         </tbody>
                     </table>
                 </div>
@@ -270,7 +244,6 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
                         <tbody>
                             <?php
                             $qr = mysqli_query($conn, "SELECT p.*, m.nama_matkul FROM presensi_kuliah p JOIN jadwal j ON p.id_jadwal = j.id_jadwal JOIN matkul m ON j.kode_matkul = m.kode_matkul WHERE p.nim = '$nim_mhs' ORDER BY p.tanggal DESC, p.waktu_hadir DESC");
-                            
                             if($qr && mysqli_num_rows($qr) > 0):
                                 while($row = mysqli_fetch_assoc($qr)):
                                     $st = $row['status']; 
@@ -307,6 +280,7 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
     </div>
 
     <script>
+        // 1. PINDAHKAN FUNGSI DASAR KE ATAS (Agar tidak macet)
         function toggleSidebar() { 
             document.getElementById('mySidebar').classList.toggle('active'); 
             document.getElementById('mainContent').classList.toggle('active');
@@ -322,7 +296,7 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
 
         function tutupModal() { $('#modalKamera').hide(); }
 
-        // --- FACE API LOGIC (PATH AMAN: ../aset) ---
+        // 2. FACE API LOGIC (Dengan Try-Catch agar tidak bikin error)
         let isModelLoaded = false;
         let TINY_FACE_OPTIONS;
 
@@ -341,10 +315,10 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
                     console.error("Gagal Load Model:", err); 
                 });
             } else {
-                console.error("Library FaceAPI tidak terload! Cek path.");
+                console.warn("FaceAPI belum terload. Cek path ../aset/js/face-api.min.js");
             }
-        } catch (e) {
-            console.error("Error Inisialisasi AI:", e);
+        } catch(e) {
+            console.warn("AI Script Error:", e);
         }
 
         <?php if ($page == 'jadwal'): ?>
