@@ -403,6 +403,8 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
     <script>
         // 2. FACE API LOGIC DENGAN ERROR HANDLING
         let isModelLoaded = false;
+        const userHasFace = <?= $punya_wajah ?>;
+
         let TINY_FACE_OPTIONS;
 
         try {
@@ -431,7 +433,6 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
         // --- SCRIPT KHUSUS PAGE JADWAL ---
         <?php if ($page == 'jadwal'): ?>
         let currentJadwalId = null, video = document.getElementById('video'), stream = null, detectInterval;
-        const userHasFace = <?= $punya_wajah ?>;
 
 
 function bukaKamera(id) {
@@ -491,7 +492,7 @@ function startDetection(targetDescriptor) {
                 // ... (kode deteksi sama seperti sebelumnya) ...
             }, 300);
         }
-        
+
         function simpanAbsen(id) {
             $.post('mahasiswa_ajax.php', { action: 'simpan_absen', id_jadwal: id, nim: '<?= $nim_mhs ?>' }, function(res){
                 Swal.fire({ title: "Berhasil", text: "Absensi Berhasil!", icon: "success", timer: 1500, showConfirmButton: false })
