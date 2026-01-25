@@ -419,29 +419,31 @@ if(isset($_POST['simpan_jadwal'])) {
             </div>
 
 <?php elseif ($page == 'rekap'): ?>
-    <div class="card">        
+    <div class="card">
+        <h3 style="margin-bottom:15px;">Laporan Presensi</h3>
+        
         <div style="background:#f8fafc; padding:15px; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:15px;">
             <div style="margin-bottom:10px;">
-                <label style="font-size:11px; font-weight:bold; color:#64748b; display:block; margin-bottom:5px;">Pencarian</label>
-                <input type="text" id="filter_keyword" placeholder="Cari Mata Kuliah..." class="input-form" style="width:100%; margin:0;">
+                <label style="font-size:11px; font-weight:bold; color:#64748b; display:block; margin-bottom:5px;">Pencarian (Matkul/Kelas)</label>
+                <input type="text" id="filter_keyword" placeholder="Ketik nama matkul..." onkeyup="loadRekap()" class="input-form" style="width:100%; margin:0;">
             </div>
 
-            <div style="display:grid; grid-template-columns: 1fr 1fr auto; gap:10px; align-items:end;">
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; align-items:end;">
                 <div>
                     <label style="font-size:11px; font-weight:bold; color:#64748b; display:block; margin-bottom:5px;">Dari Tanggal</label>
-                    <input type="date" id="filter_tgl_mulai" class="input-form" style="width:100%; margin:0;">
+                    <input type="date" id="filter_tgl_mulai" onchange="loadRekap()" class="input-form" style="width:100%; margin:0;">
                 </div>
                 <div>
-                    <label style="font-size:11px; font-weight:bold; color:#64748b; display:block; margin-bottom:5px;">Sampai</label>
-                    <input type="date" id="filter_tgl_akhir" class="input-form" style="width:100%; margin:0;">
-                </div>
-                <div>
-                    <button onclick="loadRekap()" class="btn btn-blue" style="height:38px; padding:0 20px;"><i class="fa-solid fa-filter"></i> Filter</button>
+                    <label style="font-size:11px; font-weight:bold; color:#64748b; display:block; margin-bottom:5px;">Sampai Tanggal</label>
+                    <input type="date" id="filter_tgl_akhir" onchange="loadRekap()" class="input-form" style="width:100%; margin:0;">
                 </div>
             </div>
         </div>
 
         <div class="table-responsive">
+            <style>
+                .tr-clickable:hover { background-color: #f1f5f9; cursor: pointer; }
+            </style>
             <table>
                 <thead>
                     <tr>
@@ -449,12 +451,11 @@ if(isset($_POST['simpan_jadwal'])) {
                         <th>Mata Kuliah</th>
                         <th>Kelas</th>
                         <th>Materi</th>
-                        <th>Hadir</th>
-                        <th style="text-align:center;">Aksi</th>
+                        <th>Hadir / Total</th>
                     </tr>
                 </thead>
                 <tbody id="tabelRekapBody">
-                    <tr><td colspan="6" align="center" style="padding:20px;">Memuat data...</td></tr>
+                    <tr><td colspan="5" align="center" style="padding:20px; color:#94a3b8;">Sedang memuat data...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -465,14 +466,21 @@ if(isset($_POST['simpan_jadwal'])) {
             <h3 style="margin-bottom:5px;">Detail Kehadiran</h3>
             <p id="judulDetail" style="color:#666; font-size:12px; margin-bottom:15px;"></p>
             <div style="max-height:250px; overflow-y:auto; border:1px solid #eee; margin-bottom:15px;">
-                <table style="margin:0;"><tbody id="bodyDetailMhs"></tbody></table>
+                <table style="margin:0;">
+                    <thead><tr style="background:#f8fafc;"><th>NIM</th><th>Nama</th><th>Jam</th><th>Status</th></tr></thead>
+                    <tbody id="bodyDetailMhs"></tbody>
+                </table>
             </div>
             <div style="background:#f0fdf4; padding:10px; border-radius:8px; border:1px dashed #22c55e;">
                 <h4 style="font-size:12px; margin-bottom:5px; color:#166534;">+ Input Manual</h4>
                 <form onsubmit="tambahManual(event)" style="display:flex; gap:5px;">
                     <input type="hidden" id="id_jadwal_detail"><input type="hidden" id="tgl_detail">
-                    <input type="text" id="manual_nim" placeholder="NIM" required class="input-form" style="flex:1; margin:0;">
-                    <select id="manual_status" class="input-form" style="width:100px; margin:0;"><option value="Sakit">Sakit</option><option value="Izin">Izin</option><option value="Hadir">Hadir</option></select>
+                    <input type="text" id="manual_nim" placeholder="NIM Mhs" required class="input-form" style="flex:1; margin:0;">
+                    <select id="manual_status" class="input-form" style="width:80px; margin:0;">
+                        <option value="Hadir">Hadir</option>
+                        <option value="Sakit">Sakit</option>
+                        <option value="Izin">Izin</option>
+                    </select>
                     <button type="submit" class="btn btn-green">Simpan</button>
                 </form>
             </div>
