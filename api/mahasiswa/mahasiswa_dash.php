@@ -7,29 +7,42 @@ error_reporting(E_ALL);
 date_default_timezone_set('Asia/Jakarta');
 
 // Cek Login Cookie
+// Pastikan cookie 'status_login' ada dan role-nya 'mahasiswa'
 if (!isset($_COOKIE['status_login']) || $_COOKIE['role'] != 'mahasiswa') {
+    // Redirect ke index.php di folder api (mundur 1 level dari api/mahasiswa)
     header("Location: ../index.php"); 
     exit;
 }
 
+// Include koneksi database
 require_once __DIR__ . '/../database.php';
 
-// Ambil Data Mahasiswa
+// Ambil Data Mahasiswa dari Database berdasarkan Cookie NIM
 $nim_mhs = $_COOKIE['nim']; 
+// Gunakan backtick `data` untuk nama tabel 'data' karena reserved word
 $q_mhs = mysqli_query($conn, "SELECT * FROM `data` WHERE nim = '$nim_mhs'");
 $mhs = mysqli_fetch_assoc($q_mhs);
 
+// Jika data mahasiswa tidak ditemukan di database (misal dihapus), logout paksa
 if(!$mhs) { 
-    setcookie('status_login', '', time() - 3600, '/');
+    setcookie('status_login', '', time() - 3600, '/'); // Hapus cookie
     header("Location: ../index.php");
     exit; 
 }
 
 $kelas_mhs = $mhs['kelas'];
 
-// Variabel Waktu
+// Variabel Waktu untuk Jadwal
 $hari_inggris = date('l');
-$map_hari = ['Sunday'=>'Minggu', 'Monday'=>'Senin', 'Tuesday'=>'Selasa', 'Wednesday'=>'Rabu', 'Thursday'=>'Kamis', 'Friday'=>'Jumat', 'Saturday'=>'Sabtu'];
+$map_hari = [
+    'Sunday' => 'Minggu', 
+    'Monday' => 'Senin', 
+    'Tuesday' => 'Selasa', 
+    'Wednesday' => 'Rabu', 
+    'Thursday' => 'Kamis', 
+    'Friday' => 'Jumat', 
+    'Saturday' => 'Sabtu'
+];
 $hari_ini = $map_hari[$hari_inggris];
 $tgl_ini = date('Y-m-d');
 $page = isset($_GET['page']) ? $_GET['page'] : 'home';
@@ -41,30 +54,69 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portal Mahasiswa</title>
-    <link rel="icon" href="data:,"> 
-
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <link rel="icon" href="data:,"> <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
     <script src="../../aset/js/face-api.min.js"></script> 
+
+    <script>
+        // Fungsi Toggle Sidebar
+        function toggleSidebar() { 
+            const sidebar = document.getElementById('mySidebar');
+            const mainContent = document.getElementById('mainContent');
+            const overlay = document.querySelector('.overlay-sidebar');
+            
+            if (sidebar) sidebar.classList.toggle('active'); 
+            if (mainContent) mainContent.classList.toggle('active');
+            if (overlay) overlay.classList.toggle('active'); 
+        }
+
+        // Fungsi Logout
+        function logout() {
+            // Hapus semua cookie
+            document.cookie = "status_login=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            document.cookie = "nim=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            document.cookie = "role=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            // Redirect ke halaman login (index.php di folder api)
+            window.location.href = '../index.php';
+        }
+        
+        function tutupModal() { 
+            $('#modalKamera').hide(); 
+            // Matikan stream kamera jika modal ditutup
+            if (typeof stream !== 'undefined' && stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+            if (typeof detectInterval !== 'undefined') {
+                clearInterval(detectInterval);
+            }
+        }
+    </script>
 
     <style>
         /* CSS DESIGN SYSTEM */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         body { background-color: #f4f7f6; display: flex; min-height: 100vh; font-size: 13px; color: #333; overflow-x: hidden; }
+        
+        /* SIDEBAR STYLES */
         .sidebar { width: 250px; background: #1e293b; color: white; position: fixed; height: 100vh; left: -250px; top: 0; z-index: 1000; transition: 0.3s; box-shadow: 2px 0 10px rgba(0,0,0,0.1); }
         .sidebar.active { left: 0; }
         .sidebar-header { padding: 20px; border-bottom: 1px solid #334155; display: flex; align-items: center; gap: 10px; background: #0f172a; }
         .menu { list-style: none; padding-top: 10px; }
         .menu li a { display: flex; align-items: center; padding: 14px 20px; color: #cbd5e1; text-decoration: none; transition: 0.2s; gap: 12px; font-size: 13px; border-left: 3px solid transparent; }
         .menu li a:hover, .menu li a.active { background-color: #334155; color: #60a5fa; border-left-color: #60a5fa; }
+        
+        /* CONTENT STYLES */
         .main-content { flex: 1; margin-left: 0; padding: 20px; width: 100%; transition: 0.3s; }
         .top-bar { display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.03); margin-bottom: 25px; }
         .btn-burger { display: block; background: none; border: none; font-size: 20px; cursor: pointer; color: #333; }
         .overlay-sidebar { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 900; }
         .overlay-sidebar.active { display: block; }
+        
+        /* COMPONENT STYLES */
         .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-bottom: 20px; }
         .table-responsive { width: 100%; overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; white-space: nowrap; }
@@ -72,14 +124,20 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
         th { background: #f8fafc; color: #475569; font-weight: 600; font-size: 12px; }
         .btn { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-weight: 500; font-size: 12px; color: white; transition: 0.2s; }
         .btn-green { background: #10b981; } .btn-blue { background: #3b82f6; } .btn-disabled { background: #e2e8f0; color: #94a3b8; cursor: not-allowed; }
+        
+        /* DASHBOARD STATS */
         .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; margin-bottom: 20px; }
         .stat-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); text-align: center; border-bottom: 4px solid #ddd; }
         .stat-card h3 { font-size: 28px; margin-bottom: 5px; color: #1e293b; }
+
+        /* MODAL & CAMERA */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center; }
         .modal-content { background: white; padding: 20px; border-radius: 15px; width: 90%; max-width: 450px; text-align: center; }
         #video-container { width: 100%; height: 300px; background: #000; border-radius: 10px; overflow: hidden; position: relative; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
         video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
         canvas { position: absolute; top: 0; left: 0; }
+
+        /* RESPONSIVE */
         @media (min-width: 769px) { .main-content.active { margin-left: 250px; width: calc(100% - 250px); } }
     </style>
 </head>
@@ -130,9 +188,11 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
 
         <?php if ($page == 'home'): ?>
             <?php
+            // Statistik KRS
             $q_krs = mysqli_query($conn, "SELECT COALESCE(SUM(m.sks), 0) as total_sks, COUNT(j.id_jadwal) as total_mk FROM jadwal j JOIN matkul m ON j.kode_matkul = m.kode_matkul WHERE j.kelas = '$kelas_mhs'");
             $d_krs = $q_krs ? mysqli_fetch_assoc($q_krs) : ['total_sks'=>0, 'total_mk'=>0];
 
+            // Statistik Presensi
             $q_stat = mysqli_query($conn, "SELECT SUM(CASE WHEN status='Alpha' THEN 1 ELSE 0 END) as tot_alpha, SUM(CASE WHEN status='Izin' THEN 1 ELSE 0 END) as tot_izin, SUM(CASE WHEN status='Sakit' THEN 1 ELSE 0 END) as tot_sakit FROM presensi_kuliah WHERE nim = '$nim_mhs'");
             $d_stat = $q_stat ? mysqli_fetch_assoc($q_stat) : ['tot_alpha'=>0, 'tot_izin'=>0, 'tot_sakit'=>0];
             ?>
@@ -158,20 +218,27 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
             </div>
 
         <?php elseif ($page == 'jadwal'): ?>
-            <div style="background: #f0fdf4; border: 1px solid #16a34a; padding: 10px; margin-bottom: 20px; border-radius: 5px; color: #166534; font-size:11px;">
-                <strong>🔍 Info Debug:</strong><br>
-                Hari Ini: <b><?= $hari_ini ?></b> | Kelas Anda: <b>"<?= $kelas_mhs ?>"</b><br>
-                <small>Jika tabel bawah kosong, cek Database tabel 'jadwal'. Pastikan kolom 'kelas' tulisannya SAMA PERSIS dengan "<?= $kelas_mhs ?>" (Spasi/Strip berpengaruh).</small>
+            <div style="background: #fef2f2; border: 1px solid #ef4444; padding: 10px; margin-bottom: 20px; border-radius: 5px; color: #b91c1c; font-size:11px;">
+                <strong>🔍 Debug Mode:</strong><br>
+                Hari Ini: <b><?= $hari_ini ?></b> | Kelas Anda: <b>[<?= $kelas_mhs ?>]</b><br>
+                <small>* Pastikan kolom 'kelas' di tabel 'jadwal' SAMA PERSIS dengan [<?= $kelas_mhs ?>] (Spasi & Huruf Besar berpengaruh).</small>
             </div>
 
             <div class="card">
-                <h3 style="margin-bottom:15px; color:#3b82f6;"><i class="fa-solid fa-calendar-day"></i> Jadwal Hari Ini (<?= $hari_ini . ', ' . date('d M Y') ?>)</h3>
+                <h3 style="margin-bottom:15px; color:#3b82f6;"><i class="fa-solid fa-calendar-day"></i> Jadwal Hari Ini (<?= $hari_ini ?>)</h3>
                 <div class="table-responsive">
                     <table>
-                        <thead><tr><th>Jam</th><th>Mata Kuliah</th><th>Dosen</th><th>Ruang</th><th style="text-align:center;">Aksi Absen</th></tr></thead>
+                        <thead><tr><th>Jam</th><th>Mata Kuliah</th><th>Dosen</th><th>Ruang</th><th style="text-align:center;">Aksi</th></tr></thead>
                         <tbody>
                             <?php
-                            $qj = mysqli_query($conn, "SELECT j.*, m.nama_matkul, m.kode_matkul, d.nama_dosen FROM jadwal j JOIN matkul m ON j.kode_matkul = m.kode_matkul LEFT JOIN dosen d ON j.nip = d.nip WHERE j.kelas = '$kelas_mhs' AND j.hari = '$hari_ini' ORDER BY j.jam_mulai ASC");
+                            // QUERY 1: LEFT JOIN DOSEN (Supaya jadwal tetap muncul meski data dosen hilang/salah)
+                            $qj = mysqli_query($conn, "SELECT j.*, m.nama_matkul, m.kode_matkul, d.nama_dosen 
+                                FROM jadwal j 
+                                JOIN matkul m ON j.kode_matkul = m.kode_matkul 
+                                LEFT JOIN dosen d ON j.nip = d.nip 
+                                WHERE j.kelas = '$kelas_mhs' AND j.hari = '$hari_ini' 
+                                ORDER BY j.jam_mulai ASC");
+                            
                             if($qj && mysqli_num_rows($qj) > 0):
                                 while($r = mysqli_fetch_assoc($qj)):
                                     $q_real = mysqli_query($conn, "SELECT * FROM realisasi_mengajar WHERE id_jadwal='".$r['id_jadwal']."' AND tanggal='$tgl_ini' AND status='Berlangsung'");
@@ -191,7 +258,7 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
                                 </td>
                             </tr>
                             <?php endwhile; else: ?>
-                            <tr><td colspan="5" style="text-align:center; padding:20px; color:#999;">Tidak ada jadwal kuliah hari ini.</td></tr>
+                            <tr><td colspan="5" align="center" style="padding:15px; color:#999;">Tidak ada jadwal kuliah hari ini.</td></tr>
                             <?php endif; ?>
                         </tbody>
                     </table>
@@ -205,7 +272,7 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
                         <thead><tr><th>Hari</th><th>Jam</th><th>Mata Kuliah</th><th>Dosen</th><th>Ruang</th></tr></thead>
                         <tbody>
                             <?php
-                            // Query AMAN (Tanpa FIELD, Pakai CASE)
+                            // QUERY 2: LEFT JOIN DOSEN & Sorting CASE
                             $sql_all = "SELECT j.*, m.nama_matkul, d.nama_dosen 
                                 FROM jadwal j 
                                 JOIN matkul m ON j.kode_matkul = m.kode_matkul 
@@ -226,13 +293,13 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
                             $q_all = mysqli_query($conn, $sql_all);
                             
                             if (!$q_all) {
-                                echo "<tr><td colspan='5' style='color:red; text-align:center;'>Error Database: ".mysqli_error($conn)."</td></tr>";
+                                echo "<tr><td colspan='5' style='color:red; text-align:center;'>Error Query: ".mysqli_error($conn)."</td></tr>";
                             } elseif (mysqli_num_rows($q_all) > 0) {
                                 while($all = mysqli_fetch_assoc($q_all)):
                             ?>
                             <tr>
                                 <td>
-                                    <?php if($all['hari']==$hari_ini):?>
+                                    <?php if($all['hari'] == $hari_ini):?>
                                         <span style="background:#dbeafe; color:#1e40af; padding:4px 8px; border-radius:4px; font-weight:bold;"><?= $all['hari'] ?></span>
                                     <?php else: echo $all['hari']; endif; ?>
                                 </td>
@@ -243,7 +310,7 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
                             </tr>
                             <?php endwhile; 
                             } else { ?>
-                            <tr><td colspan="5" style="text-align:center; padding:30px;">Belum ada data jadwal untuk kelas <b><?= $kelas_mhs ?></b>.</td></tr>
+                            <tr><td colspan="5" style="text-align:center; padding:30px;">Belum ada jadwal. Cek kecocokan nama kelas!</td></tr>
                             <?php } ?>
                         </tbody>
                     </table>
@@ -255,7 +322,7 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
                     <h3>Verifikasi Wajah</h3>
                     <div id="video-container"><video id="video" autoplay muted playsinline></video></div>
                     <div id="statusScan" style="font-weight:bold; color:#3b82f6; margin-bottom:15px;">Memuat AI...</div>
-                    <button class="btn" style="background:#ef4444;" onclick="tutupKamera()">Batal</button>
+                    <button class="btn" style="background:#ef4444;" onclick="tutupModal()">Batal</button>
                 </div>
             </div>
 
@@ -305,111 +372,132 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
     </div>
 
     <script>
-        // 1. PINDAHKAN FUNGSI DASAR KE ATAS
-        function toggleSidebar() { 
-            document.getElementById('mySidebar').classList.toggle('active'); 
-            document.getElementById('mainContent').classList.toggle('active');
-            document.querySelector('.overlay-sidebar').classList.toggle('active'); 
-        }
-
-        function logout() {
-            document.cookie = "status_login=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-            document.cookie = "nim=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-            document.cookie = "role=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-            // FIX: Mundur 1 langkah karena index ada di folder API (api/index.php)
-            window.location.href = '../index.php';
-        }
-
-        function tutupModal() { $('#modalKamera').hide(); }
-
-        // 2. FACE API LOGIC (PATH AMAN: ../../aset)
+        // 2. FACE API LOGIC DENGAN ERROR HANDLING
         let isModelLoaded = false;
         let TINY_FACE_OPTIONS;
 
         try {
+            // Cek apakah faceapi terload
             if (typeof faceapi !== 'undefined') {
                 TINY_FACE_OPTIONS = new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.5 });
                 
+                // Path model AI: mundur 2 level ke folder aset/models
                 Promise.all([
                     faceapi.nets.tinyFaceDetector.loadFromUri('../../aset/models'),
                     faceapi.nets.faceLandmark68Net.loadFromUri('../../aset/models'),
                     faceapi.nets.faceRecognitionNet.loadFromUri('../../aset/models')
                 ]).then(() => { 
                     isModelLoaded = true; 
-                    console.log("AI Loaded"); 
+                    console.log("AI Loaded Successfully"); 
                 }).catch(err => { 
-                    console.error("Gagal Load Model:", err); 
+                    console.error("Gagal Load Model AI:", err); 
                 });
             } else {
-                console.warn("Library FaceAPI tidak terload! Cek path.");
+                console.warn("Library FaceAPI tidak ditemukan! Cek path di <head>");
             }
-        } catch (e) {
-            console.error("Error Inisialisasi AI:", e);
+        } catch(e) {
+            console.error("Script FaceAPI Error:", e);
         }
 
+        // --- SCRIPT KHUSUS PAGE JADWAL ---
         <?php if ($page == 'jadwal'): ?>
         let currentJadwalId = null, video = document.getElementById('video'), stream = null, detectInterval;
         
         function bukaKamera(id) {
             if(!isModelLoaded) { Swal.fire("Tunggu", "Memuat AI...", "info"); return; }
-            currentJadwalId = id; $('#modalKamera').css('display', 'flex');
+            currentJadwalId = id; 
+            $('#modalKamera').css('display', 'flex');
+            
+            // Ambil data wajah dari database via AJAX
             $.post('mahasiswa_ajax.php', { action: 'get_face_descriptor', nim: '<?= $nim_mhs ?>' }, function(res){
                 try {
                     let rawData = JSON.parse(res);
+                    // Konversi object ke array jika perlu
                     if (rawData && typeof rawData === 'object' && !Array.isArray(rawData)) rawData = Object.values(rawData);
+                    
                     const targetDescriptor = new faceapi.LabeledFaceDescriptors('<?= $nim_mhs ?>', [new Float32Array(rawData)]);
                     $('#statusScan').text("Mencari wajah...");
+                    
                     navigator.mediaDevices.getUserMedia({ video: {} }).then(s => {
-                        stream = s; video.srcObject = stream;
+                        stream = s; 
+                        video.srcObject = stream;
                         video.onloadedmetadata = () => { video.play(); startDetection(targetDescriptor); };
                     });
-                } catch(e) { Swal.fire("Gagal", "Wajah belum terdaftar.", "warning"); tutupKamera(); }
+                } catch(e) { 
+                    Swal.fire("Gagal", "Wajah Anda belum terdaftar. Silakan update wajah di menu profil.", "warning"); 
+                    tutupModal(); 
+                }
             });
         }
+
         function startDetection(targetDescriptor) {
             $('canvas').remove();
             const canvas = faceapi.createCanvasFromMedia(video);
             $('#video-container').append(canvas);
             const displaySize = { width: video.offsetWidth, height: video.offsetHeight };
             faceapi.matchDimensions(canvas, displaySize);
+            
             detectInterval = setInterval(async () => {
                 const detection = await faceapi.detectSingleFace(video, TINY_FACE_OPTIONS).withFaceLandmarks().withFaceDescriptor();
                 const ctx = canvas.getContext('2d'); ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
                 if (detection) {
                     const match = new faceapi.FaceMatcher(targetDescriptor, 0.45).findBestMatch(detection.descriptor);
-                    new faceapi.draw.DrawBox(faceapi.resizeResults(detection, displaySize).detection.box, { label: match.toString(), boxColor: match.label === '<?= $nim_mhs ?>' ? "green" : "red" }).draw(canvas);
-                    if (match.label === '<?= $nim_mhs ?>') { clearInterval(detectInterval); simpanAbsen(currentJadwalId); }
+                    const box = detection.detection.box;
+                    const drawBox = new faceapi.draw.DrawBox(box, { label: match.toString(), boxColor: match.label === '<?= $nim_mhs ?>' ? "green" : "red" });
+                    drawBox.draw(canvas);
+                    
+                    if (match.label === '<?= $nim_mhs ?>') { 
+                        clearInterval(detectInterval); 
+                        simpanAbsen(currentJadwalId); 
+                    }
                 }
             }, 300);
         }
+
         function simpanAbsen(id) {
             $.post('mahasiswa_ajax.php', { action: 'simpan_absen', id_jadwal: id, nim: '<?= $nim_mhs ?>' }, function(res){
-                Swal.fire({ title: "Berhasil", text: "Absensi Berhasil!", icon: "success", timer: 1500, showConfirmButton: false }).then(() => location.reload());
+                Swal.fire({ title: "Berhasil", text: "Absensi Berhasil!", icon: "success", timer: 1500, showConfirmButton: false })
+                .then(() => location.reload());
             });
         }
-        function tutupKamera() { $('#modalKamera').hide(); if(detectInterval) clearInterval(detectInterval); if(stream) stream.getTracks().forEach(t => t.stop()); $('canvas').remove(); }
         <?php endif; ?>
 
+        // --- SCRIPT KHUSUS PAGE UPDATE WAJAH ---
         <?php if ($page == 'update_wajah'): ?>
         let regStream, regInterval, lastDescriptor;
+        
         function mulaiKameraReg() {
-            if(!isModelLoaded) { Swal.fire("Error", "AI belum siap.", "error"); return; }
+            if(!isModelLoaded) { Swal.fire("Error", "AI belum siap. Cek koneksi internet.", "error"); return; }
             navigator.mediaDevices.getUserMedia({ video: {} }).then(s => {
-                regStream = s; document.getElementById('videoReg').srcObject = regStream;
+                regStream = s; 
+                document.getElementById('videoReg').srcObject = regStream;
                 document.getElementById('videoReg').onloadedmetadata = () => { document.getElementById('videoReg').play(); detectRegLoop(); };
-                $('#btnMulaiReg').hide(); $('#msgReg').text("Lihat kamera...");
+                $('#btnMulaiReg').hide(); 
+                $('#msgReg').text("Lihat kamera...");
             });
         }
+
         function detectRegLoop() {
             regInterval = setInterval(async () => {
                 const detection = await faceapi.detectSingleFace(document.getElementById('videoReg'), TINY_FACE_OPTIONS).withFaceLandmarks().withFaceDescriptor();
-                if (detection) { lastDescriptor = detection.descriptor; $('#btnSimpanReg').prop('disabled', false).removeClass('btn-disabled').addClass('btn-green'); $('#msgReg').text("Wajah OK! Klik Simpan."); }
+                if (detection) { 
+                    lastDescriptor = detection.descriptor; 
+                    $('#btnSimpanReg').prop('disabled', false).removeClass('btn-disabled').addClass('btn-green'); 
+                    $('#msgReg').text("Wajah Terdeteksi! Klik Simpan."); 
+                }
             }, 500);
         }
+
         function simpanWajah() {
             if(!lastDescriptor) return;
-            $.post('mahasiswa_ajax.php', { action: 'update_face', nim: '<?= $nim_mhs ?>', descriptor: JSON.stringify(Array.from(lastDescriptor)) }, function(res){
-                clearInterval(regInterval); if(regStream) regStream.getTracks().forEach(t => t.stop());
+            $.post('mahasiswa_ajax.php', { 
+                action: 'update_face', 
+                nim: '<?= $nim_mhs ?>', 
+                descriptor: JSON.stringify(Array.from(lastDescriptor)) 
+            }, function(res){
+                clearInterval(regInterval); 
+                if(regStream) regStream.getTracks().forEach(t => t.stop());
                 Swal.fire("Sukses", "Data Wajah Disimpan!", "success").then(() => location.href='?page=home');
             });
         }
