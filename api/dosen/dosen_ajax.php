@@ -160,7 +160,7 @@ $sql = "SELECT r.*, m.nama_matkul, j.kelas, j.kuota as total_mhs,
         JOIN matkul m ON j.kode_matkul = m.kode_matkul 
         $where 
         ORDER BY r.tanggal DESC, r.jam_mulai_real DESC";
-        
+
     $q = mysqli_query($conn, $sql);
 
     if(mysqli_num_rows($q) > 0) {
@@ -171,10 +171,6 @@ $sql = "SELECT r.*, m.nama_matkul, j.kelas, j.kuota as total_mhs,
             echo "<td>" . date('d/m/Y', strtotime($row['tanggal'])) . "</td>";
             echo "<td>" . $row['nama_matkul'] . "</td>";
             echo "<td>" . $row['kelas'] . "</td>";
-            // Materi (Opsional jika ada kolom materi)
-            echo "<td>" . (strlen($materi) > 30 ? substr($materi,0,30).'...' : $materi) . "</td>";
-            
-            // Kolom Hadir / Total
             echo "<td><b style='color:#16a34a'>" . $row['hadir'] . "</b> / " . $row['total_mhs'] . "</td>";
             
             echo "</tr>";
