@@ -326,7 +326,7 @@ if(isset($_POST['simpan_jadwal'])) {
                             ?>
                         </select>
                         <select name="hari" required class="input-form" style="margin:0;">
-                            <option value="Senin">Senin</option><option value="Selasa">Selasa</option><option value="Rabu">Rabu</option><option value="Kamis">Kamis</option><option value="Jumat">Jumat</option><option value="Minggu">Minggu</option>
+                            <option value="Senin">Senin</option><option value="Selasa">Selasa</option><option value="Rabu">Rabu</option><option value="Kamis">Kamis</option><option value="Jumat">Jumat</option>
                         </select>
                         <input type="text" name="kelas" placeholder="Kelas (mis: KA-3C)" required class="input-form" style="margin:0;">
                         <input type="number" name="kuota" placeholder="Kuota" value="30" required class="input-form" style="margin:0;">
@@ -398,7 +398,7 @@ if(isset($_POST['simpan_jadwal'])) {
                         <form onsubmit="simpanEditJadwal(event)">
                             <input type="hidden" id="edit_id_jadwal">
                             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                                <div><label>Hari</label><select id="edit_hari" class="input-form"><option value="Senin">Senin</option><option value="Selasa">Selasa</option><option value="Rabu">Rabu</option><option value="Kamis">Kamis</option><option value="Jumat">Jumat</option><option value="Minggu">Minggu</option></select></div>
+                                <div><label>Hari</label><select id="edit_hari" class="input-form"><option value="Senin">Senin</option><option value="Selasa">Selasa</option><option value="Rabu">Rabu</option><option value="Kamis">Kamis</option><option value="Jumat">Jumat</option></select></div>
                                 <div><label>Ruang</label><input type="text" id="edit_ruang" class="input-form"></div>
                             </div>
                             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
