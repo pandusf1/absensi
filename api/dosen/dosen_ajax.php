@@ -218,15 +218,7 @@ elseif ($action == 'load_detail_mhs') {
             echo "<td style='padding:8px;'>".$r['nim']."</td>";
             echo "<td style='padding:8px;'>".$r['nama']."</td>";
             echo "<td style='padding:8px;'>".substr($r['waktu_hadir'], 0, 5)."</td>";
-            echo "<td style='padding:8px;'>";
-            // Dropdown untuk ubah status langsung
-            echo "<select style='padding:4px; border-radius:4px; border:1px solid #ddd;' onchange=\"ubahStatus(".$r['id_presensi'].", this.value)\">";
-            echo "<option value='Hadir' $h>Hadir</option>";
-            echo "<option value='Sakit' $s>Sakit</option>";
-            echo "<option value='Izin' $i>Izin</option>";
-            echo "<option value='Alpha' $a>Alpha</option>";
-            echo "</select>";
-            echo "</td></tr>";
+            echo "<td style='padding:8px;'>".$r['id_presensi']."</td></tr>";
         }
     } else { 
         echo "<tr><td colspan='4' align='center' style='padding:15px;'>Belum ada data mahasiswa.</td></tr>"; 
