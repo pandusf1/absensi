@@ -8,11 +8,11 @@ date_default_timezone_set('Asia/Jakarta');
 
 // Cek Login Cookie
 if (!isset($_COOKIE['status_login']) || $_COOKIE['role'] != 'mahasiswa') {
-    header("Location: ../../index.php"); 
+    header("Location: ../index.php"); // Mundur 1 langkah ke api/index.php
     exit;
 }
 
-require_once __DIR__ . '/../database.php';
+require_once __DIR__ . '/../database.php'; // api/database.php
 
 // Ambil Data Mahasiswa
 $nim_mhs = $_COOKIE['nim']; 
@@ -21,7 +21,7 @@ $mhs = mysqli_fetch_assoc($q_mhs);
 
 if(!$mhs) { 
     setcookie('status_login', '', time() - 3600, '/');
-    header("Location: ../../index.php");
+    header("Location: ../index.php");
     exit; 
 }
 
@@ -41,19 +41,20 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portal Mahasiswa</title>
-    <link rel="icon" href="data:,"> <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="../../aset/js/face-api.min.js"></script> 
+    <link rel="icon" href="data:,"> 
 
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="../../aset/js/face-api.min.js"></script> 
+
     <style>
-        /* CSS RESET & LAYOUT */
+        /* CSS DESIGN SYSTEM */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         body { background-color: #f4f7f6; display: flex; min-height: 100vh; font-size: 13px; color: #333; overflow-x: hidden; }
         
-        /* SIDEBAR */
         .sidebar { width: 250px; background: #1e293b; color: white; position: fixed; height: 100vh; left: -250px; top: 0; z-index: 1000; transition: 0.3s; box-shadow: 2px 0 10px rgba(0,0,0,0.1); }
         .sidebar.active { left: 0; }
         .sidebar-header { padding: 20px; border-bottom: 1px solid #334155; display: flex; align-items: center; gap: 10px; background: #0f172a; }
@@ -61,14 +62,12 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
         .menu li a { display: flex; align-items: center; padding: 14px 20px; color: #cbd5e1; text-decoration: none; transition: 0.2s; gap: 12px; font-size: 13px; border-left: 3px solid transparent; }
         .menu li a:hover, .menu li a.active { background-color: #334155; color: #60a5fa; border-left-color: #60a5fa; }
         
-        /* CONTENT */
         .main-content { flex: 1; margin-left: 0; padding: 20px; width: 100%; transition: 0.3s; }
         .top-bar { display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.03); margin-bottom: 25px; }
         .btn-burger { display: block; background: none; border: none; font-size: 20px; cursor: pointer; color: #333; }
         .overlay-sidebar { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 900; }
         .overlay-sidebar.active { display: block; }
         
-        /* CARDS & TABLES */
         .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-bottom: 20px; }
         .table-responsive { width: 100%; overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; white-space: nowrap; }
@@ -77,12 +76,10 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
         .btn { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-weight: 500; font-size: 12px; color: white; transition: 0.2s; }
         .btn-green { background: #10b981; } .btn-blue { background: #3b82f6; } .btn-disabled { background: #e2e8f0; color: #94a3b8; cursor: not-allowed; }
         
-        /* STATS */
         .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; margin-bottom: 20px; }
         .stat-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); text-align: center; border-bottom: 4px solid #ddd; }
         .stat-card h3 { font-size: 28px; margin-bottom: 5px; color: #1e293b; }
 
-        /* MODAL */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center; }
         .modal-content { background: white; padding: 20px; border-radius: 15px; width: 90%; max-width: 450px; text-align: center; }
         #video-container { width: 100%; height: 300px; background: #000; border-radius: 10px; overflow: hidden; position: relative; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
@@ -167,9 +164,10 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
             </div>
 
         <?php elseif ($page == 'jadwal'): ?>
-            
             <div class="card">
                 <h3 style="margin-bottom:15px; color:#3b82f6;"><i class="fa-solid fa-calendar-day"></i> Jadwal Hari Ini (<?= $hari_ini . ', ' . date('d M Y') ?>)</h3>
+                <p style="font-size:10px; color:red;">Debug: Kelas Mahasiswa = [<?= $kelas_mhs ?>], Hari = [<?= $hari_ini ?>]</p>
+                
                 <div class="table-responsive">
                     <table>
                         <thead><tr><th>Jam</th><th>Mata Kuliah</th><th>Dosen</th><th>Ruang</th><th style="text-align:center;">Aksi Absen</th></tr></thead>
@@ -195,15 +193,15 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
                                 </td>
                             </tr>
                             <?php endwhile; else: ?>
-                            <tr><td colspan="5" style="text-align:center; padding:20px; color:#999;"><i class="fa-solid fa-mug-hot"></i> Tidak ada jadwal kuliah hari ini.</td></tr>
+                            <tr><td colspan="5" style="text-align:center; padding:20px; color:#999;">Tidak ada jadwal kuliah hari ini.</td></tr>
                             <?php endif; ?>
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <div class="card">
-                <h3 style="margin-bottom:15px; color:#64748b;"><i class="fa-solid fa-calendar-week"></i> Semua Jadwal Kelas (<?= $kelas_mhs ?>)</h3>
+            <div class="card" style="margin-top: 20px;">
+                <h3 style="margin-bottom:15px; color:#64748b;"><i class="fa-solid fa-calendar-week"></i> Semua Jadwal Kelas</h3>
                 <div class="table-responsive">
                     <table>
                         <thead><tr><th>Hari</th><th>Jam</th><th>Mata Kuliah</th><th>Dosen</th><th>Ruang</th></tr></thead>
@@ -221,13 +219,13 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
                                 <td><?= $all['ruang'] ?></td>
                             </tr>
                             <?php endwhile; else: ?>
-                            <tr><td colspan="5" style="text-align:center; padding:20px;">Belum ada jadwal untuk kelas <?= $kelas_mhs ?>.</td></tr>
+                            <tr><td colspan="5" style="text-align:center;">Belum ada jadwal.</td></tr>
                             <?php endif; ?>
                         </tbody>
                     </table>
                 </div>
             </div>
-
+            
             <div id="modalKamera" class="modal">
                 <div class="modal-content">
                     <h3>Verifikasi Wajah</h3>
@@ -282,6 +280,7 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
     </div>
 
     <script>
+        // 1. FUNGSI DASAR (Diletakkan paling atas agar tidak kena error FaceAPI)
         function toggleSidebar() { 
             document.getElementById('mySidebar').classList.toggle('active'); 
             document.getElementById('mainContent').classList.toggle('active');
@@ -292,26 +291,43 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
             document.cookie = "status_login=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
             document.cookie = "nim=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
             document.cookie = "role=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-            window.location.href = '../../index.php';
+            // FIX: Mundur 1 langkah karena index ada di folder API
+            window.location.href = '../index.php';
         }
 
         function tutupModal() { $('#modalKamera').hide(); }
 
-        // --- FACE API LOGIC ---
-        const TINY_FACE_OPTIONS = new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.5 });
+        // 2. LOGIKA FACE API DENGAN PENGAMAN (Try-Catch)
+        // Agar jika file ../../aset/js/face-api.min.js tidak ketemu, toggle sidebar TETAP JALAN
         let isModelLoaded = false;
+        let TINY_FACE_OPTIONS;
 
-        // PATH DIPERBAIKI: ../../
-        Promise.all([
-            faceapi.nets.tinyFaceDetector.loadFromUri('../../aset/models'),
-            faceapi.nets.faceLandmark68Net.loadFromUri('../../aset/models'),
-            faceapi.nets.faceRecognitionNet.loadFromUri('../../aset/models')
-        ]).then(() => { isModelLoaded = true; console.log("AI Loaded"); }).catch(err => { console.error(err); });
+        try {
+            if (typeof faceapi !== 'undefined') {
+                TINY_FACE_OPTIONS = new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.5 });
+                
+                Promise.all([
+                    faceapi.nets.tinyFaceDetector.loadFromUri('../../aset/models'),
+                    faceapi.nets.faceLandmark68Net.loadFromUri('../../aset/models'),
+                    faceapi.nets.faceRecognitionNet.loadFromUri('../../aset/models')
+                ]).then(() => { 
+                    isModelLoaded = true; 
+                    console.log("AI Loaded"); 
+                }).catch(err => { 
+                    console.error("Gagal Load Model:", err); 
+                });
+            } else {
+                console.error("FaceAPI Library tidak ditemukan! Cek path ../../aset/js/face-api.min.js");
+            }
+        } catch (e) {
+            console.error("Error Inisialisasi AI:", e);
+        }
 
         <?php if ($page == 'jadwal'): ?>
         let currentJadwalId = null, video = document.getElementById('video'), stream = null, detectInterval;
+        
         function bukaKamera(id) {
-            if(!isModelLoaded) { Swal.fire("Tunggu", "Memuat AI...", "info"); return; }
+            if(!isModelLoaded) { Swal.fire("Tunggu", "Memuat AI atau Library Gagal...", "info"); return; }
             currentJadwalId = id; $('#modalKamera').css('display', 'flex');
             $.post('mahasiswa_ajax.php', { action: 'get_face_descriptor', nim: '<?= $nim_mhs ?>' }, function(res){
                 try {
@@ -353,7 +369,7 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
         <?php if ($page == 'update_wajah'): ?>
         let regStream, regInterval, lastDescriptor;
         function mulaiKameraReg() {
-            if(!isModelLoaded) return;
+            if(!isModelLoaded) { Swal.fire("Error", "AI belum siap. Cek Console (F12).", "error"); return; }
             navigator.mediaDevices.getUserMedia({ video: {} }).then(s => {
                 regStream = s; document.getElementById('videoReg').srcObject = regStream;
                 document.getElementById('videoReg').onloadedmetadata = () => { document.getElementById('videoReg').play(); detectRegLoop(); };
