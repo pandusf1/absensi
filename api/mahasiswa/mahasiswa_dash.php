@@ -410,43 +410,19 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
         const userHasFace = <?= $punya_wajah ?>;
 
         function bukaKamera(id) {
-            if (!userHasFace) {
-                Swal.fire({
-                    title: "Wajah Belum Terdaftar!",
-                    text: "Anda harus scan wajah dulu di menu Registrasi Wajah.",
-                    icon: "warning",
-                    confirmButtonText: "Ke Menu Scan",
-                    allowOutsideClick: false
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.location.href = '?page=update_wajah'; // Redirect paksa
-                    }
-                });
-                return; // Stop, jangan lanjut buka kamera
-            }
             if(!isModelLoaded) { Swal.fire("Tunggu", "Memuat AI...", "info"); return; }
-            currentJadwalId = id; 
-            $('#modalKamera').css('display', 'flex');
-            
-            // Ambil data wajah dari database via AJAX
+            currentJadwalId = id; $('#modalKamera').css('display', 'flex');
             $.post('mahasiswa_ajax.php', { action: 'get_face_descriptor', nim: '<?= $nim_mhs ?>' }, function(res){
                 try {
                     let rawData = JSON.parse(res);
-                    // Konversi object ke array jika perlu
                     if (rawData && typeof rawData === 'object' && !Array.isArray(rawData)) rawData = Object.values(rawData);
-                    
                     const targetDescriptor = new faceapi.LabeledFaceDescriptors('<?= $nim_mhs ?>', [new Float32Array(rawData)]);
                     $('#statusScan').text("Mencari wajah...");
-                    
                     navigator.mediaDevices.getUserMedia({ video: {} }).then(s => {
-                        stream = s; 
-                        video.srcObject = stream;
+                        stream = s; video.srcObject = stream;
                         video.onloadedmetadata = () => { video.play(); startDetection(targetDescriptor); };
                     });
-                } catch(e) { 
-                    Swal.fire("Gagal", "Wajah Anda belum terdaftar. Silakan update wajah di menu profil.", "warning"); 
-                    tutupModal(); 
-                }
+                } catch(e) { Swal.fire("Gagal", "Wajah belum terdaftar.", "warning"); tutupKamera(); }
             });
         }
 
