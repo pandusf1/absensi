@@ -31,6 +31,7 @@ if(!$mhs) {
 }
 
 $kelas_mhs = $mhs['kelas'];
+$punya_wajah = !empty($mhs['face_descriptor']) ? 'true' : 'false';
 
 // Variabel Waktu untuk Jadwal
 $hari_inggris = date('l');
@@ -406,8 +407,23 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
         // --- SCRIPT KHUSUS PAGE JADWAL ---
         <?php if ($page == 'jadwal'): ?>
         let currentJadwalId = null, video = document.getElementById('video'), stream = null, detectInterval;
-        
+        const userHasFace = <?= $punya_wajah ?>;
+
         function bukaKamera(id) {
+            if (!userHasFace) {
+                Swal.fire({
+                    title: "Wajah Belum Terdaftar!",
+                    text: "Anda harus scan wajah dulu di menu Registrasi Wajah.",
+                    icon: "warning",
+                    confirmButtonText: "Ke Menu Scan",
+                    allowOutsideClick: false
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = '?page=update_wajah'; // Redirect paksa
+                    }
+                });
+                return; // Stop, jangan lanjut buka kamera
+            }
             if(!isModelLoaded) { Swal.fire("Tunggu", "Memuat AI...", "info"); return; }
             currentJadwalId = id; 
             $('#modalKamera').css('display', 'flex');
