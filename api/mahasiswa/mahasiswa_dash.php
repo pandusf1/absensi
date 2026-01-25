@@ -195,7 +195,7 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
                         if($page=='home') echo 'Dashboard Overview';
                         elseif($page=='jadwal') echo 'Jadwal Kuliah';
                         elseif($page=='riwayat') echo 'Riwayat Kehadiran';
-                        elseif($page=='update_wajah') echo 'Registrasi Wajah';
+                        elseif($page=='update_wajah') echo 'Scan Wajah';
                     ?>
                 </h3>
             </div>
@@ -391,7 +391,6 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
 
         <?php elseif ($page == 'update_wajah'): ?>
             <div class="card" style="max-width:500px; margin:0 auto; text-align:center;">
-                <h3>Registrasi Wajah</h3>
                 <p style="color:#64748b; font-size:12px; margin-bottom:20px;">Pastikan wajah terlihat jelas.</p>
                 <div style="width:100%; height:350px; background:#000; border-radius:10px; overflow:hidden; margin-bottom:15px; position:relative;">
                     <video id="videoReg" autoplay muted playsinline style="width:100%; height:100%; object-fit:cover; transform: scaleX(-1);"></video>
@@ -440,7 +439,7 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
             if (!userHasFace) {
                 Swal.fire({
                     title: "Wajah Belum Terdaftar!",
-                    text: "Anda wajib merekam wajah dulu di menu 'Registrasi Wajah' sebelum absen.",
+                    text: "Anda wajib merekam wajah dulu di menu 'Scan Wajah' sebelum absen.",
                     icon: "warning",
                     confirmButtonText: "Ke Menu Scan",
                     allowOutsideClick: false,
