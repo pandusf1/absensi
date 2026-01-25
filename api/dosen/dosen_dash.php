@@ -419,7 +419,9 @@ if(isset($_POST['simpan_jadwal'])) {
             </div>
 
 <?php elseif ($page == 'rekap'): ?>
-    <div class="card">        
+    <div class="card">
+        <h3 style="margin-bottom:15px;">Laporan Presensi</h3>
+        
         <div style="background:#f8fafc; padding:15px; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:15px;">
             <div style="margin-bottom:10px;">
                 <label style="font-size:11px; font-weight:bold; color:#64748b; display:block; margin-bottom:5px;">Pencarian</label>
@@ -494,8 +496,96 @@ if(isset($_POST['simpan_jadwal'])) {
             </div>
         </div>
     </div>
-<?php endif; ?>
 
+    <script>
+        // Load data automatically when page opens
+        document.addEventListener("DOMContentLoaded", function() {
+            loadRekap();
+        });
+
+        function loadRekap() {
+            const keyword = document.getElementById('filter_keyword').value;
+            const tglMulai = document.getElementById('filter_tgl_mulai').value;
+            const tglAkhir = document.getElementById('filter_tgl_akhir').value;
+            const tbody = document.getElementById('tabelRekapBody');
+
+            tbody.innerHTML = '<tr><td colspan="5" align="center" style="padding:20px;">Memuat data...</td></tr>';
+
+            // Use fetch or jQuery $.post depending on what you have loaded. 
+            // Assuming jQuery is available based on previous context:
+            $.post('dosen_ajax.php', {
+                action: 'load_rekap_list',
+                keyword: keyword,
+                tgl_mulai: tglMulai,
+                tgl_akhir: tglAkhir
+            }, function(response) {
+                tbody.innerHTML = response;
+            });
+        }
+
+        // Trigger detail modal
+        function bukaDetail(id, tgl, matkul, kelas) {
+            document.getElementById('judulDetail').innerText = matkul + ' (' + kelas + ') - ' + tgl;
+            document.getElementById('id_jadwal_detail').value = id;
+            document.getElementById('tgl_detail').value = tgl;
+            
+            // Load detail students
+            const bodyDetail = document.getElementById('bodyDetailMhs');
+            bodyDetail.innerHTML = '<tr><td colspan="4" align="center">Loading...</td></tr>';
+            
+            document.getElementById('modalDetailRekap').style.display = 'flex';
+
+            $.post('dosen_ajax.php', {
+                action: 'load_detail_mhs',
+                id_jadwal: id,
+                tanggal: tgl
+            }, function(response) {
+                bodyDetail.innerHTML = response;
+            });
+        }
+
+        function tutupModal(e) {
+            if (e.target.id === 'modalDetailRekap') {
+                e.target.style.display = 'none';
+            }
+        }
+
+        function tambahManual(e) {
+            e.preventDefault();
+            const id = document.getElementById('id_jadwal_detail').value;
+            const tgl = document.getElementById('tgl_detail').value;
+            const nim = document.getElementById('manual_nim').value;
+            const status = document.getElementById('manual_status').value;
+
+            $.post('dosen_ajax.php', {
+                action: 'tambah_presensi_manual',
+                id_jadwal: id,
+                tanggal: tgl,
+                nim: nim,
+                status: status
+            }, function(response) {
+                // Assuming response is text message or JSON
+                // Simple alert for feedback
+                alert(response); 
+                // Reload the detail list
+                bukaDetail(id, tgl, document.getElementById('judulDetail').innerText.split(' (')[0], '');
+                document.getElementById('manual_nim').value = '';
+            });
+        }
+        
+        // Function to handle status change from dropdown inside modal
+        function ubahStatus(id_presensi, newStatus) {
+             $.post('dosen_ajax.php', {
+                action: 'update_status_presensi',
+                id_presensi: id_presensi,
+                status: newStatus
+            }, function(response) {
+                // Optional: show small notification
+                console.log("Status updated");
+            });
+        }
+    </script>
+<?php endif; ?>
 <script>
     <?= $swal_script ?>
 
@@ -524,89 +614,12 @@ if(isset($_POST['simpan_jadwal'])) {
         if (e.target.classList.contains('modal')) e.target.style.display = 'none'; 
     }
 
-    // --- FUNGSI HALAMAN REKAP ---
-        document.addEventListener("DOMContentLoaded", function() {
-            loadRekap();
-        });
-
-        function loadRekap() {
-            const keyword = document.getElementById('filter_keyword').value;
-            const tglMulai = document.getElementById('filter_tgl_mulai').value;
-            const tglAkhir = document.getElementById('filter_tgl_akhir').value;
-            const tbody = document.getElementById('tabelRekapBody');
-
-            tbody.innerHTML = '<tr><td colspan="5" align="center" style="padding:20px;">Memuat data...</td></tr>';
-
-            $.post('dosen_ajax.php', {
-                action: 'load_rekap_list',
-                keyword: keyword,
-                tgl_mulai: tglMulai,
-                tgl_akhir: tglAkhir
-            }, function(response) {
-                tbody.innerHTML = response;
-            });
-        }
-
-function bukaDetail(id, tgl, matkul, kelas) {
-            document.getElementById('judulDetail').innerText = matkul + ' (' + kelas + ') - ' + tgl;
-            document.getElementById('id_jadwal_detail').value = id;
-            document.getElementById('tgl_detail').value = tgl;
-            
-            // Load detail students
-            const bodyDetail = document.getElementById('bodyDetailMhs');
-            bodyDetail.innerHTML = '<tr><td colspan="4" align="center">Loading...</td></tr>';
-            
-            document.getElementById('modalDetailRekap').style.display = 'flex';
-
-            $.post('dosen_ajax.php', {
-                action: 'load_detail_mhs',
-                id_jadwal: id,
-                tanggal: tgl
-            }, function(response) {
-                bodyDetail.innerHTML = response;
-            });
-        }
-
     function loadDetailIsi(id, tgl) {
         $('#bodyDetailMhs').html('<tr><td align="center">Loading...</td></tr>');
         $.post('dosen_ajax.php', { action: 'load_detail_mhs', id_jadwal: id, tanggal: tgl }, function(res) { 
             $('#bodyDetailMhs').html(res); 
         });
     }
-
-function tambahManual(e) {
-            e.preventDefault();
-            const id = document.getElementById('id_jadwal_detail').value;
-            const tgl = document.getElementById('tgl_detail').value;
-            const nim = document.getElementById('manual_nim').value;
-            const status = document.getElementById('manual_status').value;
-
-            $.post('dosen_ajax.php', {
-                action: 'tambah_presensi_manual',
-                id_jadwal: id,
-                tanggal: tgl,
-                nim: nim,
-                status: status
-            }, function(response) {
-                // Assuming response is text message or JSON
-                // Simple alert for feedback
-                alert(response); 
-                // Reload the detail list
-                bukaDetail(id, tgl, document.getElementById('judulDetail').innerText.split(' (')[0], '');
-                document.getElementById('manual_nim').value = '';
-            });
-        }
-
-        function ubahStatus(id_presensi, newStatus) {
-             $.post('dosen_ajax.php', {
-                action: 'update_status_presensi',
-                id_presensi: id_presensi,
-                status: newStatus
-            }, function(response) {
-                // Optional: show small notification
-                console.log("Status updated");
-            });
-        }
 
     // --- FUNGSI HALAMAN MATKUL ---
     function bukaModalMatkul(el) {
