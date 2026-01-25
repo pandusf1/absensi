@@ -239,50 +239,51 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
         <div class="table-responsive">
             <table>
                 <thead><tr><th>Jam</th><th>Mata Kuliah</th><th>Dosen</th><th>Ruang</th><th style="text-align:center;">Absen</th></tr></thead>
-                <tbody>
-                    <?php
-                    $qj = mysqli_query($conn, "SELECT j.*, m.nama_matkul, m.kode_matkul, d.nama_dosen 
-                        FROM jadwal j 
-                        JOIN matkul m ON j.kode_matkul = m.kode_matkul 
-                        LEFT JOIN dosen d ON j.nip = d.nip 
-                        WHERE j.kelas = '$kelas_mhs' AND j.hari = '$hari_ini' 
-                        ORDER BY j.jam_mulai ASC");
-                    
-                    if($qj && mysqli_num_rows($qj) > 0):
-                        while($r = mysqli_fetch_assoc($qj)):
-                            // Cek status kelas (Dosen sudah mulai belum?)
-                            $q_real = mysqli_query($conn, "SELECT * FROM realisasi_mengajar WHERE id_jadwal='".$r['id_jadwal']."' AND tanggal='$tgl_ini' AND status='Berlangsung'");
-                            $is_mulai = (mysqli_num_rows($q_real) > 0);
-                            
-                            // Cek apakah mahasiswa SUDAH ABSEN?
-                            $q_absen = mysqli_query($conn, "SELECT * FROM presensi_kuliah WHERE id_jadwal='".$r['id_jadwal']."' AND tanggal='$tgl_ini' AND nim='$nim_mhs'");
-                            $sudah_absen = (mysqli_num_rows($q_absen) > 0);
-                    ?>
-                    <tr>
-                        <td><?= substr($r['jam_mulai'],0,5) ?></td>
-                        <td><?= $r['nama_matkul'] ?></td>
-                        <td><?= $r['nama_dosen'] ?? '-' ?></td>
-                        <td><?= $r['ruang'] ?></td>
-                        <td style="text-align:center;">
-                            <?php if($sudah_absen): ?>
-                                <button class="btn btn-green" style="cursor: not-allowed; opacity: 0.8;" disabled>
-                                    <i class="fa-solid fa-check"></i> Sudah Absen
-                                </button>
-                            
-                            <?php elseif($is_mulai): ?>
-                                <button class="btn btn-blue" onclick="bukaKamera(<?= $r['id_jadwal'] ?>)">
-                                    <i class="fa-solid fa-camera"></i> Absen
-                                </button>
-                            
-                            <?php else: ?>
-                                <button class="btn btn-disabled" disabled>Belum Mulai</button>
-                            <?php endif; ?>
-                        </td>
-                    </tr>
-                    <?php endwhile; else: ?>
-                    <tr><td colspan="5" align="center" style="padding:15px; color:#999;">Tidak ada jadwal hari ini.</td></tr>
-                    <?php endif; ?>
-                </tbody>
+<tbody>
+    <?php
+    // Query uses LEFT JOIN to ensure schedule shows even if lecturer data is missing
+    $qj = mysqli_query($conn, "SELECT j.*, m.nama_matkul, m.kode_matkul, d.nama_dosen 
+        FROM jadwal j 
+        JOIN matkul m ON j.kode_matkul = m.kode_matkul 
+        LEFT JOIN dosen d ON j.nip = d.nip 
+        WHERE j.kelas = '$kelas_mhs' AND j.hari = '$hari_ini' 
+        ORDER BY j.jam_mulai ASC");
+
+    if($qj && mysqli_num_rows($qj) > 0):
+        while($r = mysqli_fetch_assoc($qj)):
+            // Check if class has started (Lecturer has initiated 'realisasi_mengajar')
+            $q_real = mysqli_query($conn, "SELECT * FROM realisasi_mengajar WHERE id_jadwal='".$r['id_jadwal']."' AND tanggal='$tgl_ini' AND status='Berlangsung'");
+            $is_mulai = (mysqli_num_rows($q_real) > 0);
+            
+            // Check if student has already attended
+            $q_absen = mysqli_query($conn, "SELECT * FROM presensi_kuliah WHERE id_jadwal='".$r['id_jadwal']."' AND tanggal='$tgl_ini' AND nim='$nim_mhs'");
+            $sudah_absen = (mysqli_num_rows($q_absen) > 0);
+    ?>
+    <tr>
+        <td><?= substr($r['jam_mulai'], 0, 5) ?></td>
+        <td><?= $r['nama_matkul'] ?></td>
+        <td><?= $r['nama_dosen'] ?? '-' ?></td>
+        <td><?= $r['ruang'] ?></td>
+        <td style="text-align:center;">
+            <?php if($sudah_absen): ?>
+                <button class="btn btn-green" style="cursor: not-allowed; opacity: 0.8;" disabled>
+                    <i class="fa-solid fa-check"></i> Sudah Absen
+                </button>
+            
+            <?php elseif($is_mulai): ?>
+                <button class="btn btn-blue" onclick="bukaKamera(<?= $r['id_jadwal'] ?>)">
+                    <i class="fa-solid fa-camera"></i> Absen
+                </button>
+            
+            <?php else: ?>
+                <button class="btn btn-disabled" disabled>Belum Mulai</button>
+            <?php endif; ?>
+        </td>
+    </tr>
+    <?php endwhile; else: ?>
+    <tr><td colspan="5" align="center" style="padding:15px; color:#999;">Tidak ada jadwal hari ini.</td></tr>
+    <?php endif; ?>
+</tbody>
             </table>
         </div>
     </div>
