@@ -1,9 +1,7 @@
 <?php
-// Include koneksi database (naik satu folder)
 require_once __DIR__ . '/../database.php';
 date_default_timezone_set('Asia/Jakarta');
 
-// Ambil action dari request AJAX
 $action = isset($_POST['action']) ? $_POST['action'] : '';
 
 if ($action == 'get_face_descriptor') {
@@ -16,7 +14,7 @@ if ($action == 'get_face_descriptor') {
         // Kembalikan string JSON (Array Angka)
         echo $d['face_descriptor']; 
     } else {
-        echo "null"; // Belum ada data wajah
+        echo "null"; 
     }
 }
 
@@ -61,9 +59,8 @@ elseif ($action == 'simpan_absen') {
 
 if ($action == 'update_face') {
     $nim = $_POST['nim'];
-    $descriptor = $_POST['descriptor']; // Ini string JSON array
+    $descriptor = $_POST['descriptor'];
     
-    // Pastikan aman dari SQL Injection
     $descriptor = mysqli_real_escape_string($conn, $descriptor);
     
     $query = "UPDATE data SET face_descriptor = '$descriptor' WHERE nim = '$nim'";

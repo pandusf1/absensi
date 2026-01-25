@@ -56,7 +56,7 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
     <link rel="icon" href="data:,"> <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="../../aset/js/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
     <script src="../../aset/js/face-api.min.js"></script> 
@@ -355,7 +355,7 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
         <div class="modal-content">
             <h3>Verifikasi Wajah</h3>
             <div id="video-container"><video id="video" autoplay muted playsinline></video></div>
-            <div id="statusScan" style="font-weight:bold; color:#3b82f6; margin-bottom:15px;">Memuat AI...</div>
+            <div id="statusScan" style="font-weight:bold; color:#3b82f6; margin-bottom:15px;">Memuat Scanner...</div>
             <button class="btn" style="background:#ef4444;" onclick="tutupModal()">Batal</button>
         </div>
     </div>
@@ -414,7 +414,7 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
         // Tangkap status wajah dari PHP
         const userHasFace = <?= $punya_wajah ?>; 
 
-        // 2. Load Model AI
+        // 2. Load Model 
         try {
             if (typeof faceapi !== 'undefined') {
                 const TINY_FACE_OPTIONS = new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.5 });
@@ -450,8 +450,8 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
                 return; // Stop disini
             }
 
-            // B. Cek Model AI
-            if(!isModelLoaded) { Swal.fire("Tunggu", "Memuat AI...", "info"); return; }
+            // B. Cek Model 
+            if(!isModelLoaded) { Swal.fire("Tunggu", "Memuat Scanner...", "info"); return; }
             
             // C. Buka Modal
             currentJadwalId = id; 

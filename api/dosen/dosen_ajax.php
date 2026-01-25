@@ -1,15 +1,9 @@
 <?php
-// ==========================================
-// API AJAX DOSEN (FINAL VERSION - REKAP FIX)
-// ==========================================
 require_once __DIR__ . '/../database.php';
 date_default_timezone_set('Asia/Jakarta');
 
 $action = isset($_POST['action']) ? $_POST['action'] : '';
 
-// ---------------------------------------------------------
-// 1. EDIT MATA KULIAH
-// ---------------------------------------------------------
 if ($action == 'edit_matkul') {
     $kode_lama = mysqli_real_escape_string($conn, $_POST['kode_lama']);
     $kode_baru = mysqli_real_escape_string($conn, $_POST['kode_baru']);
@@ -21,9 +15,6 @@ if ($action == 'edit_matkul') {
     else echo "Gagal Update: " . mysqli_error($conn);
 }
 
-// ---------------------------------------------------------
-// 2. HAPUS MATA KULIAH
-// ---------------------------------------------------------
 elseif ($action == 'hapus_matkul') {
     $kode = mysqli_real_escape_string($conn, $_POST['kode']);
 
@@ -32,25 +23,18 @@ elseif ($action == 'hapus_matkul') {
     
     while($row = mysqli_fetch_assoc($cari_jadwal)) {
         $id_j = $row['id_jadwal'];
-        // Hapus Presensi
         mysqli_query($conn, "DELETE FROM presensi_kuliah WHERE id_jadwal='$id_j'");
-        // Hapus Log Mengajar
         mysqli_query($conn, "DELETE FROM realisasi_mengajar WHERE id_jadwal='$id_j'");
     }
 
-    // Hapus Jadwal
     mysqli_query($conn, "DELETE FROM jadwal WHERE kode_matkul='$kode'");
 
-    // Hapus Matkul
     $q = "DELETE FROM matkul WHERE kode_matkul = '$kode'";
     
     if(mysqli_query($conn, $q)) echo "🗑️ Mata Kuliah (dan data terkait) Berhasil Dihapus!";
     else echo "❌ Gagal Hapus: " . mysqli_error($conn);
 }
 
-// ---------------------------------------------------------
-// 3. MULAI KELAS
-// ---------------------------------------------------------
 elseif ($action == 'mulai_kelas') {
     $id = $_POST['id_jadwal'];
     $tgl = date('Y-m-d');
@@ -66,18 +50,11 @@ elseif ($action == 'mulai_kelas') {
     }
 } 
 
-// ---------------------------------------------------------
-// 4. SELESAI KELAS
-// ---------------------------------------------------------
-// ---------------------------------------------------------
-// 4. SELESAI KELAS (+ FITUR AUTO ALPHA)
-// ---------------------------------------------------------
 elseif ($action == 'selesai_kelas') {
     $id = $_POST['id_jadwal'];
     $tgl = date('Y-m-d');
     $jam = date('H:i:s');
 
-    // [BARU] LOGIKA AUTO ALPHA
     // Masukkan data ke presensi_kuliah untuk mahasiswa yang belum absen
     $q_alpha = "INSERT INTO presensi_kuliah (id_jadwal, nim, tanggal, waktu_hadir, status, koordinat)
                 SELECT 
@@ -108,16 +85,13 @@ elseif ($action == 'selesai_kelas') {
     }
 }
 
-// ---------------------------------------------------------
-// 5. MONITORING LIVE PRESENSI
-// ---------------------------------------------------------
 elseif ($action == 'cek_monitoring') {
     $id = $_POST['id_jadwal'];
     
-    // [FIX 1] Gunakan tanggal kiriman dari JS jika ada. Jika tidak, pakai hari ini.
+    // Gunakan tanggal kiriman dari JS jika ada. Jika tidak, pakai hari ini.
     $tgl = isset($_POST['tanggal']) ? $_POST['tanggal'] : date('Y-m-d');
 
-    // [FIX 2] Hitung Total (Hadir + Terlambat)
+    // Hitung Total (Hadir + Terlambat)
     // Jangan cuma 'Hadir', karena 'Terlambat' juga dihitung masuk kelas
     $q_total = mysqli_query($conn, "SELECT COUNT(*) as total FROM presensi_kuliah 
                                     WHERE id_jadwal = '$id' 
@@ -134,7 +108,7 @@ elseif ($action == 'cek_monitoring') {
     
     $list_mhs = [];
     while($row = mysqli_fetch_assoc($q_list)) {
-        // [FIX 3] Tampilkan status di list (biar ketahuan siapa yg telat)
+        // Tampilkan status di list (biar ketahuan siapa yg telat)
         $jam_tampil = substr($row['waktu_hadir'], 0, 5);
         if($row['status'] == 'Terlambat') {
             $jam_tampil .= " <span style='color:red; font-size:9px;'>(Telat)</span>";
@@ -148,9 +122,6 @@ elseif ($action == 'cek_monitoring') {
     echo json_encode(['jumlah_hadir' => $d_total['total'], 'list_mhs' => $list_mhs]);
 }
 
-// ---------------------------------------------------------
-// 6. EDIT JADWAL
-// ---------------------------------------------------------
 elseif ($action == 'edit_jadwal') {
     $id = $_POST['id']; $hari = $_POST['hari']; $jam_m = $_POST['jam_m']; $jam_s = $_POST['jam_s'];
     $ruang = mysqli_real_escape_string($conn, $_POST['ruang']); 
@@ -169,9 +140,6 @@ elseif ($action == 'edit_jadwal') {
     }
 }
 
-// ---------------------------------------------------------
-// 7. HAPUS JADWAL
-// ---------------------------------------------------------
 elseif ($action == 'hapus_jadwal') {
     $id = $_POST['id'];
     mysqli_query($conn, "DELETE FROM presensi_kuliah WHERE id_jadwal='$id'");
@@ -180,9 +148,6 @@ elseif ($action == 'hapus_jadwal') {
     echo "Jadwal Dihapus!";
 }
 
-// ---------------------------------------------------------
-// 8. FILTER REKAP (Corrected: No Button, Clickable Row)
-// ---------------------------------------------------------
 elseif ($action == 'filter_rekap') {
     $nip = $_POST['nip'];
     $kw  = mysqli_real_escape_string($conn, $_POST['keyword']);
@@ -192,10 +157,9 @@ elseif ($action == 'filter_rekap') {
     // Query Dasar: Filter NIP & Status Selesai
     $where = "WHERE j.nip = '$nip' AND r.status = 'Selesai'";
     
-// Filter Keyword (SUPER SMART SEARCH)
+    // Filter Keyword (SUPER SMART SEARCH)
     if(!empty($kw)) {
         // 1. Bersihkan input dan pecah berdasarkan spasi
-        // Contoh user ketik: "web  3c " -> jadi array ["web", "3c"]
         $words = explode(" ", trim($kw));
         
         foreach($words as $word) {
@@ -205,7 +169,6 @@ elseif ($action == 'filter_rekap') {
             $word = mysqli_real_escape_string($conn, $word);
             
             // 2. Logika: SETIAP kata yang diketik harus ada di (Matkul ATAU Kelas)
-            // Menggunakan LOWER() agar "WEB", "Web", "web" dianggap sama
             $where .= " AND (
                 LOWER(m.nama_matkul) LIKE LOWER('%$word%') OR 
                 LOWER(j.kelas) LIKE LOWER('%$word%')
@@ -216,7 +179,7 @@ elseif ($action == 'filter_rekap') {
     if(!empty($tm)) { $where .= " AND r.tanggal >= '$tm'"; }
     if(!empty($ta)) { $where .= " AND r.tanggal <= '$ta'"; }
 
-    // Total Mhs diambil dari tabel 'data' (mahasiswa) yang kelasnya sama dengan jadwal
+    // Total Mhs diambil dari tabel data yang kelasnya sama dengan jadwal
 $sql = "SELECT r.*, m.nama_matkul, j.kelas, j.kuota as total_mhs,
         (SELECT COUNT(*) FROM presensi_kuliah pk WHERE pk.id_jadwal = r.id_jadwal AND pk.tanggal = r.tanggal AND pk.status = 'Hadir') as hadir
         FROM realisasi_mengajar r 
@@ -244,9 +207,6 @@ $sql = "SELECT r.*, m.nama_matkul, j.kelas, j.kuota as total_mhs,
     }
 }
 
-// ---------------------------------------------------------
-// 9. LOAD DETAIL MAHASISWA
-// ---------------------------------------------------------
 elseif ($action == 'load_detail_mhs') {
     $id = $_POST['id_jadwal']; 
     $tgl = $_POST['tanggal'];
@@ -273,18 +233,12 @@ elseif ($action == 'load_detail_mhs') {
     }
 }
 
-// ---------------------------------------------------------
-// 10. UPDATE STATUS
-// ---------------------------------------------------------
 elseif ($action == 'update_status_presensi') {
     $id = $_POST['id_presensi']; 
     $stt = $_POST['status'];
     mysqli_query($conn, "UPDATE presensi_kuliah SET status='$stt' WHERE id_presensi='$id'");
 }
 
-// ---------------------------------------------------------
-// 11. TAMBAH PRESENSI MANUAL
-// ---------------------------------------------------------
 elseif ($action == 'tambah_presensi_manual') {
     $id = $_POST['id_jadwal']; 
     $tgl = $_POST['tanggal']; 
