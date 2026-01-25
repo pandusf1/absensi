@@ -239,9 +239,9 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
         <div class="table-responsive">
             <table>
                 <thead><tr><th>Jam</th><th>Mata Kuliah</th><th>Dosen</th><th>Ruang</th><th style="text-align:center;">Absen</th></tr></thead>
-                <tbody>
+<tbody>
                     <?php
-                    // --- QUERY 1: JADWAL HARI INI ---
+                    // --- QUERY 1: JADWAL HARI INI (TIDAK SAYA UBAH) ---
                     $qj = mysqli_query($conn, "SELECT j.*, m.nama_matkul, m.kode_matkul, d.nama_dosen 
                         FROM jadwal j 
                         JOIN matkul m ON j.kode_matkul = m.kode_matkul 
@@ -252,8 +252,7 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
                     // Cek apakah ada data
                     if($qj && mysqli_num_rows($qj) > 0):
                         while($r = mysqli_fetch_assoc($qj)):
-                            // --- SAFETY CHECK (PENTING!) ---
-                            // Gunakan @ untuk suppress error jika tabel belum ada
+                            // --- SAFETY CHECK (TIDAK SAYA UBAH) ---
                             $q_real = @mysqli_query($conn, "SELECT * FROM realisasi_mengajar WHERE id_jadwal='".$r['id_jadwal']."' AND tanggal='$tgl_ini' AND status='Berlangsung'");
                             $is_mulai = ($q_real && mysqli_num_rows($q_real) > 0);
                             
@@ -266,9 +265,16 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
                         <td><?= $r['nama_dosen'] ?? '-' ?></td>
                         <td><?= $r['ruang'] ?></td>
                         <td style="text-align:center;">
-                            <?php if($sudah_absen): ?><button class="btn btn-green">Hadir</button>
-                            <?php elseif($is_mulai): ?><button class="btn btn-blue" onclick="bukaKamera(<?= $r['id_jadwal'] ?>)">Absen</button>
-                            <?php else: ?><button class="btn btn-disabled">Tutup</button><?php endif; ?>
+                            <?php if($sudah_absen): ?>
+                                <button class="btn btn-green" style="cursor: not-allowed; opacity: 0.8;" disabled>
+                                    <i class="fa-solid fa-check"></i> Sudah Absen
+                                </button>
+                            
+                            <?php elseif($is_mulai): ?>
+                                <button class="btn btn-blue" onclick="bukaKamera(<?= $r['id_jadwal'] ?>)">Absen</button>
+                            <?php else: ?>
+                                <button class="btn btn-disabled" disabled>Tutup</button>
+                            <?php endif; ?>
                         </td>
                     </tr>
                     <?php endwhile; else: ?>
