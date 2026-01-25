@@ -187,6 +187,11 @@ if(isset($_POST['simpan_jadwal'])) {
             .btn-burger { display: block; }
             .stat-grid { display: grid;grid-template-columns: 1fr; gap: 15px; margin-bottom: 20px; }
         }
+
+        div.swal2-container {
+            z-index: 99999 !important; /* Angka harus lebih besar dari 2000 */
+        }
+
     </style>
 </head>
 <body>

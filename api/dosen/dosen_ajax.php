@@ -114,10 +114,10 @@ elseif ($action == 'edit_jadwal') {
     
     if(mysqli_num_rows($cek) > 0) {
         $d = mysqli_fetch_assoc($cek);
-        echo "❌ Gagal! Bentrok dengan jadwal " . $d['kode_matkul'] . " (" . substr($d['jam_mulai'],0,5) . ")";
+        echo "Gagal! Bentrok dengan jadwal " . $d['kode_matkul'] . " (" . substr($d['jam_mulai'],0,5) . ")";
     } else {
         $q = "UPDATE jadwal SET hari='$hari', jam_mulai='$jam_m', jam_selesai='$jam_s', ruang='$ruang', kelas='$kelas', kuota='$kuota' WHERE id_jadwal='$id'";
-        if(mysqli_query($conn, $q)) echo "✅ Jadwal Updated!"; else echo "Gagal: " . mysqli_error($conn);
+        if(mysqli_query($conn, $q)) echo "Jadwal Updated!"; else echo "Gagal: " . mysqli_error($conn);
     }
 }
 
