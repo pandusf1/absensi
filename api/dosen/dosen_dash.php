@@ -244,7 +244,7 @@ if(isset($_POST['simpan_jadwal'])) {
                     <table style="max-width: 600px;">
                         <tr><td width="150"><strong>NIP</strong></td><td><?= $dosen['nip'] ?></td></tr>
                         <tr><td><strong>Nama Lengkap</strong></td><td><?= $dosen['nama_dosen'] ?></td></tr>
-                        <tr><td><strong>Jabatan</strong></td><td><span style="background:#e0f2fe; color:#0284c7; padding:2px 8px; border-radius:4px; font-weight:bold;"><?= $dosen['jabatan'] ?></span></td></tr>
+                        <tr><td><strong>Jabatan</strong></td><td><?= $dosen['jabatan'] ?></td></tr>
                         <tr><td><strong>Email</strong></td><td><?= $dosen['email'] ?></td></tr>
                     </table>
                 </div>

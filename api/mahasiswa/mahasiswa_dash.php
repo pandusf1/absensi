@@ -225,7 +225,7 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
                     <table style="max-width: 600px;">
                         <tr><td width="150"><strong>NIM</strong></td><td><?= $mhs['nim'] ?></td></tr>
                         <tr><td><strong>Nama Lengkap</strong></td><td><?= $mhs['nama'] ?></td></tr>
-                        <tr><td><strong>Kelas</strong></td><td><span style="background:#e0f2fe; color:#0284c7; padding:2px 8px; border-radius:4px; font-weight:bold;"><?= $mhs['kelas'] ?></span></td></tr>
+                        <tr><td><strong>Kelas</strong></td><td>><?= $mhs['kelas'] ?></td></tr>
                         <tr><td><strong>Jurusan</strong></td><td><?= $mhs['jurusan'] ?></td></tr>
                         <tr><td><strong>Prodi</strong></td><td><?= $mhs['prodi'] ?></td></tr>
                     </table>
