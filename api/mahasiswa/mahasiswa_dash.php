@@ -30,7 +30,7 @@ if(!$mhs) {
 }
 
 $kelas_mhs = $mhs['kelas'];
-$punya_wajah = (!empty($mhs['face_descriptor']) && $mhs['face_descriptor'] != 'null') ? 'true' : 'false';
+$punya_wajah = (!empty($mhs['face_descriptor']) && strlen($mhs['face_descriptor']) > 10) ? 'true' : 'false';
 
 $hari_inggris = date('l');
 $map_hari = [
@@ -132,10 +132,35 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
         /* MODAL & CAMERA */
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center; }
         .modal-content { background: white; padding: 20px; border-radius: 15px; width: 90%; max-width: 450px; text-align: center; }
-        #video-container { width: 100%; height: 300px; background: #000; border-radius: 10px; overflow: hidden; position: relative; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
-        video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
-        canvas { position: absolute; top: 0; left: 0; transform: scaleX(-1);}
-
+        #video-container { 
+            width: 100%; 
+            height: 300px; 
+            background: #000; 
+            border-radius: 10px; 
+            overflow: hidden; 
+            position: relative; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            margin-bottom: 10px; 
+        }
+        
+        video { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: fill; /* PENTING: Ganti cover jadi fill agar koordinat pas */
+            transform: scaleX(-1); /* Efek Cermin */
+        }
+        
+        canvas { 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%;
+            object-fit: fill; /* Harus sama dengan video */
+            transform: scaleX(-1); /* Canvas juga harus dicermin */
+        }
         /* RESPONSIVE */
         @media (min-width: 769px) { .main-content.active { margin-left: 250px; width: calc(100% - 250px); } }
     </style>
@@ -377,6 +402,7 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
     <script>
         // 2. FACE API LOGIC DENGAN ERROR HANDLING
         let isModelLoaded = false;
+        const userHasFace = <?= $punya_wajah ?>;
         let TINY_FACE_OPTIONS;
 
         try {
@@ -407,23 +433,25 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
         let currentJadwalId = null, video = document.getElementById('video'), stream = null, detectInterval;
         const userHasFace = <?= $punya_wajah ?>;
 
-        function bukaKamera(id) {
-            if (!userHasFace) {
-                Swal.fire({
-                    title: "Wajah Belum Terdaftar!",
-                    text: "Anda harus scan wajah dulu di menu Registrasi Wajah.",
-                    icon: "warning",
-                    confirmButtonText: "Ke Menu Scan",
-                    allowOutsideClick: false
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.location.href = '?page=update_wajah'; // Redirect paksa
-                    }
-                });
-                return; // Stop, jangan lanjut buka kamera
-            }
-            if(!isModelLoaded) { Swal.fire("Tunggu", "Memuat AI...", "info"); return; }
-            currentJadwalId = id; 
+function bukaKamera(id) {
+        // --- BLOKIR JIKA BELUM ADA WAJAH ---
+        if (!userHasFace) {
+            Swal.fire({
+                title: "Wajah Belum Terdaftar!",
+                text: "Anda belum mendaftarkan wajah. Silakan rekam wajah dulu di menu 'Registrasi Wajah'.",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Rekam Sekarang",
+                cancelButtonText: "Nanti Saja"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '?page=update_wajah';
+                }
+            });
+            return; // Berhenti disini, kamera tidak akan nyala
+        }
+
+        if(!isModelLoaded) { Swal.fire("Tunggu", "Memuat AI...", "info"); return; }            currentJadwalId = id; 
             $('#modalKamera').css('display', 'flex');
             
             // Ambil data wajah dari database via AJAX
