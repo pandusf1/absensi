@@ -227,12 +227,34 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
                     
                     if($qj && mysqli_num_rows($qj) > 0):
                         while($r = mysqli_fetch_assoc($qj)):
+                            // --- PENGAMAN (ANTI-CRASH) ---
+                            // Kita cek dulu apakah query berhasil sebelum hitung baris
+                            
+                            // Cek Realisasi Dosen
                             $q_real = mysqli_query($conn, "SELECT * FROM realisasi_mengajar WHERE id_jadwal='".$r['id_jadwal']."' AND tanggal='$tgl_ini' AND status='Berlangsung'");
-                            $is_mulai = (mysqli_num_rows($q_real) > 0);
+                            $is_mulai = ($q_real && mysqli_num_rows($q_real) > 0); // Pakai && biar aman
+                            
+                            // Cek Absensi Mahasiswa
                             $q_absen = mysqli_query($conn, "SELECT * FROM presensi_kuliah WHERE id_jadwal='".$r['id_jadwal']."' AND tanggal='$tgl_ini' AND nim='$nim_mhs'");
-                            $sudah_absen = (mysqli_num_rows($q_absen) > 0);
-                    ?>
-                    <tr>
+                            $sudah_absen = ($q_absen && mysqli_num_rows($q_absen) > 0); // Pakai && biar aman
+                        ?>
+                        <tr>
+                            <td><?= substr($r['jam_mulai'],0,5) ?> - <?= substr($r['jam_selesai'],0,5) ?></td>
+                            <td><?= $r['nama_matkul'] ?></td>
+                            <td><?= $r['nama_dosen'] ?? '<span style="color:red; font-size:10px;">(Data Dosen Kosong)</span>' ?></td>
+                            <td><?= $r['ruang'] ?></td>
+                            <td style="text-align:center;">
+                                <?php if($sudah_absen): ?>
+                                    <button class="btn btn-green" style="cursor: default;"><i class="fa-solid fa-check"></i> Hadir</button>
+                                <?php elseif($is_mulai): ?>
+                                    <button class="btn btn-blue" onclick="bukaKamera(<?= $r['id_jadwal'] ?>)">Absen</button>
+                                <?php else: ?>
+                                    <button class="btn btn-disabled"><i class="fa-solid fa-lock"></i> Tutup</button>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                        <?php endwhile; ?>                    
+                        <tr>
                         <td><?= substr($r['jam_mulai'],0,5) ?> - <?= substr($r['jam_selesai'],0,5) ?></td>
                         <td><?= $r['nama_matkul'] ?></td>
                         <td><?= $r['nama_dosen'] ?? '-' ?></td>
@@ -243,7 +265,6 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
                             <?php else: ?><button class="btn btn-disabled">Tutup</button><?php endif; ?>
                         </td>
                     </tr>
-                    <?php endwhile; else: ?>
                     <tr><td colspan="5" align="center" style="padding:15px; color:#999;">Tidak ada jadwal kuliah hari ini.</td></tr>
                     <?php endif; ?>
                 </tbody>
@@ -257,7 +278,7 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
             <table>
                 <thead><tr><th>Hari</th><th>Jam</th><th>Mata Kuliah</th><th>Dosen</th><th>Ruang</th></tr></thead>
                 <tbody>
-<?php
+                <?php
                 // 1. QUERY YANG LEBIH AMAN (Tanpa FIELD, pakai CASE WHEN)
                 $sql_all = "SELECT j.*, m.nama_matkul, d.nama_dosen 
                             FROM jadwal j 
