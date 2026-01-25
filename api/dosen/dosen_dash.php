@@ -634,7 +634,7 @@ function bukaDetail(id, tgl, matkul, kelas) {
         if ($(el).data('status') === 'Berlangsung') $('#formEditJadwalArea').hide(); else $('#formEditJadwalArea').show();
 
         $('#listMahasiswaBody').html('<tr><td align="center">Loading...</td></tr>');
-        $.post('dosen_ajax.php', { action: 'cek_monitoring', id_jadwal: id }, function(res) {
+        $.post('dosen_ajax.php', { action: 'cek_monitoring', id_jadwal: id, tanggal: '<?= date('Y-m-d') ?>' }, function(res) {
             let d = JSON.parse(res); 
             $('#txtHadir').text(d.jumlah_hadir);
             let html = ''; 

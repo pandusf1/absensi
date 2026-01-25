@@ -84,18 +84,37 @@ elseif ($action == 'selesai_kelas') {
 // ---------------------------------------------------------
 elseif ($action == 'cek_monitoring') {
     $id = $_POST['id_jadwal'];
-    $tgl = date('Y-m-d');
+    
+    // [FIX 1] Gunakan tanggal kiriman dari JS jika ada. Jika tidak, pakai hari ini.
+    $tgl = isset($_POST['tanggal']) ? $_POST['tanggal'] : date('Y-m-d');
 
-    // Hitung Total Hadir
-    $q_total = mysqli_query($conn, "SELECT COUNT(*) as total FROM presensi_kuliah WHERE id_jadwal = '$id' AND tanggal = '$tgl' AND status='Hadir'");
+    // [FIX 2] Hitung Total (Hadir + Terlambat)
+    // Jangan cuma 'Hadir', karena 'Terlambat' juga dihitung masuk kelas
+    $q_total = mysqli_query($conn, "SELECT COUNT(*) as total FROM presensi_kuliah 
+                                    WHERE id_jadwal = '$id' 
+                                    AND tanggal = '$tgl' 
+                                    AND status IN ('Hadir', 'Terlambat')");
     $d_total = mysqli_fetch_assoc($q_total);
     
     // Ambil Daftar Mahasiswa
-    $q_list = mysqli_query($conn, "SELECT p.waktu_hadir, d.nama, d.nim FROM presensi_kuliah p JOIN data d ON p.nim = d.nim WHERE p.id_jadwal = '$id' AND p.tanggal = '$tgl' ORDER BY p.waktu_hadir DESC");
+    $q_list = mysqli_query($conn, "SELECT p.waktu_hadir, p.status, d.nama, d.nim 
+                                   FROM presensi_kuliah p 
+                                   JOIN data d ON p.nim = d.nim 
+                                   WHERE p.id_jadwal = '$id' AND p.tanggal = '$tgl' 
+                                   ORDER BY p.waktu_hadir DESC");
     
     $list_mhs = [];
     while($row = mysqli_fetch_assoc($q_list)) {
-        $list_mhs[] = ['nama' => $row['nama'], 'nim' => $row['nim'], 'jam' => substr($row['waktu_hadir'], 0, 5)];
+        // [FIX 3] Tampilkan status di list (biar ketahuan siapa yg telat)
+        $jam_tampil = substr($row['waktu_hadir'], 0, 5);
+        if($row['status'] == 'Terlambat') {
+            $jam_tampil .= " <span style='color:red; font-size:9px;'>(Telat)</span>";
+        }
+        $list_mhs[] = [
+            'nama' => $row['nama'], 
+            'nim' => $row['nim'], 
+            'jam' => $jam_tampil
+        ];
     }
     echo json_encode(['jumlah_hadir' => $d_total['total'], 'list_mhs' => $list_mhs]);
 }
@@ -218,7 +237,7 @@ elseif ($action == 'load_detail_mhs') {
             echo "<td style='padding:8px;'>".$r['nim']."</td>";
             echo "<td style='padding:8px;'>".$r['nama']."</td>";
             echo "<td style='padding:8px;'>".substr($r['waktu_hadir'], 0, 5)."</td>";
-            echo "<td style='padding:8px;'>".$r['id_presensi']."</td></tr>";
+            echo "<td style='padding:8px;'>".$r['status']."</td></tr>";
         }
     } else { 
         echo "<tr><td colspan='4' align='center' style='padding:15px;'>Belum ada data mahasiswa.</td></tr>"; 
