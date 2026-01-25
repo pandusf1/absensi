@@ -207,8 +207,8 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
                     </table>
                 </div>
             </div>
+        </div>    
 
-                </div>        
 <?php elseif ($page == 'jadwal'): ?>
     <div class="card">
         <h3 style="margin-bottom:15px; color:#3b82f6;"><i class="fa-solid fa-calendar-day"></i> Jadwal Hari Ini (<?= $hari_ini ?>)</h3>
@@ -217,7 +217,7 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
                 <thead><tr><th>Jam</th><th>Mata Kuliah</th><th>Dosen</th><th>Ruang</th><th style="text-align:center;">Aksi</th></tr></thead>
                 <tbody>
                     <?php
-                    // Query 1: Jadwal Hari Ini (LEFT JOIN Dosen)
+                    // Query 1: Jadwal Hari Ini (LEFT JOIN)
                     $qj = mysqli_query($conn, "SELECT j.*, m.nama_matkul, m.kode_matkul, d.nama_dosen 
                         FROM jadwal j 
                         JOIN matkul m ON j.kode_matkul = m.kode_matkul 
@@ -225,7 +225,7 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
                         WHERE j.kelas = '$kelas_mhs' AND j.hari = '$hari_ini' 
                         ORDER BY j.jam_mulai ASC");
                     
-                    if($qj && mysqli_num_rows($qj) > 0):
+                    if(mysqli_num_rows($qj) > 0):
                         while($r = mysqli_fetch_assoc($qj)):
                             $q_real = mysqli_query($conn, "SELECT * FROM realisasi_mengajar WHERE id_jadwal='".$r['id_jadwal']."' AND tanggal='$tgl_ini' AND status='Berlangsung'");
                             $is_mulai = (mysqli_num_rows($q_real) > 0);
@@ -258,7 +258,7 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
                 <thead><tr><th>Hari</th><th>Jam</th><th>Mata Kuliah</th><th>Dosen</th><th>Ruang</th></tr></thead>
                 <tbody>
                     <?php
-                    // Query 2: Semua Jadwal (LEFT JOIN Dosen & ORDER BY CASE)
+                    // Query 2: Semua Jadwal (LEFT JOIN & CASE ORDER)
                     $sql_all = "SELECT j.*, m.nama_matkul, d.nama_dosen 
                         FROM jadwal j 
                         JOIN matkul m ON j.kode_matkul = m.kode_matkul 
@@ -278,7 +278,7 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
 
                     $q_all = mysqli_query($conn, $sql_all);
                     
-                    if ($q_all && mysqli_num_rows($q_all) > 0):
+                    if (mysqli_num_rows($q_all) > 0):
                         while($all = mysqli_fetch_assoc($q_all)):
                     ?>
                     <tr>
@@ -308,7 +308,7 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
             <button class="btn" style="background:#ef4444;" onclick="tutupModal()">Batal</button>
         </div>
     </div>
-    
+        
         <?php elseif ($page == 'riwayat'): ?>
             <div class="card">
                 <h3>Riwayat Kehadiran</h3>
