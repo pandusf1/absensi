@@ -175,15 +175,6 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
                     ?>
                 </h3>
             </div>
-            <div style="display:flex; align-items:center; gap:10px;">
-                <div style="text-align:right; display:none sm:block;">
-                    <span style="font-weight:600; display:block;"><?= htmlspecialchars($mhs['nama']) ?></span>
-                    <small style="color:#64748b;"><?= htmlspecialchars($mhs['nim']) ?></small>
-                </div>
-                <div style="width:35px; height:35px; background:#3b82f6; color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold;">
-                    <?= substr($mhs['nama'],0,1) ?>
-                </div>
-            </div>
         </div>
 
         <?php if ($page == 'home'): ?>
@@ -217,13 +208,8 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
                 </div>
             </div>
 
-        <?php elseif ($page == 'jadwal'): ?>
-            <div style="background: #fef2f2; border: 1px solid #ef4444; padding: 10px; margin-bottom: 20px; border-radius: 5px; color: #b91c1c; font-size:11px;">
-                <strong>🔍 Debug Mode:</strong><br>
-                Hari Ini: <b><?= $hari_ini ?></b> | Kelas Anda: <b>[<?= $kelas_mhs ?>]</b><br>
-                <small>* Pastikan kolom 'kelas' di tabel 'jadwal' SAMA PERSIS dengan [<?= $kelas_mhs ?>] (Spasi & Huruf Besar berpengaruh).</small>
-            </div>
-
+                </div>        
+            <?php elseif ($page == 'jadwal'): ?>
             <div class="card">
                 <h3 style="margin-bottom:15px; color:#3b82f6;"><i class="fa-solid fa-calendar-day"></i> Jadwal Hari Ini (<?= $hari_ini ?>)</h3>
                 <div class="table-responsive">
@@ -265,36 +251,24 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
                 </div>
             </div>
 
-            <div class="card" style="margin-top: 20px;">
-                <h3 style="margin-bottom:15px; color:#64748b;"><i class="fa-solid fa-calendar-week"></i> Semua Jadwal Kelas</h3>
+<div class="card" style="margin-top: 20px;">
+                <h3 style="margin-bottom:15px; color:#64748b;">Semua Jadwal Kelas (Mingguan)</h3>
                 <div class="table-responsive">
                     <table>
                         <thead><tr><th>Hari</th><th>Jam</th><th>Mata Kuliah</th><th>Dosen</th><th>Ruang</th></tr></thead>
                         <tbody>
                             <?php
-                            // QUERY 2: LEFT JOIN DOSEN & Sorting CASE
+                            // Query Semua Jadwal (Sorting Hari Senin-Minggu)
                             $sql_all = "SELECT j.*, m.nama_matkul, d.nama_dosen 
                                 FROM jadwal j 
                                 JOIN matkul m ON j.kode_matkul = m.kode_matkul 
                                 LEFT JOIN dosen d ON j.nip = d.nip 
                                 WHERE j.kelas = '$kelas_mhs' 
-                                ORDER BY 
-                                CASE j.hari
-                                    WHEN 'Senin' THEN 1
-                                    WHEN 'Selasa' THEN 2
-                                    WHEN 'Rabu' THEN 3
-                                    WHEN 'Kamis' THEN 4
-                                    WHEN 'Jumat' THEN 5
-                                    WHEN 'Sabtu' THEN 6
-                                    WHEN 'Minggu' THEN 7
-                                    ELSE 8
-                                END, j.jam_mulai ASC";
+                                ORDER BY FIELD(j.hari, 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'), j.jam_mulai ASC";
 
                             $q_all = mysqli_query($conn, $sql_all);
                             
-                            if (!$q_all) {
-                                echo "<tr><td colspan='5' style='color:red; text-align:center;'>Error Query: ".mysqli_error($conn)."</td></tr>";
-                            } elseif (mysqli_num_rows($q_all) > 0) {
+                            if (mysqli_num_rows($q_all) > 0):
                                 while($all = mysqli_fetch_assoc($q_all)):
                             ?>
                             <tr>
@@ -308,22 +282,21 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
                                 <td><?= $all['nama_dosen'] ?? '-' ?></td>
                                 <td><?= $all['ruang'] ?></td>
                             </tr>
-                            <?php endwhile; 
-                            } else { ?>
-                            <tr><td colspan="5" style="text-align:center; padding:30px;">Belum ada jadwal. Cek kecocokan nama kelas!</td></tr>
-                            <?php } ?>
+                            <?php endwhile; else: ?>
+                            <tr><td colspan="5" style="text-align:center; padding:30px;">Belum ada jadwal untuk kelas <b><?= $kelas_mhs ?></b>.</td></tr>
+                            <?php endif; ?>
                         </tbody>
                     </table>
                 </div>
             </div>
-            
+
             <div id="modalKamera" class="modal">
                 <div class="modal-content">
                     <h3>Verifikasi Wajah</h3>
                     <div id="video-container"><video id="video" autoplay muted playsinline></video></div>
                     <div id="statusScan" style="font-weight:bold; color:#3b82f6; margin-bottom:15px;">Memuat AI...</div>
                     <button class="btn" style="background:#ef4444;" onclick="tutupModal()">Batal</button>
-                </div>
+
             </div>
 
         <?php elseif ($page == 'riwayat'): ?>
