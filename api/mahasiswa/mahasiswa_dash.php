@@ -208,107 +208,72 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
                 </div>
             </div>
         </div>    
+            
+        <?php elseif ($page == 'jadwal'): ?>
+            <div class="card">
+                <h3 style="margin-bottom:15px; color:#3b82f6;"><i class="fa-solid fa-calendar-day"></i> Jadwal Hari Ini (<?= $hari_ini . ', ' . date('d M Y') ?>)</h3>
+                <div class="table-responsive">
+                    <table>
+                        <thead><tr><th>Jam</th><th>Mata Kuliah</th><th>Dosen</th><th>Ruang</th><th style="text-align:center;">Aksi Absen</th></tr></thead>
+                        <tbody>
+                            <?php
+                            $qj = mysqli_query($conn, "SELECT j.*, m.nama_matkul, m.kode_matkul, d.nama_dosen FROM jadwal j JOIN matkul m ON j.kode_matkul = m.kode_matkul JOIN dosen d ON j.nip = d.nip WHERE j.kelas = '$kelas_mhs' AND j.hari = '$hari_ini' ORDER BY j.jam_mulai ASC");
+                            if(mysqli_num_rows($qj) > 0):
+                                while($r = mysqli_fetch_assoc($qj)):
+                                    $q_real = mysqli_query($conn, "SELECT * FROM realisasi_mengajar WHERE id_jadwal='".$r['id_jadwal']."' AND tanggal='$tgl_ini' AND status='Berlangsung'");
+                                    $is_mulai = (mysqli_num_rows($q_real) > 0);
+                                    $q_absen = mysqli_query($conn, "SELECT * FROM presensi_kuliah WHERE id_jadwal='".$r['id_jadwal']."' AND tanggal='$tgl_ini' AND nim='$nim_mhs'");
+                                    $sudah_absen = (mysqli_num_rows($q_absen) > 0);
+                            ?>
+                            <tr>
+                                <td><span style="background:#f1f5f9; padding:4px 8px; border-radius:4px; font-weight:600;"><?= substr($r['jam_mulai'],0,5) ?> - <?= substr($r['jam_selesai'],0,5) ?></span></td>
+                                <td><div style="font-weight:600;"><?= $r['nama_matkul'] ?></div><small style="color:#64748b;"><?= $r['kode_matkul'] ?></small></td>
+                                <td><?= $r['nama_dosen'] ?></td>
+                                <td><?= $r['ruang'] ?></td>
+                                <td style="text-align:center;">
+                                    <?php if($sudah_absen): ?><button class="btn btn-green" style="cursor:default;"><i class="fa-solid fa-check-circle"></i> Hadir</button>
+                                    <?php elseif($is_mulai): ?><button class="btn btn-blue" onclick="bukaKamera(<?= $r['id_jadwal'] ?>)"><i class="fa-solid fa-camera"></i> Absen</button>
+                                    <?php else: ?><button class="btn btn-disabled"><i class="fa-solid fa-lock"></i> Tutup</button><?php endif; ?>
+                                </td>
+                            </tr>
+                            <?php endwhile; else: ?>
+                            <tr><td colspan="5" style="text-align:center; padding:30px; color:#94a3b8;">Tidak ada jadwal kuliah hari ini.</td></tr>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
 
-<?php elseif ($page == 'jadwal'): ?>
-    <div class="card">
-        <h3 style="margin-bottom:15px; color:#3b82f6;"><i class="fa-solid fa-calendar-day"></i> Jadwal Hari Ini (<?= $hari_ini ?>)</h3>
-        <div class="table-responsive">
-            <table>
-                <thead><tr><th>Jam</th><th>Mata Kuliah</th><th>Dosen</th><th>Ruang</th><th style="text-align:center;">Aksi</th></tr></thead>
-                <tbody>
-                    <?php
-                    // Query 1: Jadwal Hari Ini (LEFT JOIN)
-                    $qj = mysqli_query($conn, "SELECT j.*, m.nama_matkul, m.kode_matkul, d.nama_dosen 
-                        FROM jadwal j 
-                        JOIN matkul m ON j.kode_matkul = m.kode_matkul 
-                        LEFT JOIN dosen d ON j.nip = d.nip 
-                        WHERE j.kelas = '$kelas_mhs' AND j.hari = '$hari_ini' 
-                        ORDER BY j.jam_mulai ASC");
-                    
-                    if(mysqli_num_rows($qj) > 0):
-                        while($r = mysqli_fetch_assoc($qj)):
-                            $q_real = mysqli_query($conn, "SELECT * FROM realisasi_mengajar WHERE id_jadwal='".$r['id_jadwal']."' AND tanggal='$tgl_ini' AND status='Berlangsung'");
-                            $is_mulai = (mysqli_num_rows($q_real) > 0);
-                            $q_absen = mysqli_query($conn, "SELECT * FROM presensi_kuliah WHERE id_jadwal='".$r['id_jadwal']."' AND tanggal='$tgl_ini' AND nim='$nim_mhs'");
-                            $sudah_absen = (mysqli_num_rows($q_absen) > 0);
-                    ?>
-                    <tr>
-                        <td><?= substr($r['jam_mulai'],0,5) ?> - <?= substr($r['jam_selesai'],0,5) ?></td>
-                        <td><?= $r['nama_matkul'] ?></td>
-                        <td><?= $r['nama_dosen'] ?? '-' ?></td>
-                        <td><?= $r['ruang'] ?></td>
-                        <td style="text-align:center;">
-                            <?php if($sudah_absen): ?><button class="btn btn-green">Hadir</button>
-                            <?php elseif($is_mulai): ?><button class="btn btn-blue" onclick="bukaKamera(<?= $r['id_jadwal'] ?>)">Absen</button>
-                            <?php else: ?><button class="btn btn-disabled">Tutup</button><?php endif; ?>
-                        </td>
-                    </tr>
-                    <?php endwhile; else: ?>
-                    <tr><td colspan="5" align="center" style="padding:15px; color:#999;">Tidak ada jadwal kuliah hari ini.</td></tr>
-                    <?php endif; ?>
-                </tbody>
-            </table>
-        </div>
-    </div>
+                        <div class="card">
+                <h4 style="margin-bottom:10px; color:#64748b;">Daftar Mata Kuliah</h4>
+                <div class="table-responsive"> <table>
+                        <thead><tr><th>Hari</th><th>Jam</th><th>Mata Kuliah</th><th>SKS</th><th>Dosen</th></tr></thead>
+                        <tbody>
+                            <?php
+                            $today_idx = date('N'); 
+                            $q_all = mysqli_query($conn, "SELECT j.*, m.nama_matkul, m.sks, d.nama_dosen FROM jadwal j JOIN matkul m ON j.kode_matkul = m.kode_matkul JOIN dosen d ON j.nip = d.nip WHERE j.kelas = '$kelas_mhs' ORDER BY MOD(FIELD(j.hari, 'Senin','Selasa','Rabu','Kamis','Jumat','Sabtu','Minggu') - $today_idx + 7, 7) ASC, j.jam_mulai ASC");
+                            while($row = mysqli_fetch_assoc($q_all)):
+                                $bg_style = ($row['hari'] == $hari_ini) ? "background:#f0f9ff;" : "";
+                            ?>
+                            <tr style="<?= $bg_style ?>">
+                                <td><?= $row['hari'] ?></td><td><?= substr($row['jam_mulai'],0,5) ?></td><td><?= $row['nama_matkul'] ?></td><td><?= $row['sks'] ?></td><td><?= $row['nama_dosen'] ?></td>
+                            </tr>
+                            <?php endwhile; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
 
-    <div class="card" style="margin-top: 20px;">
-        <h3 style="margin-bottom:15px; color:#64748b;"><i class="fa-solid fa-calendar-week"></i> Semua Jadwal Kelas</h3>
-        <div class="table-responsive">
-            <table>
-                <thead><tr><th>Hari</th><th>Jam</th><th>Mata Kuliah</th><th>Dosen</th><th>Ruang</th></tr></thead>
-                <tbody>
-                    <?php
-                    // Query 2: Semua Jadwal (LEFT JOIN & CASE ORDER)
-                    $sql_all = "SELECT j.*, m.nama_matkul, d.nama_dosen 
-                        FROM jadwal j 
-                        JOIN matkul m ON j.kode_matkul = m.kode_matkul 
-                        LEFT JOIN dosen d ON j.nip = d.nip 
-                        WHERE j.kelas = '$kelas_mhs' 
-                        ORDER BY 
-                        CASE j.hari
-                            WHEN 'Senin' THEN 1
-                            WHEN 'Selasa' THEN 2
-                            WHEN 'Rabu' THEN 3
-                            WHEN 'Kamis' THEN 4
-                            WHEN 'Jumat' THEN 5
-                            WHEN 'Sabtu' THEN 6
-                            WHEN 'Minggu' THEN 7
-                            ELSE 8
-                        END, j.jam_mulai ASC";
-
-                    $q_all = mysqli_query($conn, $sql_all);
-                    
-                    if (mysqli_num_rows($q_all) > 0):
-                        while($all = mysqli_fetch_assoc($q_all)):
-                    ?>
-                    <tr>
-                        <td>
-                            <?php if($all['hari'] == $hari_ini):?>
-                                <span style="background:#dbeafe; color:#1e40af; padding:4px 8px; border-radius:4px; font-weight:bold;"><?= $all['hari'] ?></span>
-                            <?php else: echo $all['hari']; endif; ?>
-                        </td>
-                        <td><?= substr($all['jam_mulai'],0,5) ?> - <?= substr($all['jam_selesai'],0,5) ?></td>
-                        <td><?= $all['nama_matkul'] ?></td>
-                        <td><?= $all['nama_dosen'] ?? '-' ?></td>
-                        <td><?= $all['ruang'] ?></td>
-                    </tr>
-                    <?php endwhile; else: ?>
-                    <tr><td colspan="5" style="text-align:center; padding:30px;">Belum ada jadwal untuk kelas <b><?= $kelas_mhs ?></b>.</td></tr>
-                    <?php endif; ?>
-                </tbody>
-            </table>
-        </div>
-    </div>
+            
+            <div id="modalKamera" class="modal">
+                <div class="modal-content">
+                    <h3>Verifikasi Wajah</h3>
+                    <div id="video-container"><video id="video" autoplay muted playsinline></video></div>
+                    <div id="statusScan" style="font-weight:bold; color:#3b82f6; margin-bottom:15px;">Memuat AI...</div>
+                    <button class="btn" style="background:#ef4444;" onclick="tutupKamera()">Batal</button>
+                </div>
+            </div>
     
-    <div id="modalKamera" class="modal">
-        <div class="modal-content">
-            <h3>Verifikasi Wajah</h3>
-            <div id="video-container"><video id="video" autoplay muted playsinline></video></div>
-            <div id="statusScan" style="font-weight:bold; color:#3b82f6; margin-bottom:15px;">Memuat AI...</div>
-            <button class="btn" style="background:#ef4444;" onclick="tutupModal()">Batal</button>
-        </div>
-    </div>
-        
         <?php elseif ($page == 'riwayat'): ?>
             <div class="card">
                 <h3>Riwayat Kehadiran</h3>
