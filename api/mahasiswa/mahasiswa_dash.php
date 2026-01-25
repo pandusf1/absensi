@@ -435,22 +435,18 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
 
 function bukaKamera(id) {
         // --- BLOKIR JIKA BELUM ADA WAJAH ---
-        if (!userHasFace) {
+if (!userHasFace) {
             Swal.fire({
                 title: "Wajah Belum Terdaftar!",
-                text: "Anda belum mendaftarkan wajah. Silakan rekam wajah dulu di menu 'Registrasi Wajah'.",
+                text: "Anda wajib merekam wajah dulu di menu 'Scan Wajah' sebelum absen.",
                 icon: "warning",
-                showCancelButton: true,
-                confirmButtonText: "Rekam Sekarang",
-                cancelButtonText: "Nanti Saja"
+                confirmButtonText: "Ke Menu Scan",
+                allowOutsideClick: false
             }).then((result) => {
-                if (result.isConfirmed) {
-                    window.location.href = '?page=update_wajah';
-                }
+                if (result.isConfirmed) window.location.href = '?page=update_wajah';
             });
-            return; // Berhenti disini, kamera tidak akan nyala
+            return; // Stop agar kamera tidak nyala
         }
-
         if(!isModelLoaded) { Swal.fire("Tunggu", "Memuat AI...", "info"); return; }            currentJadwalId = id; 
             $('#modalKamera').css('display', 'flex');
             
