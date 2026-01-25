@@ -157,7 +157,6 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
             left: 0; 
             width: 100%; 
             height: 100%;
-            transform: scaleX(-1); /* Canvas juga harus dicermin */
         }
         div.swal2-container {
             z-index: 99999 !important; /* Angka harus lebih besar dari 2000 */
@@ -487,34 +486,38 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
             const displaySize = { width: videoEl.offsetWidth, height: videoEl.offsetHeight };
             faceapi.matchDimensions(canvas, displaySize);
             
-            detectInterval = setInterval(async () => {
-                const detection = await faceapi.detectSingleFace(videoEl, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptor();
-                
-                // Bersihkan canvas
-                const ctx = canvas.getContext('2d'); 
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                
-                if (detection) {
-                    const match = new faceapi.FaceMatcher(targetDescriptor, 0.45).findBestMatch(detection.descriptor);
-                    
-                    // Resize hasil deteksi ke ukuran tampilan layar
-                    const resizedDetections = faceapi.resizeResults(detection, displaySize);
-                    const box = resizedDetections.detection.box;
-                    
-                    // Gambar Kotak
-                    const drawBox = new faceapi.draw.DrawBox(box, { 
-                        label: match.toString(), 
-                        boxColor: match.label === '<?= $nim_mhs ?>' ? "green" : "red" 
-                    });
-                    drawBox.draw(canvas);
-                    
-                    // Jika Cocok, Absen
-                    if (match.label === '<?= $nim_mhs ?>') { 
-                        clearInterval(detectInterval); 
-                        simpanAbsen(currentJadwalId); 
-                    }
-                }
-            }, 300);
+detectInterval = setInterval(async () => {
+    const detection = await faceapi.detectSingleFace(video, TINY_FACE_OPTIONS).withFaceLandmarks().withFaceDescriptor();
+    const ctx = canvas.getContext('2d'); ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    if (detection) {
+        const match = new faceapi.FaceMatcher(targetDescriptor, 0.45).findBestMatch(detection.descriptor);
+        
+        // 1. Ambil ukuran kotak asli
+        const box = faceapi.resizeResults(detection, displaySize).detection.box;
+        
+        // 2. [RUMUS CERMIN] Balik Koordinat X secara manual
+        // Posisi Baru = Lebar Layar - Posisi Lama - Lebar Kotak
+        const flippedBox = {
+            x: displaySize.width - box.x - box.width,
+            y: box.y,
+            width: box.width,
+            height: box.height
+        };
+
+        // 3. Gambar kotak menggunakan koordinat yang sudah dibalik
+        const drawBox = new faceapi.draw.DrawBox(flippedBox, { 
+            label: match.toString(), 
+            boxColor: match.label === '<?= $nim_mhs ?>' ? "green" : "red" 
+        });
+        drawBox.draw(canvas);
+        
+        if (match.label === '<?= $nim_mhs ?>') { 
+            clearInterval(detectInterval); 
+            simpanAbsen(currentJadwalId); 
+        }
+    }
+}, 100);
         }
 
         function simpanAbsen(id) {
