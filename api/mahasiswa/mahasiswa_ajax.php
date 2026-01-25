@@ -6,40 +6,6 @@ date_default_timezone_set('Asia/Jakarta');
 // Ambil action dari request AJAX
 $action = isset($_POST['action']) ? $_POST['action'] : '';
 
-if ($action == 'simpan_absen') {
-    $id_jadwal = $_POST['id_jadwal'];
-    $nim       = $_POST['nim'];
-    
-    $tgl_ini   = date('Y-m-d');
-    $jam_ini   = date('H:i:s');
-
-    // --- VALIDASI 1: CEK DUPLIKASI ---
-    // Pastikan mahasiswa belum absen di jadwal & tanggal yang sama
-    $cek_duplikat = mysqli_query($conn, "SELECT id_presensi FROM presensi_kuliah 
-                                         WHERE id_jadwal = '$id_jadwal' 
-                                         AND nim = '$nim' 
-                                         AND tanggal = '$tgl_ini'");
-
-    if (mysqli_num_rows($cek_duplikat) > 0) {
-        // Jika sudah ada, jangan insert lagi (untuk mencegah double data jika Face API mendeteksi berkali-kali)
-        echo "Anda sudah absen sebelumnya.";
-    } else {
-        // --- PROSES INSERT ---
-        // Status otomatis 'Hadir' karena lewat verifikasi wajah
-        // Koordinat kita isi 'Face-API' sebagai penanda metode absen
-        $query = "INSERT INTO presensi_kuliah 
-                  (id_jadwal, nim, tanggal, waktu_hadir, status, koordinat) 
-                  VALUES 
-                  ('$id_jadwal', '$nim', '$tgl_ini', '$jam_ini', 'Hadir', 'Face-API')";
-
-        if (mysqli_query($conn, $query)) {
-            echo "Berhasil! Presensi tercatat.";
-        } else {
-            echo "Gagal: " . mysqli_error($conn);
-        }
-    }
-}
-
 if ($action == 'get_face_descriptor') {
     $nim = $_POST['nim'];
     
@@ -53,6 +19,45 @@ if ($action == 'get_face_descriptor') {
         echo "null"; // Belum ada data wajah
     }
 }
+
+elseif ($action == 'simpan_absen') {
+    $id_jadwal = $_POST['id_jadwal'];
+    $nim = $_POST['nim'];
+    $tgl = date('Y-m-d');
+    $jam_sekarang = date('H:i:s');
+
+    // 1. Ambil Jam Mulai Jadwal dari Database
+    $q_jadwal = mysqli_query($conn, "SELECT jam_mulai FROM jadwal WHERE id_jadwal='$id_jadwal'");
+    $r_jadwal = mysqli_fetch_assoc($q_jadwal);
+    
+    // 2. Hitung Selisih Waktu (Dalam Menit)
+    $waktu_mulai = strtotime($r_jadwal['jam_mulai']);
+    $waktu_absen = strtotime($jam_sekarang);
+    $selisih_menit = ($waktu_absen - $waktu_mulai) / 60;
+
+    if ($selisih_menit > 20) {
+        $status_fix = 'Terlambat';
+    } else {
+        $status_fix = 'Hadir';
+    }
+
+    $cek = mysqli_query($conn, "SELECT id_presensi FROM presensi_kuliah WHERE id_jadwal='$id_jadwal' AND nim='$nim' AND tanggal='$tgl'");
+    
+    if (mysqli_num_rows($cek) == 0) {
+        // Masukkan status hasil perhitungan ($status_fix)
+        $q = "INSERT INTO presensi_kuliah (id_jadwal, nim, tanggal, waktu_hadir, status, koordinat) 
+              VALUES ('$id_jadwal', '$nim', '$tgl', '$jam_sekarang', '$status_fix', 'Wajah')";
+        
+        if (mysqli_query($conn, $q)) {
+            echo "Sukses: Status Anda tercatat sebagai " . $status_fix;
+        } else {
+            echo "Gagal database";
+        }
+    } else {
+        echo "Sudah absen sebelumnya.";
+    }
+}
+
 
 if ($action == 'update_face') {
     $nim = $_POST['nim'];

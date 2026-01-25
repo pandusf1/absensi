@@ -477,7 +477,7 @@ if(isset($_POST['simpan_jadwal'])) {
                 <h4 style="font-size:12px; margin-bottom:5px; color:#166534;">+ Input Manual</h4>
                 <form onsubmit="tambahManual(event)" style="display:flex; gap:5px;">
                     <input type="hidden" id="id_jadwal_detail"><input type="hidden" id="tgl_detail">
-                    <input type="text" id="manual_nim" placeholder="NIM Mhs" class="input-form" style="flex:1; margin:0;">
+                    <input type="text" id="manual_nim" placeholder="NIM Mhs" required class="input-form" style="flex:1; margin:0;">
                     <select id="manual_status" class="input-form" style="width:80px; margin:0;">
                         <option value="Hadir">Hadir</option>
                         <option value="Sakit">Sakit</option>
