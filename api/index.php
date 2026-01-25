@@ -120,22 +120,31 @@ switch($page):
 
 // ================= HOME (LOGIN UTAMA) =================
 case 'home': ?>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
     <div class="container" style="max-width: 500px;">
         <div class="card">
             <div class="home-header" style="margin-bottom: 20px;">
-                <img src="aset/img/polines.png" alt="Logo POLINES" style="width: 100px;">
+                <img src="aset/img/polines.png" onerror="this.src='https://via.placeholder.com/100'" alt="Logo POLINES" style="width: 100px;">
                 <h2 style="font-size: 24px;">Sistem Informasi Akademik</h2>
                 <h2 style="font-size: 20px; margin-bottom: 20px; margin-top:-10px; color:#555;">Politeknik Negeri Semarang</h2>
             </div>
             
             <form action="login/login.php" method="POST">
                 <label style="font-size:13px; font-weight:bold; color:#555;">NIM / NIP</label>
-                <input type="text" name="username" placeholder="Masukkan NIM atau NIP" required>
+                <input type="text" name="username" placeholder="Masukkan NIM atau NIP" required style="width: 100%; margin-bottom: 15px;">
                 
                 <label style="font-size:13px; font-weight:bold; color:#555;">Kata Sandi</label>
-                <input type="password" name="password" placeholder="Masukkan kata sandi" required>
                 
-                <button type="submit">Masuk</button>
+                <div style="position: relative; margin-bottom: 15px;">
+                    <input type="password" name="password" id="passwordInput" placeholder="Masukkan kata sandi" required style="width: 100%; padding-right: 40px;">
+                    
+                    <span onclick="togglePassword()" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #777;">
+                        <i id="toggleIcon" class="fa-solid fa-eye"></i>
+                    </span>
+                </div>
+                
+                <button type="submit" style="margin-top: 10px;">Masuk</button>
             </form>
 
             <div class="link" style="margin-top: 15px;">
@@ -145,6 +154,23 @@ case 'home': ?>
             </div>
         </div>
     </div>
+
+    <script>
+        function togglePassword() {
+            var input = document.getElementById("passwordInput");
+            var icon = document.getElementById("toggleIcon");
+
+            if (input.type === "password") {
+                input.type = "text"; // Ubah jadi teks biasa
+                icon.classList.remove("fa-eye");
+                icon.classList.add("fa-eye-slash"); // Ganti ikon jadi mata dicoret
+            } else {
+                input.type = "password"; // Kembalikan jadi password (bintang-bintang)
+                icon.classList.remove("fa-eye-slash");
+                icon.classList.add("fa-eye"); // Ganti ikon jadi mata biasa
+            }
+        }
+    </script>
 <?php break; ?>
 
 <?php 
@@ -205,26 +231,105 @@ case 'daftar_dosen': ?>
 <?php 
 // ================= DAFTAR MAHASISWA =================
 case 'daftar_mhs': ?>
-    <div class="container"><div class="card">
-        <h2>Pendaftaran Akun Mahasiswa</h2>
-        <form action="login/daftar.php" method="POST">
-            <input type="hidden" name="role" value="mahasiswa">
-            
-            <input type="text" name="nim" placeholder="NIM" required>
-            <input type="text" name="nama" placeholder="Nama Lengkap" required>
-            <input type="text" name="kelas" placeholder="Kelas" required>
-            <input type="text" name="jurusan" placeholder="Jurusan" required>
-            <input type="text" name="prodi" placeholder="Program Studi" required>
-            <input type="email" name="email" placeholder="Email Aktif" required>
-            <input type="password" name="password" placeholder="Kata Sandi" required>
-            <input type="password" name="k_password" placeholder="Konfirmasi Kata Sandi" required>
-            
-            <button type="submit">Daftar Akun</button>
-        </form>
-        <div class="link"><a href="?page=pilih_peran">Kembali</a></div>
-    </div></div>
-<?php break; ?>
+    <div class="container">
+        <div class="card">
+            <h2>Pendaftaran Akun Mahasiswa</h2>
+            <form action="login/daftar.php" method="POST">
+                <input type="hidden" name="role" value="mahasiswa">
+                
+                <input type="text" name="nim" placeholder="NIM" required style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:5px;">
+                
+                <input type="text" name="nama" placeholder="Nama Lengkap" required style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:5px;">
+                
+                <input type="text" name="kelas" placeholder="Kelas (Contoh: KA-3C)" required style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:5px;">
+                
+                <select name="jurusan" id="jurusan" required onchange="updateProdi()" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:5px; background:white;">
+                    <option value="">-- Pilih Jurusan --</option>
+                    <option value="Teknik Sipil">Teknik Sipil</option>
+                    <option value="Teknik Mesin">Teknik Mesin</option>
+                    <option value="Teknik Elektro">Teknik Elektro</option>
+                    <option value="Akuntansi">Akuntansi</option>
+                    <option value="Administrasi Bisnis">Administrasi Bisnis</option>
+                </select>
 
+                <select name="prodi" id="prodi" required style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:5px; background:white;">
+                    <option value="">-- Pilih Jurusan Terlebih Dahulu --</option>
+                </select>
+
+                <input type="email" name="email" placeholder="Email Aktif" required style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:5px;">
+                
+                <input type="password" name="password" placeholder="Kata Sandi" required style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:5px;">
+                <input type="password" name="k_password" placeholder="Konfirmasi Kata Sandi" required style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:5px;">
+                
+                <button type="submit" style="width:100%; padding:10px; background:#3b82f6; color:white; border:none; border-radius:5px; cursor:pointer;">Daftar Akun</button>
+            </form>
+            <div class="link" style="margin-top:10px; text-align:center;">
+                <a href="?page=pilih_peran" style="text-decoration:none; color:#3b82f6;">Kembali</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updateProdi() {
+            // Data Jurusan dan Prodi Polines
+            const dataPolines = {
+                "Teknik Sipil": [
+                    "D3 Konstruksi Gedung",
+                    "D3 Konstruksi Sipil",
+                    "S.Tr Perancangan Jalan dan Jembatan",
+                    "S.Tr Teknik Perawatan dan Perbaikan Gedung"
+                ],
+                "Teknik Mesin": [
+                    "D3 Teknik Mesin",
+                    "D3 Teknik Konversi Energi",
+                    "S.Tr Teknik Mesin Produksi dan Perawatan",
+                    "S.Tr Teknologi Rekayasa Pembangkit Energi"
+                ],
+                "Teknik Elektro": [
+                    "D3 Teknik Listrik",
+                    "D3 Teknik Elektronika",
+                    "D3 Teknik Telekomunikasi",
+                    "D3 Teknik Informatika",
+                    "S.Tr Teknik Telekomunikasi",
+                    "S.Tr Teknologi Rekayasa Instalasi Listrik",
+                    "S.Tr Teknologi Rekayasa Komputer",
+                    "S.Tr Teknologi Rekayasa Elektronika"
+                ],
+                "Akuntansi": [
+                    "D3 Akuntansi",
+                    "D3 Keuangan dan Perbankan",
+                    "S.Tr Komputerisasi Akuntansi",
+                    "S.Tr Perbankan Syariah",
+                    "S.Tr Analis Keuangan",
+                    "S.Tr Akuntansi Manajerial"
+                ],
+                "Administrasi Bisnis": [
+                    "D3 Administrasi Bisnis",
+                    "D3 Manajemen Pemasaran",
+                    "S.Tr Manajemen Bisnis Internasional",
+                    "S.Tr Administrasi Bisnis Terapan"
+                ]
+            };
+
+            const jurusanSelect = document.getElementById("jurusan");
+            const prodiSelect = document.getElementById("prodi");
+            const selectedJurusan = jurusanSelect.value;
+
+            // Kosongkan dropdown prodi
+            prodiSelect.innerHTML = '<option value="">-- Pilih Program Studi --</option>';
+
+            // Jika jurusan dipilih, isi prodi sesuai data
+            if (selectedJurusan && dataPolines[selectedJurusan]) {
+                dataPolines[selectedJurusan].forEach(function(prodi) {
+                    const option = document.createElement("option");
+                    option.value = prodi;
+                    option.text = prodi;
+                    prodiSelect.appendChild(option);
+                });
+            }
+        }
+    </script>
+<?php break; ?>
 <?php 
 // ================= RESET PASSWORD =================
 case 'reset': ?>
