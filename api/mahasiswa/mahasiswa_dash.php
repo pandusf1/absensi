@@ -400,63 +400,63 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
         <?php endif; ?>
     </div>
 
-    <script>
-        // 2. FACE API LOGIC DENGAN ERROR HANDLING
+<script>
+        // 1. Variabel Global
         let isModelLoaded = false;
-        let TINY_FACE_OPTIONS;
+        let currentJadwalId = null;
+        let stream = null;
+        let detectInterval;
+        
+        // Tangkap status wajah dari PHP
+        const userHasFace = <?= $punya_wajah ?>; 
 
+        // 2. Load Model AI
         try {
-            // Cek apakah faceapi terload
             if (typeof faceapi !== 'undefined') {
-                TINY_FACE_OPTIONS = new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.5 });
+                const TINY_FACE_OPTIONS = new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.5 });
                 
-                // Path model AI: mundur 2 level ke folder aset/models
                 Promise.all([
                     faceapi.nets.tinyFaceDetector.loadFromUri('../../aset/models'),
                     faceapi.nets.faceLandmark68Net.loadFromUri('../../aset/models'),
                     faceapi.nets.faceRecognitionNet.loadFromUri('../../aset/models')
                 ]).then(() => { 
                     isModelLoaded = true; 
-                    console.log("AI Loaded Successfully"); 
-                }).catch(err => { 
-                    console.error("Gagal Load Model AI:", err); 
+                    console.log("AI Ready"); 
+                }).catch(err => {
+                    console.error("Gagal Load Model:", err);
                 });
-            } else {
-                console.warn("Library FaceAPI tidak ditemukan! Cek path di <head>");
             }
-        } catch(e) {
-            console.error("Script FaceAPI Error:", e);
-        }
+        } catch(e) { console.warn("Face API Error:", e); }
 
-        // --- SCRIPT KHUSUS PAGE JADWAL ---
+        // 3. Fungsi Buka Kamera (Untuk Jadwal)
         <?php if ($page == 'jadwal'): ?>
-        let currentJadwalId = null, video = document.getElementById('video'), stream = null, detectInterval;
-        const userHasFace = <?= $punya_wajah ?>;
+        function bukaKamera(id) {
+            // A. Cek Validasi Wajah Dulu
+            if (!userHasFace) {
+                Swal.fire({
+                    title: "Wajah Belum Terdaftar!",
+                    text: "Anda wajib merekam wajah dulu di menu 'Registrasi Wajah' sebelum absen.",
+                    icon: "warning",
+                    confirmButtonText: "Ke Menu Scan",
+                    allowOutsideClick: false,
+                    target: 'body' // Supaya alert muncul paling depan
+                }).then((result) => {
+                    if (result.isConfirmed) window.location.href = '?page=update_wajah';
+                });
+                return; // Stop disini
+            }
 
-
-function bukaKamera(id) {
-        // --- BLOKIR JIKA BELUM ADA WAJAH ---
-if (!userHasFace) {
-            Swal.fire({
-                title: "Wajah Belum Terdaftar!",
-                text: "Anda wajib merekam wajah dulu di menu 'Scan Wajah' sebelum absen.",
-                icon: "warning",
-                confirmButtonText: "Ke Menu Scan",
-                target: 'body'
-                allowOutsideClick: false
-            }).then((result) => {
-                if (result.isConfirmed) window.location.href = '?page=update_wajah';
-            });
-            return; // Stop agar kamera tidak nyala
-        }
-        if(!isModelLoaded) { Swal.fire("Tunggu", "Memuat AI...", "info"); return; }            currentJadwalId = id; 
+            // B. Cek Model AI
+            if(!isModelLoaded) { Swal.fire("Tunggu", "Memuat AI...", "info"); return; }
+            
+            // C. Buka Modal
+            currentJadwalId = id; 
             $('#modalKamera').css('display', 'flex');
             
-            // Ambil data wajah dari database via AJAX
+            // D. Ambil Data Wajah & Nyalakan Kamera
             $.post('mahasiswa_ajax.php', { action: 'get_face_descriptor', nim: '<?= $nim_mhs ?>' }, function(res){
                 try {
                     let rawData = JSON.parse(res);
-                    // Konversi object ke array jika perlu
                     if (rawData && typeof rawData === 'object' && !Array.isArray(rawData)) rawData = Object.values(rawData);
                     
                     const targetDescriptor = new faceapi.LabeledFaceDescriptors('<?= $nim_mhs ?>', [new Float32Array(rawData)]);
@@ -464,39 +464,51 @@ if (!userHasFace) {
                     
                     navigator.mediaDevices.getUserMedia({ video: {} }).then(s => {
                         stream = s; 
-                        video.srcObject = stream;
-                        video.onloadedmetadata = () => { video.play(); startDetection(targetDescriptor); };
+                        const videoEl = document.getElementById('video');
+                        videoEl.srcObject = stream;
+                        videoEl.onloadedmetadata = () => { 
+                            videoEl.play(); 
+                            startDetection(targetDescriptor, videoEl); 
+                        };
                     });
                 } catch(e) { 
-                    Swal.fire("Gagal", "Wajah Anda belum terdaftar. Silakan update wajah di menu profil.", "warning"); 
+                    Swal.fire("Gagal", "Data wajah rusak/tidak ditemukan.", "error"); 
                     tutupModal(); 
                 }
             });
         }
 
-function startDetection(targetDescriptor) {
+        function startDetection(targetDescriptor, videoEl) {
             $('canvas').remove();
-            const canvas = faceapi.createCanvasFromMedia(video);
+            const canvas = faceapi.createCanvasFromMedia(videoEl);
             $('#video-container').append(canvas);
             
-            // [PERBAIKAN] Gunakan videoWidth dan videoHeight asli dari kamera
-            const displaySize = { width: video.videoWidth, height: video.videoHeight };
+            // [KUNCI AGAR KOTAK PAS] Gunakan offsetWidth (Ukuran Tampil) bukan videoWidth (Ukuran Asli)
+            const displaySize = { width: videoEl.offsetWidth, height: videoEl.offsetHeight };
             faceapi.matchDimensions(canvas, displaySize);
             
-            // Paksa ukuran CSS canvas sama dengan video agar tidak melenceng
-            canvas.style.width = video.clientWidth + 'px';
-            canvas.style.height = video.clientHeight + 'px';
-            
             detectInterval = setInterval(async () => {
-                const detection = await faceapi.detectSingleFace(video, TINY_FACE_OPTIONS).withFaceLandmarks().withFaceDescriptor();
-                const ctx = canvas.getContext('2d'); ctx.clearRect(0, 0, canvas.width, canvas.height);
+                const detection = await faceapi.detectSingleFace(videoEl, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptor();
+                
+                // Bersihkan canvas
+                const ctx = canvas.getContext('2d'); 
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
                 
                 if (detection) {
                     const match = new faceapi.FaceMatcher(targetDescriptor, 0.45).findBestMatch(detection.descriptor);
-                    const box = detection.detection.box;
-                    const drawBox = new faceapi.draw.DrawBox(box, { label: match.toString(), boxColor: match.label === '<?= $nim_mhs ?>' ? "green" : "red" });
+                    
+                    // Resize hasil deteksi ke ukuran tampilan layar
+                    const resizedDetections = faceapi.resizeResults(detection, displaySize);
+                    const box = resizedDetections.detection.box;
+                    
+                    // Gambar Kotak
+                    const drawBox = new faceapi.draw.DrawBox(box, { 
+                        label: match.toString(), 
+                        boxColor: match.label === '<?= $nim_mhs ?>' ? "green" : "red" 
+                    });
                     drawBox.draw(canvas);
                     
+                    // Jika Cocok, Absen
                     if (match.label === '<?= $nim_mhs ?>') { 
                         clearInterval(detectInterval); 
                         simpanAbsen(currentJadwalId); 
@@ -504,49 +516,41 @@ function startDetection(targetDescriptor) {
                 }
             }, 300);
         }
+
         function simpanAbsen(id) {
             $.post('mahasiswa_ajax.php', { action: 'simpan_absen', id_jadwal: id, nim: '<?= $nim_mhs ?>' }, function(res){
-                Swal.fire({ title: "Berhasil", text: "Absensi Berhasil!", icon: "success", timer: 1500, showConfirmButton: false })
-                .then(() => location.reload());
+                Swal.fire({ title: "Berhasil", text: "Absensi Berhasil!", icon: "success", timer: 1500, showConfirmButton: false }).then(() => location.reload());
             });
         }
         <?php endif; ?>
 
-        // --- SCRIPT KHUSUS PAGE UPDATE WAJAH ---
+        // 4. Fungsi Scan Wajah Baru (Registrasi)
         <?php if ($page == 'update_wajah'): ?>
         let regStream, regInterval, lastDescriptor;
-        
         function mulaiKameraReg() {
-            if(!isModelLoaded) { Swal.fire("Error", "AI belum siap. Cek koneksi internet.", "error"); return; }
+            if(!isModelLoaded) { Swal.fire("Error", "AI belum siap.", "error"); return; }
             navigator.mediaDevices.getUserMedia({ video: {} }).then(s => {
                 regStream = s; 
-                document.getElementById('videoReg').srcObject = regStream;
-                document.getElementById('videoReg').onloadedmetadata = () => { document.getElementById('videoReg').play(); detectRegLoop(); };
-                $('#btnMulaiReg').hide(); 
-                $('#msgReg').text("Lihat kamera...");
+                const v = document.getElementById('videoReg');
+                v.srcObject = regStream;
+                v.onloadedmetadata = () => { v.play(); detectRegLoop(v); };
+                $('#btnMulaiReg').hide(); $('#msgReg').text("Lihat kamera...");
             });
         }
-
-        function detectRegLoop() {
+        function detectRegLoop(videoEl) {
             regInterval = setInterval(async () => {
-                const detection = await faceapi.detectSingleFace(document.getElementById('videoReg'), TINY_FACE_OPTIONS).withFaceLandmarks().withFaceDescriptor();
+                const detection = await faceapi.detectSingleFace(videoEl, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptor();
                 if (detection) { 
                     lastDescriptor = detection.descriptor; 
                     $('#btnSimpanReg').prop('disabled', false).removeClass('btn-disabled').addClass('btn-green'); 
-                    $('#msgReg').text("Wajah Terdeteksi! Klik Simpan."); 
+                    $('#msgReg').text("Wajah OK! Klik Simpan."); 
                 }
             }, 500);
         }
-
         function simpanWajah() {
             if(!lastDescriptor) return;
-            $.post('mahasiswa_ajax.php', { 
-                action: 'update_face', 
-                nim: '<?= $nim_mhs ?>', 
-                descriptor: JSON.stringify(Array.from(lastDescriptor)) 
-            }, function(res){
-                clearInterval(regInterval); 
-                if(regStream) regStream.getTracks().forEach(t => t.stop());
+            $.post('mahasiswa_ajax.php', { action: 'update_face', nim: '<?= $nim_mhs ?>', descriptor: JSON.stringify(Array.from(lastDescriptor)) }, function(res){
+                clearInterval(regInterval); if(regStream) regStream.getTracks().forEach(t => t.stop());
                 Swal.fire("Sukses", "Data Wajah Disimpan!", "success").then(() => location.href='?page=home');
             });
         }
