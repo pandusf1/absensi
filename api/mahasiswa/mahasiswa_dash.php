@@ -170,7 +170,7 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
                 <thead><tr><th>Jam</th><th>Mata Kuliah</th><th>Dosen</th><th>Ruang</th><th style="text-align:center;">Aksi Absen</th></tr></thead>
                 <tbody>
                     <?php
-                    // Query Jadwal HARI INI
+                    // Query Jadwal Khusus Hari Ini
                     $qj = mysqli_query($conn, "SELECT j.*, m.nama_matkul, m.kode_matkul, d.nama_dosen 
                         FROM jadwal j 
                         JOIN matkul m ON j.kode_matkul = m.kode_matkul 
@@ -180,11 +180,11 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
                     
                     if(mysqli_num_rows($qj) > 0):
                         while($r = mysqli_fetch_assoc($qj)):
-                            // Cek apakah dosen sudah mulai kelas (Realisasi)
+                            // Cek Status Kelas (Berlangsung/Belum)
                             $q_real = mysqli_query($conn, "SELECT * FROM realisasi_mengajar WHERE id_jadwal='".$r['id_jadwal']."' AND tanggal='$tgl_ini' AND status='Berlangsung'");
                             $is_mulai = (mysqli_num_rows($q_real) > 0);
                             
-                            // Cek apakah mahasiswa sudah absen
+                            // Cek Apakah Sudah Absen
                             $q_absen = mysqli_query($conn, "SELECT * FROM presensi_kuliah WHERE id_jadwal='".$r['id_jadwal']."' AND tanggal='$tgl_ini' AND nim='$nim_mhs'");
                             $sudah_absen = (mysqli_num_rows($q_absen) > 0);
                     ?>
@@ -200,7 +200,10 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
                         </td>
                     </tr>
                     <?php endwhile; else: ?>
-                    <tr><td colspan="5" style="text-align:center; padding:30px; color:#94a3b8;">Tidak ada jadwal kuliah hari ini.</td></tr>
+                    <tr><td colspan="5" style="text-align:center; padding:30px; color:#94a3b8;">
+                        <i class="fa-solid fa-mug-hot" style="font-size:24px; margin-bottom:10px; display:block;"></i>
+                        Tidak ada jadwal kuliah hari ini.
+                    </td></tr>
                     <?php endif; ?>
                 </tbody>
             </table>
@@ -214,7 +217,7 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
                 <thead><tr><th>Hari</th><th>Jam</th><th>Mata Kuliah</th><th>Dosen</th><th>Ruang</th></tr></thead>
                 <tbody>
                     <?php
-                    // Query SEMUA JADWAL (Urutkan hari Senin s/d Minggu)
+                    // Query SEMUA JADWAL (Diurutkan dari Senin s/d Minggu)
                     $q_all = mysqli_query($conn, "SELECT j.*, m.nama_matkul, d.nama_dosen 
                         FROM jadwal j 
                         JOIN matkul m ON j.kode_matkul = m.kode_matkul 
@@ -263,13 +266,13 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
                 <thead><tr><th>Tanggal</th><th>Jam</th><th>Mata Kuliah</th><th>Status</th></tr></thead>
                 <tbody>
                     <?php
-                    // Query Riwayat TANPA LIMIT (Agar muncul semua)
+                    // Query Riwayat Tanpa LIMIT agar muncul semua
                     $qr = mysqli_query($conn, "SELECT p.*, m.nama_matkul 
                         FROM presensi_kuliah p 
                         JOIN jadwal j ON p.id_jadwal = j.id_jadwal 
                         JOIN matkul m ON j.kode_matkul = m.kode_matkul 
                         WHERE p.nim = '$nim_mhs' 
-                        ORDER BY p.tanggal DESC, p.waktu_hadir DESC"); // HAPUS 'LIMIT 20' disini
+                        ORDER BY p.tanggal DESC, p.waktu_hadir DESC"); // LIMIT DIHAPUS
                     
                     if(mysqli_num_rows($qr) > 0):
                         while($row = mysqli_fetch_assoc($qr)):
@@ -290,7 +293,7 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
         </div>
     </div>
 
-        <?php elseif ($page == 'update_wajah'): ?>
+    <?php elseif ($page == 'update_wajah'): ?>
             <div class="card" style="max-width:500px; margin:0 auto; text-align:center;">
                 <h3>Registrasi Wajah</h3>
                 <p style="color:#64748b; font-size:12px; margin-bottom:20px;">Pastikan wajah terlihat jelas.</p>
