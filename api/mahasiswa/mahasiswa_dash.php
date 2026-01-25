@@ -8,7 +8,7 @@ date_default_timezone_set('Asia/Jakarta');
 
 // Cek Login Cookie
 if (!isset($_COOKIE['status_login']) || $_COOKIE['role'] != 'mahasiswa') {
-    header("Location: ../index.php"); 
+    header("Location: ../../index.php"); 
     exit;
 }
 
@@ -21,7 +21,7 @@ $mhs = mysqli_fetch_assoc($q_mhs);
 
 if(!$mhs) { 
     setcookie('status_login', '', time() - 3600, '/');
-    header("Location: .../index.php");
+    header("Location: ../../index.php");
     exit; 
 }
 
@@ -292,7 +292,7 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
             document.cookie = "status_login=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
             document.cookie = "nim=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
             document.cookie = "role=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-            window.location.href = '../index.php';
+            window.location.href = '../../index.php';
         }
 
         function tutupModal() { $('#modalKamera').hide(); }
