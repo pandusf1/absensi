@@ -326,7 +326,7 @@ if(isset($_POST['simpan_jadwal'])) {
                             ?>
                         </select>
                         <select name="hari" required class="input-form" style="margin:0;">
-                            <option value="Senin">Senin</option><option value="Selasa">Selasa</option><option value="Rabu">Rabu</option><option value="Kamis">Kamis</option><option value="Jumat">Jumat</option><option value="Sabtu">Sabtu</option><option value="Sabtu">Minggu</option>
+                            <option value="Senin">Senin</option><option value="Selasa">Selasa</option><option value="Rabu">Rabu</option><option value="Kamis">Kamis</option><option value="Jumat">Jumat</option><option value="Sabtu">Sabtu</option><option value="Minggu">Minggu</option>
                         </select>
                         <input type="text" name="kelas" placeholder="Kelas (mis: KA-3C)" required class="input-form" style="margin:0;">
                         <input type="number" name="kuota" placeholder="Kuota" value="30" required class="input-form" style="margin:0;">
