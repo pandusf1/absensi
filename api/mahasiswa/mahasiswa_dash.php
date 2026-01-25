@@ -48,7 +48,7 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
     
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="../../aset/js/face-api.min.js"></script> 
+    <script src="../aset/js/face-api.min.js"></script> 
 
     <style>
         /* CSS DESIGN SYSTEM */
@@ -95,7 +95,7 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
 
     <nav class="sidebar" id="mySidebar">
         <div class="sidebar-header">
-            <img src="../../aset/img/polines.png" onerror="this.src='https://via.placeholder.com/40'" alt="Logo" style="width: 35px;">
+            <img src="../aset/img/polines.png" onerror="this.src='https://via.placeholder.com/40'" alt="Logo" style="width: 35px;">
             <div>
                 <h3 style="margin:0; font-size:14px; color:white;">PORTAL MAHASISWA</h3>
                 <small style="font-size:11px; color:#94a3b8;">Sistem Absensi Polines</small>
@@ -122,15 +122,6 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
                         elseif($page=='update_wajah') echo 'Registrasi Wajah';
                     ?>
                 </h3>
-            </div>
-            <div style="display:flex; align-items:center; gap:10px;">
-                <div style="text-align:right; display:none sm:block;">
-                    <span style="font-weight:600; display:block;"><?= htmlspecialchars($mhs['nama']) ?></span>
-                    <small style="color:#64748b;"><?= htmlspecialchars($mhs['nim']) ?></small>
-                </div>
-                <div style="width:35px; height:35px; background:#3b82f6; color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold;">
-                    <?= substr($mhs['nama'],0,1) ?>
-                </div>
             </div>
         </div>
 
@@ -166,8 +157,6 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
         <?php elseif ($page == 'jadwal'): ?>
             <div class="card">
                 <h3 style="margin-bottom:15px; color:#3b82f6;"><i class="fa-solid fa-calendar-day"></i> Jadwal Hari Ini (<?= $hari_ini . ', ' . date('d M Y') ?>)</h3>
-                <p style="font-size:10px; color:red;">Debug: Kelas Mahasiswa = [<?= $kelas_mhs ?>], Hari = [<?= $hari_ini ?>]</p>
-                
                 <div class="table-responsive">
                     <table>
                         <thead><tr><th>Jam</th><th>Mata Kuliah</th><th>Dosen</th><th>Ruang</th><th style="text-align:center;">Aksi Absen</th></tr></thead>
@@ -193,7 +182,7 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
                                 </td>
                             </tr>
                             <?php endwhile; else: ?>
-                            <tr><td colspan="5" style="text-align:center; padding:20px; color:#999;">Tidak ada jadwal kuliah hari ini.</td></tr>
+                            <tr><td colspan="5" style="text-align:center; padding:20px; color:#999;"><i class="fa-solid fa-mug-hot"></i> Tidak ada jadwal kuliah hari ini.</td></tr>
                             <?php endif; ?>
                         </tbody>
                     </table>
@@ -280,7 +269,6 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
     </div>
 
     <script>
-        // 1. FUNGSI DASAR (Diletakkan paling atas agar tidak kena error FaceAPI)
         function toggleSidebar() { 
             document.getElementById('mySidebar').classList.toggle('active'); 
             document.getElementById('mainContent').classList.toggle('active');
@@ -297,8 +285,7 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
 
         function tutupModal() { $('#modalKamera').hide(); }
 
-        // 2. LOGIKA FACE API DENGAN PENGAMAN (Try-Catch)
-        // Agar jika file ../../aset/js/face-api.min.js tidak ketemu, toggle sidebar TETAP JALAN
+        // --- FACE API LOGIC (PATH BARU: ../aset) ---
         let isModelLoaded = false;
         let TINY_FACE_OPTIONS;
 
@@ -307,9 +294,9 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
                 TINY_FACE_OPTIONS = new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.5 });
                 
                 Promise.all([
-                    faceapi.nets.tinyFaceDetector.loadFromUri('../../aset/models'),
-                    faceapi.nets.faceLandmark68Net.loadFromUri('../../aset/models'),
-                    faceapi.nets.faceRecognitionNet.loadFromUri('../../aset/models')
+                    faceapi.nets.tinyFaceDetector.loadFromUri('../aset/models'),
+                    faceapi.nets.faceLandmark68Net.loadFromUri('../aset/models'),
+                    faceapi.nets.faceRecognitionNet.loadFromUri('../aset/models')
                 ]).then(() => { 
                     isModelLoaded = true; 
                     console.log("AI Loaded"); 
@@ -317,7 +304,7 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
                     console.error("Gagal Load Model:", err); 
                 });
             } else {
-                console.error("FaceAPI Library tidak ditemukan! Cek path ../../aset/js/face-api.min.js");
+                console.error("FaceAPI Library tidak ditemukan! Cek path ../aset/js/face-api.min.js");
             }
         } catch (e) {
             console.error("Error Inisialisasi AI:", e);
