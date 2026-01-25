@@ -241,7 +241,6 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
                 <thead><tr><th>Jam</th><th>Mata Kuliah</th><th>Dosen</th><th>Ruang</th><th style="text-align:center;">Absen</th></tr></thead>
                 <tbody>
                     <?php
-                    // --- QUERY 1: JADWAL HARI INI ---
                     $qj = mysqli_query($conn, "SELECT j.*, m.nama_matkul, m.kode_matkul, d.nama_dosen 
                         FROM jadwal j 
                         JOIN matkul m ON j.kode_matkul = m.kode_matkul 
@@ -249,30 +248,39 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
                         WHERE j.kelas = '$kelas_mhs' AND j.hari = '$hari_ini' 
                         ORDER BY j.jam_mulai ASC");
                     
-                    // Cek apakah ada data
                     if($qj && mysqli_num_rows($qj) > 0):
                         while($r = mysqli_fetch_assoc($qj)):
-                            // --- SAFETY CHECK (PENTING!) ---
-                            // Gunakan @ untuk suppress error jika tabel belum ada
-                            $q_real = @mysqli_query($conn, "SELECT * FROM realisasi_mengajar WHERE id_jadwal='".$r['id_jadwal']."' AND tanggal='$tgl_ini' AND status='Berlangsung'");
-                            $is_mulai = ($q_real && mysqli_num_rows($q_real) > 0);
+                            // Cek status kelas (Dosen sudah mulai belum?)
+                            $q_real = mysqli_query($conn, "SELECT * FROM realisasi_mengajar WHERE id_jadwal='".$r['id_jadwal']."' AND tanggal='$tgl_ini' AND status='Berlangsung'");
+                            $is_mulai = (mysqli_num_rows($q_real) > 0);
                             
-                            $q_absen = @mysqli_query($conn, "SELECT * FROM presensi_kuliah WHERE id_jadwal='".$r['id_jadwal']."' AND tanggal='$tgl_ini' AND nim='$nim_mhs'");
-                            $sudah_absen = ($q_absen && mysqli_num_rows($q_absen) > 0);
+                            // Cek apakah mahasiswa SUDAH ABSEN?
+                            $q_absen = mysqli_query($conn, "SELECT * FROM presensi_kuliah WHERE id_jadwal='".$r['id_jadwal']."' AND tanggal='$tgl_ini' AND nim='$nim_mhs'");
+                            $sudah_absen = (mysqli_num_rows($q_absen) > 0);
                     ?>
                     <tr>
-                        <td><?= substr($r['jam_mulai'],0,5) ?> - <?= substr($r['jam_selesai'],0,5) ?></td>
+                        <td><?= substr($r['jam_mulai'],0,5) ?></td>
                         <td><?= $r['nama_matkul'] ?></td>
                         <td><?= $r['nama_dosen'] ?? '-' ?></td>
                         <td><?= $r['ruang'] ?></td>
                         <td style="text-align:center;">
-                            <?php if($sudah_absen): ?><button class="btn btn-green">Hadir</button>
-                            <?php elseif($is_mulai): ?><button class="btn btn-blue" onclick="bukaKamera(<?= $r['id_jadwal'] ?>)">Absen</button>
-                            <?php else: ?><button class="btn btn-disabled">Tutup</button><?php endif; ?>
+                            <?php if($sudah_absen): ?>
+                                <button class="btn btn-green" style="cursor: not-allowed; opacity: 0.8;" disabled>
+                                    <i class="fa-solid fa-check"></i> Sudah Absen
+                                </button>
+                            
+                            <?php elseif($is_mulai): ?>
+                                <button class="btn btn-blue" onclick="bukaKamera(<?= $r['id_jadwal'] ?>)">
+                                    <i class="fa-solid fa-camera"></i> Absen
+                                </button>
+                            
+                            <?php else: ?>
+                                <button class="btn btn-disabled" disabled>Belum Mulai</button>
+                            <?php endif; ?>
                         </td>
                     </tr>
                     <?php endwhile; else: ?>
-                    <tr><td colspan="5" align="center" style="padding:15px; color:#999;">Tidak ada jadwal kuliah hari ini.</td></tr>
+                    <tr><td colspan="5" align="center" style="padding:15px; color:#999;">Tidak ada jadwal hari ini.</td></tr>
                     <?php endif; ?>
                 </tbody>
             </table>
@@ -486,38 +494,34 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
             const displaySize = { width: videoEl.offsetWidth, height: videoEl.offsetHeight };
             faceapi.matchDimensions(canvas, displaySize);
             
-detectInterval = setInterval(async () => {
-    const detection = await faceapi.detectSingleFace(video, TINY_FACE_OPTIONS).withFaceLandmarks().withFaceDescriptor();
-    const ctx = canvas.getContext('2d'); ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    if (detection) {
-        const match = new faceapi.FaceMatcher(targetDescriptor, 0.45).findBestMatch(detection.descriptor);
-        
-        // 1. Ambil ukuran kotak asli
-        const box = faceapi.resizeResults(detection, displaySize).detection.box;
-        
-        // 2. [RUMUS CERMIN] Balik Koordinat X secara manual
-        // Posisi Baru = Lebar Layar - Posisi Lama - Lebar Kotak
-        const flippedBox = {
-            x: displaySize.width - box.x - box.width,
-            y: box.y,
-            width: box.width,
-            height: box.height
-        };
-
-        // 3. Gambar kotak menggunakan koordinat yang sudah dibalik
-        const drawBox = new faceapi.draw.DrawBox(flippedBox, { 
-            label: match.toString(), 
-            boxColor: match.label === '<?= $nim_mhs ?>' ? "green" : "red" 
-        });
-        drawBox.draw(canvas);
-        
-        if (match.label === '<?= $nim_mhs ?>') { 
-            clearInterval(detectInterval); 
-            simpanAbsen(currentJadwalId); 
-        }
-    }
-}, 100);
+            detectInterval = setInterval(async () => {
+                const detection = await faceapi.detectSingleFace(videoEl, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceDescriptor();
+                
+                // Bersihkan canvas
+                const ctx = canvas.getContext('2d'); 
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                if (detection) {
+                    const match = new faceapi.FaceMatcher(targetDescriptor, 0.45).findBestMatch(detection.descriptor);
+                    
+                    // Resize hasil deteksi ke ukuran tampilan layar
+                    const resizedDetections = faceapi.resizeResults(detection, displaySize);
+                    const box = resizedDetections.detection.box;
+                    
+                    // Gambar Kotak
+                    const drawBox = new faceapi.draw.DrawBox(box, { 
+                        label: match.toString(), 
+                        boxColor: match.label === '<?= $nim_mhs ?>' ? "green" : "red" 
+                    });
+                    drawBox.draw(canvas);
+                    
+                    // Jika Cocok, Absen
+                    if (match.label === '<?= $nim_mhs ?>') { 
+                        clearInterval(detectInterval); 
+                        simpanAbsen(currentJadwalId); 
+                    }
+                }
+            }, 300);
         }
 
         function simpanAbsen(id) {
