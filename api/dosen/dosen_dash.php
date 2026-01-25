@@ -419,9 +419,7 @@ if(isset($_POST['simpan_jadwal'])) {
             </div>
 
 <?php elseif ($page == 'rekap'): ?>
-    <div class="card">
-        <h3 style="margin-bottom:15px;">Laporan Presensi</h3>
-        
+    <div class="card">        
         <div style="background:#f8fafc; padding:15px; border-radius:8px; border:1px solid #e2e8f0; margin-bottom:15px;">
             <div style="margin-bottom:10px;">
                 <label style="font-size:11px; font-weight:bold; color:#64748b; display:block; margin-bottom:5px;">Pencarian</label>
@@ -444,19 +442,17 @@ if(isset($_POST['simpan_jadwal'])) {
         </div>
 
         <div class="table-responsive">
-            <table>
-                <thead>
+            <table class="table table-hover"> <thead>
                     <tr>
                         <th>Tanggal</th>
                         <th>Mata Kuliah</th>
                         <th>Kelas</th>
                         <th>Materi</th>
                         <th>Hadir</th>
-                        <th style="text-align:center;">Aksi</th>
                     </tr>
                 </thead>
                 <tbody id="tabelRekapBody">
-                    <tr><td colspan="6" align="center" style="padding:20px;">Memuat data...</td></tr>
+                    <tr><td colspan="5" align="center" style="padding:20px;">Silakan klik filter untuk memuat data.</td></tr>
                 </tbody>
             </table>
         </div>
@@ -466,16 +462,34 @@ if(isset($_POST['simpan_jadwal'])) {
         <div class="modal-content">
             <h3 style="margin-bottom:5px;">Detail Kehadiran</h3>
             <p id="judulDetail" style="color:#666; font-size:12px; margin-bottom:15px;"></p>
+            
             <div style="max-height:250px; overflow-y:auto; border:1px solid #eee; margin-bottom:15px;">
-                <table style="margin:0;"><tbody id="bodyDetailMhs"></tbody></table>
+                <table style="margin:0; width:100%;">
+                    <thead>
+                        <tr style="background:#f1f5f9; position:sticky; top:0;">
+                            <th style="padding:8px; font-size:11px;">NIM</th>
+                            <th style="padding:8px; font-size:11px;">Nama</th>
+                            <th style="padding:8px; font-size:11px;">Waktu</th>
+                            <th style="padding:8px; font-size:11px;">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="bodyDetailMhs"></tbody>
+                </table>
             </div>
+
             <div style="background:#f0fdf4; padding:10px; border-radius:8px; border:1px dashed #22c55e;">
                 <h4 style="font-size:12px; margin-bottom:5px; color:#166534;">+ Input Manual</h4>
                 <form onsubmit="tambahManual(event)" style="display:flex; gap:5px;">
-                    <input type="hidden" id="id_jadwal_detail"><input type="hidden" id="tgl_detail">
-                    <input type="text" id="manual_nim" placeholder="NIM" required class="input-form" style="flex:1; margin:0;">
-                    <select id="manual_status" class="input-form" style="width:100px; margin:0;"><option value="Sakit">Sakit</option><option value="Izin">Izin</option><option value="Hadir">Hadir</option></select>
-                    <button type="submit" class="btn btn-green">Simpan</button>
+                    <input type="hidden" id="id_jadwal_detail">
+                    <input type="hidden" id="tgl_detail">
+                    <input type="text" id="manual_nim" placeholder="NIM" required class="input-form" style="flex:1; margin:0; font-size:12px;">
+                    <select id="manual_status" class="input-form" style="width:100px; margin:0; font-size:12px;">
+                        <option value="Sakit">Sakit</option>
+                        <option value="Izin">Izin</option>
+                        <option value="Hadir">Hadir</option>
+                        <option value="Alpha">Alpha</option>
+                    </select>
+                    <button type="submit" class="btn btn-green" style="font-size:12px;">Simpan</button>
                 </form>
             </div>
         </div>
@@ -511,31 +525,47 @@ if(isset($_POST['simpan_jadwal'])) {
     }
 
     // --- FUNGSI HALAMAN REKAP ---
-    function loadRekap() {
-        let kw = $('#filter_keyword').val();
-        let tm = $('#filter_tgl_mulai').val();
-        let ta = $('#filter_tgl_akhir').val();
-
-        $('#tabelRekapBody').html('<tr><td colspan="6" align="center">Memuat riwayat kelas...</td></tr>');
-
-        $.post('dosen_ajax.php', { 
-            action: 'filter_rekap', 
-            keyword: kw, 
-            tgl_mulai: tm, 
-            tgl_akhir: ta,
-            nip: '<?= $nip_dosen ?>' // Kirim NIP dari session/cookie
-        }, function(res) {
-            $('#tabelRekapBody').html(res);
+        document.addEventListener("DOMContentLoaded", function() {
+            loadRekap();
         });
-    }
+
+        function loadRekap() {
+            const keyword = document.getElementById('filter_keyword').value;
+            const tglMulai = document.getElementById('filter_tgl_mulai').value;
+            const tglAkhir = document.getElementById('filter_tgl_akhir').value;
+            const tbody = document.getElementById('tabelRekapBody');
+
+            tbody.innerHTML = '<tr><td colspan="5" align="center" style="padding:20px;">Memuat data...</td></tr>';
+
+            $.post('dosen_ajax.php', {
+                action: 'load_rekap_list',
+                keyword: keyword,
+                tgl_mulai: tglMulai,
+                tgl_akhir: tglAkhir
+            }, function(response) {
+                tbody.innerHTML = response;
+            });
+        }
 
 function bukaDetail(id, tgl, matkul, kelas) {
-        $('#judulDetail').text(matkul + " - " + tgl); 
-        $('#id_jadwal_detail').val(id); 
-        $('#tgl_detail').val(tgl);
-        loadDetailIsi(id, tgl); 
-        $('#modalDetailRekap').css('display', 'flex');
-    }
+            document.getElementById('judulDetail').innerText = matkul + ' (' + kelas + ') - ' + tgl;
+            document.getElementById('id_jadwal_detail').value = id;
+            document.getElementById('tgl_detail').value = tgl;
+            
+            // Load detail students
+            const bodyDetail = document.getElementById('bodyDetailMhs');
+            bodyDetail.innerHTML = '<tr><td colspan="4" align="center">Loading...</td></tr>';
+            
+            document.getElementById('modalDetailRekap').style.display = 'flex';
+
+            $.post('dosen_ajax.php', {
+                action: 'load_detail_mhs',
+                id_jadwal: id,
+                tanggal: tgl
+            }, function(response) {
+                bodyDetail.innerHTML = response;
+            });
+        }
 
     function loadDetailIsi(id, tgl) {
         $('#bodyDetailMhs').html('<tr><td align="center">Loading...</td></tr>');
@@ -544,23 +574,40 @@ function bukaDetail(id, tgl, matkul, kelas) {
         });
     }
 
-    function tambahManual(e) {
-        e.preventDefault();
-        let id = $('#id_jadwal_detail').val();
-        let tgl = $('#tgl_detail').val();
-        $.post('dosen_ajax.php', { 
-            action: 'tambah_presensi_manual', 
-            id_jadwal: id, 
-            tanggal: tgl, 
-            nim: $('#manual_nim').val(), 
-            status: $('#manual_status').val() 
-        }, function(res) { 
-            Swal.fire('Info', res, 'info'); 
-            $('#manual_nim').val(''); 
-            loadDetailIsi(id, tgl); 
-        });
-    }
-    
+function tambahManual(e) {
+            e.preventDefault();
+            const id = document.getElementById('id_jadwal_detail').value;
+            const tgl = document.getElementById('tgl_detail').value;
+            const nim = document.getElementById('manual_nim').value;
+            const status = document.getElementById('manual_status').value;
+
+            $.post('dosen_ajax.php', {
+                action: 'tambah_presensi_manual',
+                id_jadwal: id,
+                tanggal: tgl,
+                nim: nim,
+                status: status
+            }, function(response) {
+                // Assuming response is text message or JSON
+                // Simple alert for feedback
+                alert(response); 
+                // Reload the detail list
+                bukaDetail(id, tgl, document.getElementById('judulDetail').innerText.split(' (')[0], '');
+                document.getElementById('manual_nim').value = '';
+            });
+        }
+
+        function ubahStatus(id_presensi, newStatus) {
+             $.post('dosen_ajax.php', {
+                action: 'update_status_presensi',
+                id_presensi: id_presensi,
+                status: newStatus
+            }, function(response) {
+                // Optional: show small notification
+                console.log("Status updated");
+            });
+        }
+
     // --- FUNGSI HALAMAN MATKUL ---
     function bukaModalMatkul(el) {
         var kode = $(el).data('kode');
