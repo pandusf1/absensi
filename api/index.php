@@ -152,10 +152,12 @@ case 'home': ?>
                 <br><br>
                 Belum memiliki akun? <a href="?page=pilih_peran" style="font-weight:bold;">Buat Akun</a>
             </div>
+            <div style="font-size: 10px;">
             <p><b>Akun Mahasiswa:</b></p>
             <p>NIM: 4.41.23.2.23 | Password: 123</p>
             <p><b>Akun Dosen:</b></p>
             <p>NIP: 1234567 | Password: 123</p>
+            </div>
         </div>
     </div>
 
