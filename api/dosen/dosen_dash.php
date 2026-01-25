@@ -516,20 +516,20 @@ if(isset($_POST['simpan_jadwal'])) {
         let tm = $('#filter_tgl_mulai').val();
         let ta = $('#filter_tgl_akhir').val();
 
-        $('#tabelRekapBody').html('<tr><td colspan="6" align="center">Sedang mencari...</td></tr>');
+        $('#tabelRekapBody').html('<tr><td colspan="6" align="center">Memuat riwayat kelas...</td></tr>');
 
         $.post('dosen_ajax.php', { 
             action: 'filter_rekap', 
             keyword: kw, 
             tgl_mulai: tm, 
             tgl_akhir: ta,
-            nip: '<?= $nip_dosen ?>'
+            nip: '<?= $nip_dosen ?>' // Kirim NIP dari session/cookie
         }, function(res) {
             $('#tabelRekapBody').html(res);
         });
     }
 
-    function bukaDetail(id, tgl, matkul, kelas) {
+function bukaDetail(id, tgl, matkul, kelas) {
         $('#judulDetail').text(matkul + " - " + tgl); 
         $('#id_jadwal_detail').val(id); 
         $('#tgl_detail').val(tgl);
@@ -560,7 +560,7 @@ if(isset($_POST['simpan_jadwal'])) {
             loadDetailIsi(id, tgl); 
         });
     }
-
+    
     // --- FUNGSI HALAMAN MATKUL ---
     function bukaModalMatkul(el) {
         var kode = $(el).data('kode');

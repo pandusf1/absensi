@@ -244,7 +244,7 @@ case 'daftar_mhs': ?>
                 <input type="text" name="kelas" placeholder="Kelas (Contoh: KA-3C)" required style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:5px;">
                 
                 <select name="jurusan" id="jurusan" required onchange="updateProdi()" style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:5px; background:white;">
-                    <option value="">-- Pilih Jurusan --</option>
+                    <option value="">Pilih Jurusan</option>
                     <option value="Teknik Sipil">Teknik Sipil</option>
                     <option value="Teknik Mesin">Teknik Mesin</option>
                     <option value="Teknik Elektro">Teknik Elektro</option>
@@ -253,7 +253,7 @@ case 'daftar_mhs': ?>
                 </select>
 
                 <select name="prodi" id="prodi" required style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:5px; background:white;">
-                    <option value="">-- Pilih Jurusan Terlebih Dahulu --</option>
+                    <option value="">Pilih Prodi /option>
                 </select>
 
                 <input type="email" name="email" placeholder="Email Aktif" required style="width:100%; padding:10px; margin-bottom:10px; border:1px solid #ddd; border-radius:5px;">
