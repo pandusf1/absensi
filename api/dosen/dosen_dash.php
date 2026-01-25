@@ -204,7 +204,7 @@ if(isset($_POST['simpan_jadwal'])) {
 
     <nav class="sidebar" id="mySidebar">
         <div class="sidebar-header">
-            <img src="../aset/img/polines.png" onerror="this.src='https://via.placeholder.com/40'" alt="Logo" style="width: 35px;">
+            <img src="../../aset/img/polines.png" onerror="this.src='https://via.placeholder.com/40'" alt="Logo" style="width: 35px;">
             <div>
                 <h3 style="margin:0; font-size:14px; color:white;">PORTAL DOSEN</h3>
                 <small style="font-size:11px; color:#94a3b8;">Sistem Akademik</small>

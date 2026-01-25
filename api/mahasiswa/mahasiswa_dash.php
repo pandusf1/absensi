@@ -59,7 +59,7 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
-    <script src="../aset/js/face-api.min.js"></script> 
+    <script src="../../aset/js/face-api.min.js"></script> 
 
     <script>
         // Fungsi Toggle Sidebar
@@ -171,7 +171,7 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
 
     <nav class="sidebar" id="mySidebar">
         <div class="sidebar-header">
-            <img src="../aset/img/polines.png" onerror="this.src='https://via.placeholder.com/40'" alt="Logo" style="width: 35px;">
+            <img src="../../aset/img/polines.png" onerror="this.src='https://via.placeholder.com/40'" alt="Logo" style="width: 35px;">
             <div>
                 <h3 style="margin:0; font-size:14px; color:white;">PORTAL MAHASISWA</h3>
                 <small style="font-size:11px; color:#94a3b8;">Sistem Absensi Polines</small>
@@ -420,14 +420,14 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
                 const TINY_FACE_OPTIONS = new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.5 });
                 
                 Promise.all([
-                    faceapi.nets.tinyFaceDetector.loadFromUri('../aset/models'),
-                    faceapi.nets.faceLandmark68Net.loadFromUri('../aset/models'),
-                    faceapi.nets.faceRecognitionNet.loadFromUri('../aset/models')
+                    faceapi.nets.tinyFaceDetector.loadFromUri('../../aset/models'),
+                    faceapi.nets.faceLandmark68Net.loadFromUri('../../aset/models'),
+                    faceapi.nets.faceRecognitionNet.loadFromUri('../../aset/models')
                 ]).then(() => { 
                     isModelLoaded = true; 
-                    console.log("AI Ready"); 
+                    console.log("Scanner Ready"); 
                 }).catch(err => {
-                    console.error("Gagal Load Model:", err);
+                    console.error("Gagal Load Scanner:", err);
                 });
             }
         } catch(e) { console.warn("Face API Error:", e); }
@@ -532,7 +532,7 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
         <?php if ($page == 'update_wajah'): ?>
         let regStream, regInterval, lastDescriptor;
         function mulaiKameraReg() {
-            if(!isModelLoaded) { Swal.fire("Error", "AI belum siap.", "error"); return; }
+            if(!isModelLoaded) { Swal.fire("Error", "Scanner belum siap.", "error"); return; }
             navigator.mediaDevices.getUserMedia({ video: {} }).then(s => {
                 regStream = s; 
                 const v = document.getElementById('videoReg');
