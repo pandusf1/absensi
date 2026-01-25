@@ -161,13 +161,13 @@ case 'home': ?>
             var icon = document.getElementById("toggleIcon");
 
             if (input.type === "password") {
-                input.type = "text"; // Ubah jadi teks biasa
+                input.type = "text"; 
                 icon.classList.remove("fa-eye");
-                icon.classList.add("fa-eye-slash"); // Ganti ikon jadi mata dicoret
+                icon.classList.add("fa-eye-slash"); 
             } else {
-                input.type = "password"; // Kembalikan jadi password (bintang-bintang)
+                input.type = "password"; 
                 icon.classList.remove("fa-eye-slash");
-                icon.classList.add("fa-eye"); // Ganti ikon jadi mata biasa
+                icon.classList.add("fa-eye"); 
             }
         }
     </script>
