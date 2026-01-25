@@ -144,11 +144,27 @@ elseif ($action == 'filter_rekap') {
     // Query Dasar: Filter NIP & Status Selesai
     $where = "WHERE j.nip = '$nip' AND r.status = 'Selesai'";
     
-    // Filter Keyword
+// Filter Keyword (SUPER SMART SEARCH)
     if(!empty($kw)) {
-        $where .= " AND (m.nama_matkul LIKE '%$kw%' OR j.kelas LIKE '%$kw%')";
+        // 1. Bersihkan input dan pecah berdasarkan spasi
+        // Contoh user ketik: "web  3c " -> jadi array ["web", "3c"]
+        $words = explode(" ", trim($kw));
+        
+        foreach($words as $word) {
+            // Skip jika cuma spasi kosong
+            if(empty($word)) continue;
+            
+            $word = mysqli_real_escape_string($conn, $word);
+            
+            // 2. Logika: SETIAP kata yang diketik harus ada di (Matkul ATAU Kelas)
+            // Menggunakan LOWER() agar "WEB", "Web", "web" dianggap sama
+            $where .= " AND (
+                LOWER(m.nama_matkul) LIKE LOWER('%$word%') OR 
+                LOWER(j.kelas) LIKE LOWER('%$word%')
+            )";
+        }
     }
-    // Filter Tanggal
+        // Filter Tanggal
     if(!empty($tm)) { $where .= " AND r.tanggal >= '$tm'"; }
     if(!empty($ta)) { $where .= " AND r.tanggal <= '$ta'"; }
 
