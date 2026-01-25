@@ -8,11 +8,11 @@ date_default_timezone_set('Asia/Jakarta');
 
 // Cek Login Cookie
 if (!isset($_COOKIE['status_login']) || $_COOKIE['role'] != 'mahasiswa') {
-    header("Location: ../index.php"); // Mundur 1 langkah ke api/index.php
+    header("Location: ../index.php"); 
     exit;
 }
 
-require_once __DIR__ . '/../database.php'; // api/database.php
+require_once __DIR__ . '/../database.php';
 
 // Ambil Data Mahasiswa
 $nim_mhs = $_COOKIE['nim']; 
@@ -48,26 +48,23 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
     
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="../aset/js/face-api.min.js"></script> 
+    <script src="../../aset/js/face-api.min.js"></script> 
 
     <style>
         /* CSS DESIGN SYSTEM */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         body { background-color: #f4f7f6; display: flex; min-height: 100vh; font-size: 13px; color: #333; overflow-x: hidden; }
-        
         .sidebar { width: 250px; background: #1e293b; color: white; position: fixed; height: 100vh; left: -250px; top: 0; z-index: 1000; transition: 0.3s; box-shadow: 2px 0 10px rgba(0,0,0,0.1); }
         .sidebar.active { left: 0; }
         .sidebar-header { padding: 20px; border-bottom: 1px solid #334155; display: flex; align-items: center; gap: 10px; background: #0f172a; }
         .menu { list-style: none; padding-top: 10px; }
         .menu li a { display: flex; align-items: center; padding: 14px 20px; color: #cbd5e1; text-decoration: none; transition: 0.2s; gap: 12px; font-size: 13px; border-left: 3px solid transparent; }
         .menu li a:hover, .menu li a.active { background-color: #334155; color: #60a5fa; border-left-color: #60a5fa; }
-        
         .main-content { flex: 1; margin-left: 0; padding: 20px; width: 100%; transition: 0.3s; }
         .top-bar { display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px 20px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.03); margin-bottom: 25px; }
         .btn-burger { display: block; background: none; border: none; font-size: 20px; cursor: pointer; color: #333; }
         .overlay-sidebar { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 900; }
         .overlay-sidebar.active { display: block; }
-        
         .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-bottom: 20px; }
         .table-responsive { width: 100%; overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; white-space: nowrap; }
@@ -75,17 +72,14 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
         th { background: #f8fafc; color: #475569; font-weight: 600; font-size: 12px; }
         .btn { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-weight: 500; font-size: 12px; color: white; transition: 0.2s; }
         .btn-green { background: #10b981; } .btn-blue { background: #3b82f6; } .btn-disabled { background: #e2e8f0; color: #94a3b8; cursor: not-allowed; }
-        
         .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; margin-bottom: 20px; }
         .stat-card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); text-align: center; border-bottom: 4px solid #ddd; }
         .stat-card h3 { font-size: 28px; margin-bottom: 5px; color: #1e293b; }
-
         .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center; }
         .modal-content { background: white; padding: 20px; border-radius: 15px; width: 90%; max-width: 450px; text-align: center; }
         #video-container { width: 100%; height: 300px; background: #000; border-radius: 10px; overflow: hidden; position: relative; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
         video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
         canvas { position: absolute; top: 0; left: 0; }
-
         @media (min-width: 769px) { .main-content.active { margin-left: 250px; width: calc(100% - 250px); } }
     </style>
 </head>
@@ -122,6 +116,15 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
                         elseif($page=='update_wajah') echo 'Registrasi Wajah';
                     ?>
                 </h3>
+            </div>
+            <div style="display:flex; align-items:center; gap:10px;">
+                <div style="text-align:right; display:none sm:block;">
+                    <span style="font-weight:600; display:block;"><?= htmlspecialchars($mhs['nama']) ?></span>
+                    <small style="color:#64748b;"><?= htmlspecialchars($mhs['nim']) ?></small>
+                </div>
+                <div style="width:35px; height:35px; background:#3b82f6; color:white; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold;">
+                    <?= substr($mhs['nama'],0,1) ?>
+                </div>
             </div>
         </div>
 
@@ -162,8 +165,15 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
                         <thead><tr><th>Jam</th><th>Mata Kuliah</th><th>Dosen</th><th>Ruang</th><th style="text-align:center;">Aksi Absen</th></tr></thead>
                         <tbody>
                             <?php
-                            $qj = mysqli_query($conn, "SELECT j.*, m.nama_matkul, m.kode_matkul, d.nama_dosen FROM jadwal j JOIN matkul m ON j.kode_matkul = m.kode_matkul JOIN dosen d ON j.nip = d.nip WHERE j.kelas = '$kelas_mhs' AND j.hari = '$hari_ini' ORDER BY j.jam_mulai ASC");
-                            if(mysqli_num_rows($qj) > 0):
+                            // Query Jadwal Hari Ini
+                            $qj = mysqli_query($conn, "SELECT j.*, m.nama_matkul, m.kode_matkul, d.nama_dosen 
+                                FROM jadwal j 
+                                JOIN matkul m ON j.kode_matkul = m.kode_matkul 
+                                LEFT JOIN dosen d ON j.nip = d.nip 
+                                WHERE j.kelas = '$kelas_mhs' AND j.hari = '$hari_ini' 
+                                ORDER BY j.jam_mulai ASC");
+                            
+                            if($qj && mysqli_num_rows($qj) > 0):
                                 while($r = mysqli_fetch_assoc($qj)):
                                     $q_real = mysqli_query($conn, "SELECT * FROM realisasi_mengajar WHERE id_jadwal='".$r['id_jadwal']."' AND tanggal='$tgl_ini' AND status='Berlangsung'");
                                     $is_mulai = (mysqli_num_rows($q_real) > 0);
@@ -173,7 +183,7 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
                             <tr>
                                 <td><?= substr($r['jam_mulai'],0,5) ?> - <?= substr($r['jam_selesai'],0,5) ?></td>
                                 <td><?= $r['nama_matkul'] ?></td>
-                                <td><?= $r['nama_dosen'] ?></td>
+                                <td><?= $r['nama_dosen'] ?? '-' ?></td>
                                 <td><?= $r['ruang'] ?></td>
                                 <td style="text-align:center;">
                                     <?php if($sudah_absen): ?><button class="btn btn-green">Hadir</button>
@@ -196,20 +206,47 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
                         <thead><tr><th>Hari</th><th>Jam</th><th>Mata Kuliah</th><th>Dosen</th><th>Ruang</th></tr></thead>
                         <tbody>
                             <?php
-                            $q_all = mysqli_query($conn, "SELECT j.*, m.nama_matkul, d.nama_dosen FROM jadwal j JOIN matkul m ON j.kode_matkul = m.kode_matkul JOIN dosen d ON j.nip = d.nip WHERE j.kelas = '$kelas_mhs' ORDER BY FIELD(j.hari, 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'), j.jam_mulai ASC");
-                            if(mysqli_num_rows($q_all) > 0):
+                            // Menggunakan CASE WHEN sebagai pengganti FIELD untuk sorting hari (Lebih Aman)
+                            $sql_all = "SELECT j.*, m.nama_matkul, d.nama_dosen 
+                                FROM jadwal j 
+                                JOIN matkul m ON j.kode_matkul = m.kode_matkul 
+                                LEFT JOIN dosen d ON j.nip = d.nip 
+                                WHERE j.kelas = '$kelas_mhs' 
+                                ORDER BY 
+                                CASE j.hari
+                                    WHEN 'Senin' THEN 1
+                                    WHEN 'Selasa' THEN 2
+                                    WHEN 'Rabu' THEN 3
+                                    WHEN 'Kamis' THEN 4
+                                    WHEN 'Jumat' THEN 5
+                                    WHEN 'Sabtu' THEN 6
+                                    WHEN 'Minggu' THEN 7
+                                    ELSE 8
+                                END, j.jam_mulai ASC";
+
+                            $q_all = mysqli_query($conn, $sql_all);
+                            
+                            // DEBUGGING: Cek jika error SQL
+                            if (!$q_all) {
+                                echo "<tr><td colspan='5' style='color:red; text-align:center;'>Error Query: ".mysqli_error($conn)."</td></tr>";
+                            } elseif (mysqli_num_rows($q_all) > 0) {
                                 while($all = mysqli_fetch_assoc($q_all)):
                             ?>
                             <tr>
-                                <td><?php if($all['hari']==$hari_ini):?><span style="background:#dbeafe; color:#1e40af; padding:4px 8px; border-radius:4px; font-weight:bold;"><?= $all['hari'] ?></span><?php else: echo $all['hari']; endif; ?></td>
+                                <td>
+                                    <?php if($all['hari']==$hari_ini):?>
+                                        <span style="background:#dbeafe; color:#1e40af; padding:4px 8px; border-radius:4px; font-weight:bold;"><?= $all['hari'] ?></span>
+                                    <?php else: echo $all['hari']; endif; ?>
+                                </td>
                                 <td><?= substr($all['jam_mulai'],0,5) ?> - <?= substr($all['jam_selesai'],0,5) ?></td>
                                 <td><?= $all['nama_matkul'] ?></td>
-                                <td><?= $all['nama_dosen'] ?></td>
+                                <td><?= $all['nama_dosen'] ?? '-' ?></td>
                                 <td><?= $all['ruang'] ?></td>
                             </tr>
-                            <?php endwhile; else: ?>
-                            <tr><td colspan="5" style="text-align:center;">Belum ada jadwal.</td></tr>
-                            <?php endif; ?>
+                            <?php endwhile; 
+                            } else { ?>
+                            <tr><td colspan="5" style="text-align:center;">Belum ada jadwal untuk kelas <?= $kelas_mhs ?>.</td></tr>
+                            <?php } ?>
                         </tbody>
                     </table>
                 </div>
@@ -233,7 +270,8 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
                         <tbody>
                             <?php
                             $qr = mysqli_query($conn, "SELECT p.*, m.nama_matkul FROM presensi_kuliah p JOIN jadwal j ON p.id_jadwal = j.id_jadwal JOIN matkul m ON j.kode_matkul = m.kode_matkul WHERE p.nim = '$nim_mhs' ORDER BY p.tanggal DESC, p.waktu_hadir DESC");
-                            if(mysqli_num_rows($qr) > 0):
+                            
+                            if($qr && mysqli_num_rows($qr) > 0):
                                 while($row = mysqli_fetch_assoc($qr)):
                                     $st = $row['status']; 
                                     $badge = ($st=='Hadir') ? '#dcfce7; color:#166534' : (($st=='Alpha') ? '#fee2e2; color:#991b1b' : '#fef3c7; color:#92400e');
@@ -279,13 +317,12 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
             document.cookie = "status_login=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
             document.cookie = "nim=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
             document.cookie = "role=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-            // FIX: Mundur 1 langkah karena index ada di folder API
             window.location.href = '../index.php';
         }
 
         function tutupModal() { $('#modalKamera').hide(); }
 
-        // --- FACE API LOGIC (PATH BARU: ../aset) ---
+        // --- FACE API LOGIC (PATH AMAN: ../aset) ---
         let isModelLoaded = false;
         let TINY_FACE_OPTIONS;
 
@@ -304,7 +341,7 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
                     console.error("Gagal Load Model:", err); 
                 });
             } else {
-                console.error("FaceAPI Library tidak ditemukan! Cek path ../aset/js/face-api.min.js");
+                console.error("Library FaceAPI tidak terload! Cek path.");
             }
         } catch (e) {
             console.error("Error Inisialisasi AI:", e);
@@ -314,7 +351,7 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
         let currentJadwalId = null, video = document.getElementById('video'), stream = null, detectInterval;
         
         function bukaKamera(id) {
-            if(!isModelLoaded) { Swal.fire("Tunggu", "Memuat AI atau Library Gagal...", "info"); return; }
+            if(!isModelLoaded) { Swal.fire("Tunggu", "Memuat AI...", "info"); return; }
             currentJadwalId = id; $('#modalKamera').css('display', 'flex');
             $.post('mahasiswa_ajax.php', { action: 'get_face_descriptor', nim: '<?= $nim_mhs ?>' }, function(res){
                 try {
@@ -356,7 +393,7 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
         <?php if ($page == 'update_wajah'): ?>
         let regStream, regInterval, lastDescriptor;
         function mulaiKameraReg() {
-            if(!isModelLoaded) { Swal.fire("Error", "AI belum siap. Cek Console (F12).", "error"); return; }
+            if(!isModelLoaded) { Swal.fire("Error", "AI belum siap.", "error"); return; }
             navigator.mediaDevices.getUserMedia({ video: {} }).then(s => {
                 regStream = s; document.getElementById('videoReg').srcObject = regStream;
                 document.getElementById('videoReg').onloadedmetadata = () => { document.getElementById('videoReg').play(); detectRegLoop(); };
