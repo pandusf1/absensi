@@ -23,7 +23,6 @@ $nim_mhs = $_COOKIE['nim'];
 $q_mhs = mysqli_query($conn, "SELECT * FROM `data` WHERE nim = '$nim_mhs'");
 $mhs = mysqli_fetch_assoc($q_mhs);
 
-// Jika data mahasiswa tidak ditemukan di database (misal dihapus), logout paksa
 if(!$mhs) { 
     setcookie('status_login', '', time() - 3600, '/'); // Hapus cookie
     header("Location: ../index.php");
@@ -31,9 +30,8 @@ if(!$mhs) {
 }
 
 $kelas_mhs = $mhs['kelas'];
-$punya_wajah = !empty($mhs['face_descriptor']) ? 'true' : 'false';
+$punya_wajah = (!empty($mhs['face_descriptor']) && $mhs['face_descriptor'] != 'null') ? 'true' : 'false';
 
-// Variabel Waktu untuk Jadwal
 $hari_inggris = date('l');
 $map_hari = [
     'Sunday' => 'Minggu', 
@@ -136,7 +134,7 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
         .modal-content { background: white; padding: 20px; border-radius: 15px; width: 90%; max-width: 450px; text-align: center; }
         #video-container { width: 100%; height: 300px; background: #000; border-radius: 10px; overflow: hidden; position: relative; display: flex; align-items: center; justify-content: center; margin-bottom: 10px; }
         video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
-        canvas { position: absolute; top: 0; left: 0; }
+        canvas { position: absolute; top: 0; left: 0; transform: scaleX(-1);}
 
         /* RESPONSIVE */
         @media (min-width: 769px) { .main-content.active { margin-left: 250px; width: calc(100% - 250px); } }
@@ -410,19 +408,43 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
         const userHasFace = <?= $punya_wajah ?>;
 
         function bukaKamera(id) {
+            if (!userHasFace) {
+                Swal.fire({
+                    title: "Wajah Belum Terdaftar!",
+                    text: "Anda harus scan wajah dulu di menu Registrasi Wajah.",
+                    icon: "warning",
+                    confirmButtonText: "Ke Menu Scan",
+                    allowOutsideClick: false
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = '?page=update_wajah'; // Redirect paksa
+                    }
+                });
+                return; // Stop, jangan lanjut buka kamera
+            }
             if(!isModelLoaded) { Swal.fire("Tunggu", "Memuat AI...", "info"); return; }
-            currentJadwalId = id; $('#modalKamera').css('display', 'flex');
+            currentJadwalId = id; 
+            $('#modalKamera').css('display', 'flex');
+            
+            // Ambil data wajah dari database via AJAX
             $.post('mahasiswa_ajax.php', { action: 'get_face_descriptor', nim: '<?= $nim_mhs ?>' }, function(res){
                 try {
                     let rawData = JSON.parse(res);
+                    // Konversi object ke array jika perlu
                     if (rawData && typeof rawData === 'object' && !Array.isArray(rawData)) rawData = Object.values(rawData);
+                    
                     const targetDescriptor = new faceapi.LabeledFaceDescriptors('<?= $nim_mhs ?>', [new Float32Array(rawData)]);
                     $('#statusScan').text("Mencari wajah...");
+                    
                     navigator.mediaDevices.getUserMedia({ video: {} }).then(s => {
-                        stream = s; video.srcObject = stream;
+                        stream = s; 
+                        video.srcObject = stream;
                         video.onloadedmetadata = () => { video.play(); startDetection(targetDescriptor); };
                     });
-                } catch(e) { Swal.fire("Gagal", "Wajah belum terdaftar.", "warning"); tutupKamera(); }
+                } catch(e) { 
+                    Swal.fire("Gagal", "Wajah Anda belum terdaftar. Silakan update wajah di menu profil.", "warning"); 
+                    tutupModal(); 
+                }
             });
         }
 
