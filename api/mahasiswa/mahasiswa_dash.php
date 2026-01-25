@@ -256,27 +256,38 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
     </div>
 
     <div class="card" style="margin-top: 20px;">
-        <h3 style="margin-bottom:15px; color:#64748b;"><i class="fa-solid fa-calendar-week"></i>Jadwal Kelas</h3>
+        <h3 style="margin-bottom:15px; color:#64748b;"><i class="fa-solid fa-calendar-week"></i> Jadwal Kelas</h3>
         <div class="table-responsive">
             <table>
                 <thead><tr><th>Hari</th><th>Jam</th><th>Mata Kuliah</th><th>Dosen</th><th>Ruang</th></tr></thead>
                 <tbody>
-<?php
-                    // --- QUERY 2: SEMUA JADWAL ---
+                <?php
+                    // Query 2: Semua Jadwal (Diurutkan: Hari Ini Paling Atas -> Sisa Hari Urut -> Jam)
                     $sql_all = "SELECT j.*, m.nama_matkul, d.nama_dosen 
                         FROM jadwal j 
                         JOIN matkul m ON j.kode_matkul = m.kode_matkul 
                         LEFT JOIN dosen d ON j.nip = d.nip 
                         WHERE j.kelas = '$kelas_mhs' 
                         ORDER BY 
+                        -- 1. Prioritas Utama: HARI INI ditaruh paling atas (0), sisanya di bawah (1)
+                        CASE WHEN j.hari = '$hari_ini' THEN 0 ELSE 1 END ASC,
+                        
+                        -- 2. Prioritas Kedua: Urutan Hari Standar (Senin - Minggu) untuk jadwal hari lain
                         CASE j.hari
-                            WHEN 'Senin' THEN 1 WHEN 'Selasa' THEN 2 WHEN 'Rabu' THEN 3
-                            WHEN 'Kamis' THEN 4 WHEN 'Jumat' THEN 5 WHEN 'Sabtu' THEN 6
-                            ELSE 7
-                        END, j.jam_mulai ASC";
+                            WHEN 'Senin' THEN 1
+                            WHEN 'Selasa' THEN 2
+                            WHEN 'Rabu' THEN 3
+                            WHEN 'Kamis' THEN 4
+                            WHEN 'Jumat' THEN 5
+                            WHEN 'Sabtu' THEN 6
+                            WHEN 'Minggu' THEN 7
+                            ELSE 8
+                        END ASC,
 
-                    $q_all = mysqli_query($conn, $sql_all);
-                    
+                        -- 3. Prioritas Ketiga: Urutkan berdasarkan Jam Mulai (Pagi -> Sore)
+                        j.jam_mulai ASC";
+
+                    $q_all = mysqli_query($conn, $sql_all);                    
                     // --- DEBUG ERROR (Agar tidak crash) ---
                     if (!$q_all) {
                         echo "<tr><td colspan='5' style='color:red; text-align:center;'>Error SQL: ".mysqli_error($conn)."</td></tr>";
