@@ -238,7 +238,7 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
         <h3 style="margin-bottom:15px; color:#3b82f6;"><i class="fa-solid fa-calendar-day"></i> Jadwal Hari Ini (<?= $hari_ini ?>)</h3>
         <div class="table-responsive">
             <table>
-                <thead><tr><th>Jam</th><th>Mata Kuliah</th><th>Dosen</th><th>Ruang</th><th style="text-align:center;">Aksi</th></tr></thead>
+                <thead><tr><th>Jam</th><th>Mata Kuliah</th><th>Dosen</th><th>Ruang</th><th style="text-align:center;">Absen</th></tr></thead>
                 <tbody>
                     <?php
                     // --- QUERY 1: JADWAL HARI INI ---
@@ -431,7 +431,6 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
         // --- SCRIPT KHUSUS PAGE JADWAL ---
         <?php if ($page == 'jadwal'): ?>
         let currentJadwalId = null, video = document.getElementById('video'), stream = null, detectInterval;
-        const userHasFace = <?= $punya_wajah ?>;
 
 function bukaKamera(id) {
         // --- BLOKIR JIKA BELUM ADA WAJAH ---
