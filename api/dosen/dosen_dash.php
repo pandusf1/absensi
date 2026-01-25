@@ -189,7 +189,11 @@ if(isset($_POST['simpan_jadwal'])) {
         }
 
         div.swal2-container {
-            z-index: 99999 !important; /* Angka harus lebih besar dari 2000 */
+            z-index: 99999 !important; 
+        }
+
+        #tr:hover {
+            background-color: #f0f8ff !important;
         }
 
     </style>
