@@ -143,11 +143,7 @@ elseif ($action == 'filter_rekap') {
             echo "<td>" . date('d/m/Y', strtotime($row['tanggal'])) . "</td>";
             echo "<td>" . $row['nama_matkul'] . "</td>";
             echo "<td>" . $row['kelas'] . "</td>";
-            echo "<td>" . ($row['materi_pembahasan'] ? substr($row['materi_pembahasan'],0,30).'...' : '-') . "</td>";
             echo "<td>" . $row['hadir'] . " / " . $row['total_mhs'] . "</td>";
-            echo '<td style="text-align:center;">
-                    <button class="btn btn-blue" onclick="bukaDetail(' . $row['id_jadwal'] . ', \'' . $row['tanggal'] . '\', \'' . htmlspecialchars($row['nama_matkul']) . '\', \'' . htmlspecialchars($row['kelas']) . '\')">Detail</button>
-                  </td>';
             echo "</tr>";
         }
     } else {

@@ -450,7 +450,6 @@ if(isset($_POST['simpan_jadwal'])) {
                         <th>Tanggal</th>
                         <th>Mata Kuliah</th>
                         <th>Kelas</th>
-                        <th>Materi</th>
                         <th>Hadir / Total</th>
                     </tr>
                 </thead>
