@@ -165,7 +165,7 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
         @media (min-width: 769px) { .main-content.active { margin-left: 250px; width: calc(100% - 250px); } }
     </style>
 </head>
-<body>
+<div>
 
     <div class="overlay-sidebar" onclick="toggleSidebar()"></div>
 
@@ -231,8 +231,6 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
                     </table>
                 </div>
             </div>
-        <footer>© 2025 Penelitian Terapan Pratama</footer>
-        </div>    
             
 <?php elseif ($page == 'jadwal'): ?>
     <div class="card">
@@ -242,7 +240,6 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
                 <thead><tr><th>Jam</th><th>Mata Kuliah</th><th>Dosen</th><th>Ruang</th><th style="text-align:center;">Absen</th></tr></thead>
             <tbody>
                     <?php
-                    // --- QUERY 1: JADWAL HARI INI (TIDAK SAYA UBAH) ---
                     $qj = mysqli_query($conn, "SELECT j.*, m.nama_matkul, m.kode_matkul, d.nama_dosen 
                         FROM jadwal j 
                         JOIN matkul m ON j.kode_matkul = m.kode_matkul 
@@ -403,6 +400,8 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
                 <p id="msgReg" style="margin-top:15px; font-weight:600; color:#3b82f6;"></p>
             </div>
         <?php endif; ?>
+    </div>
+    <footer style="text-align: center;">© 2025 Penelitian Terapan Pratama</footer>
     </div>
 <script>
         // 1. Variabel Global

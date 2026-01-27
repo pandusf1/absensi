@@ -460,7 +460,7 @@ if(isset($_POST['simpan_jadwal'])) {
                             </tr>
                         </thead>
                         <tbody id="tabelRekapBody">
-                            <tr><td colspan="5" align="center" style="padding:20px; color:#94a3b8;">Sedang memuat data...</td></tr>
+                            <tr><td colspan="4" align="center" style="padding:20px; color:#94a3b8;">Sedang memuat data...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -492,7 +492,7 @@ if(isset($_POST['simpan_jadwal'])) {
                 </div>
             </div>
         <?php endif; ?>
-        <footer>© 2025 Penelitian Terapan Pratama</footer>
+        <footer style="text-align: center;">© 2025 Penelitian Terapan Pratama</footer>
         </div>
 
 <script>
