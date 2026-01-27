@@ -493,6 +493,7 @@ if(isset($_POST['simpan_jadwal'])) {
         </div>
     </div>
 <?php endif; ?>
+<footer>© 2025 Penelitian Terapan Pratama</footer>
 
 <script>
     <?= $swal_script ?>
@@ -672,6 +673,5 @@ function bukaDetail(id, tgl, matkul, kelas) {
         });
     }
 </script>
-<footer>© 2025 Penelitian Terapan Pratama</footer>
 </body>
 </html>

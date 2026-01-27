@@ -239,7 +239,7 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
         <div class="table-responsive">
             <table>
                 <thead><tr><th>Jam</th><th>Mata Kuliah</th><th>Dosen</th><th>Ruang</th><th style="text-align:center;">Absen</th></tr></thead>
-<tbody>
+            <tbody>
                     <?php
                     // --- QUERY 1: JADWAL HARI INI (TIDAK SAYA UBAH) ---
                     $qj = mysqli_query($conn, "SELECT j.*, m.nama_matkul, m.kode_matkul, d.nama_dosen 
@@ -403,7 +403,7 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
             </div>
         <?php endif; ?>
     </div>
-
+<footer>© 2025 Penelitian Terapan Pratama</footer>
 <script>
         // 1. Variabel Global
         let isModelLoaded = false;
@@ -560,6 +560,5 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
         }
         <?php endif; ?>
     </script>
-<footer>© 2025 Penelitian Terapan Pratama</footer>
 </body>
 </html>
