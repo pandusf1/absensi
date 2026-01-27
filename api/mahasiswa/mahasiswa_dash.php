@@ -402,8 +402,8 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
                 <p id="msgReg" style="margin-top:15px; font-weight:600; color:#3b82f6;"></p>
             </div>
         <?php endif; ?>
+        <footer>© 2025 Penelitian Terapan Pratama</footer>
     </div>
-<footer>© 2025 Penelitian Terapan Pratama</footer>
 <script>
         // 1. Variabel Global
         let isModelLoaded = false;

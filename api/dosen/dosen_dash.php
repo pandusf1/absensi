@@ -138,7 +138,6 @@ if(isset($_POST['simpan_jadwal'])) {
             background-color: #334155; color: #60a5fa; border-left-color: #60a5fa; 
         }
 
-        /* MAIN CONTENT */
         .main-content { 
             flex: 1; margin-left: 0; padding: 20px; 
             width: 100%; transition: 0.3s; 
@@ -491,9 +490,9 @@ if(isset($_POST['simpan_jadwal'])) {
                 </form>
             </div>
         </div>
+        <footer>© 2025 Penelitian Terapan Pratama</footer>
     </div>
 <?php endif; ?>
-<footer>© 2025 Penelitian Terapan Pratama</footer>
 
 <script>
     <?= $swal_script ?>
