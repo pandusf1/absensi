@@ -400,7 +400,6 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
                 <p id="msgReg" style="margin-top:15px; font-weight:600; color:#3b82f6;"></p>
             </div>
         <?php endif; ?>
-    </div>
     <footer style="text-align: center;">© 2025 Penelitian Terapan Pratama</footer>
     </div>
 <script>

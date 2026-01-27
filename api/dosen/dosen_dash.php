@@ -499,7 +499,6 @@ if(isset($_POST['simpan_jadwal'])) {
     <?= $swal_script ?>
 
     $(document).ready(function(){
-        // Cek apakah kita ada di halaman rekap (agar tidak error di halaman lain)
         if ($('#tabelRekapBody').length > 0) {
             loadRekap();
         }
