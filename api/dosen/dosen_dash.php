@@ -672,5 +672,6 @@ function bukaDetail(id, tgl, matkul, kelas) {
         });
     }
 </script>
+<footer>© 2025 Penelitian Terapan Pratama</footer>
 </body>
 </html>

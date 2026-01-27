@@ -560,5 +560,6 @@ $page = isset($_GET['page']) ? $_GET['page'] : 'home';
         }
         <?php endif; ?>
     </script>
+<footer>© 2025 Penelitian Terapan Pratama</footer>
 </body>
 </html>

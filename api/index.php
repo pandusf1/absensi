@@ -33,13 +33,11 @@ $page = $_GET['page'] ?? 'home';
     border-radius: 16px;
     padding: 32px;
     box-shadow: 0 10px 30px rgba(0,0,0,.08);
-    /* PERBAIKAN: Tambahkan ini agar card tidak meluap dari container */
     width: 100%; 
   }
 
   .grid {
     display: grid;
-    /* PERBAIKAN: Ubah 320px jadi 260px agar muat di HP kecil */
     grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
     gap: 30px;
   }
@@ -66,7 +64,6 @@ $page = $_GET['page'] ?? 'home';
   .link { text-align: center; font-size: 14px; }
   .link a { text-decoration: none; color: #2563eb; }
 
-  /* HOME */
   .home-header { text-align: center; margin-bottom: 40px; }
   .home-header img { width: 150px; margin-bottom: 18px; }
   .home-header h1 { font-size: 32px; margin-bottom: 8px; }
@@ -74,7 +71,6 @@ $page = $_GET['page'] ?? 'home';
 
   .role-card { text-align: center; }
   
-  /* PERBAIKAN: Tambahkan max-width agar gambar tidak memaksa lebar card */
   .role-card img { 
     width: 180px; 
     max-width: 100%; 
@@ -84,22 +80,17 @@ $page = $_GET['page'] ?? 'home';
 
   footer { text-align: center; font-size: 13px; color: #777; margin: 40px 0; }
 
-  /* MEDIA QUERY (Tampilan HP) */
   @media (max-width: 768px) { 
       .container {
-        /* Kurangi margin atas di HP */
         margin: 30px auto; 
-        /* Kurangi padding container biar lega */
         padding: 0 16px; 
       }
 
       .card {
-        /* Kurangi padding card di HP (32px itu terlalu tebal buat HP) */
         padding: 24px 20px; 
       }
       
       .grid {
-        /* Paksa 1 kolom di HP biar rapi ke bawah */
         grid-template-columns: 1fr;
         gap: 20px;
       }
@@ -115,10 +106,8 @@ $page = $_GET['page'] ?? 'home';
 <body>
 
 <?php 
-// Routing Halaman menggunakan Switch
 switch($page): 
 
-// ================= HOME (LOGIN UTAMA) =================
 case 'home': ?>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
@@ -180,7 +169,6 @@ case 'home': ?>
 <?php break; ?>
 
 <?php 
-// ================= PILIH PERAN (2 KARTU) =================
 case 'pilih_peran': ?>
     <div class="container">
         <div class="card">
@@ -214,7 +202,6 @@ case 'pilih_peran': ?>
 <?php break; ?>
 
 <?php 
-// ================= DAFTAR DOSEN =================
 case 'daftar_dosen': ?>
     <div class="container"><div class="card">
         <h2>Pendaftaran Akun Dosen</h2>
@@ -235,7 +222,6 @@ case 'daftar_dosen': ?>
 <?php break; ?>
 
 <?php 
-// ================= DAFTAR MAHASISWA =================
 case 'daftar_mhs': ?>
     <div class="container">
         <div class="card">
@@ -277,7 +263,6 @@ case 'daftar_mhs': ?>
 
     <script>
         function updateProdi() {
-            // Data Jurusan dan Prodi Polines
             const dataPolines = {
                 "Teknik Sipil": [
                     "D3 Konstruksi Gedung",
@@ -337,7 +322,6 @@ case 'daftar_mhs': ?>
     </script>
 <?php break; ?>
 <?php 
-// ================= RESET PASSWORD =================
 case 'reset': ?>
     <div class="container"><div class="card">
         <h2>Reset Kata Sandi</h2>
@@ -352,7 +336,7 @@ case 'reset': ?>
 
 <?php endswitch; ?>
 
-<footer>© 2026 Politeknik Negeri Semarang</footer>
+<footer>© 2025 Penelitian Terapan Pratama</footer>
 
 </body>
 </html>
